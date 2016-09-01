@@ -1,3 +1,6 @@
 rootProject.name = 'Example'
 
 include ':app'
+
+include ':react-native-bluetooth'
+project(':react-native-bluetooth').projectDir = new File(rootProject.projectDir, '../../android')
