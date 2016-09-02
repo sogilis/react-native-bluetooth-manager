@@ -1,14 +1,17 @@
 'use strict';
 
-import { NativeAppEventEmitter, NativeModules } from 'react-native';
+import { NativeAppEventEmitter, NativeModules, NativeEventEmitter, Platform } from 'react-native';
 const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
+
+const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
+  new NativeEventEmitter(ReactNativeBluetooth);
 
 const unsubscription = (listener) => {
   return () => listener.remove();
 };
 
 const didChangeState = (callback) => {
-  var listener = NativeAppEventEmitter.addListener(
+  const listener = EventEmitter.addListener(
     ReactNativeBluetooth.StateChanged,
     callback
   );

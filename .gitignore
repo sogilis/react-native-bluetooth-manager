@@ -1,2 +1,71 @@
+# OSX
+#
+.DS_Store
+
+# Xcode
+#
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Android/IJ
+#
+*.iml
+.idea
+.gradle
+local.properties
+android/app/enlaps.keystore
+
+# node.js
+#
+node_modules/
+npm-debug.log
+
+# BUCK
+buck-out/
+\.buckd/
+android/app/libs
+android/keystores/debug.keystore
+
+# Enlaps
+/TempResources/
+
+# Carthage
+#
+# Add this line if you want to avoid checking in source code from Carthage dependencies.
+ios/Carthage/Checkouts
+ios/Carthage/Build
+
+# Fastlane
+2R72QGPL88.cer
+AppStore_io.enlaps.tikee.dev.mobileprovision
+Enlaps.app.dSYM.zip
+Enlaps.ipa
+ios/fastlane/report.xml
+
+#React native
+ios/main.jsbundle
+
+#Crashlytics
+android/app/src/main/assets/crashlytics-build.properties
+android/app/src/main/res/values/com_crashlytics_export_strings.xml
+
+#Anon
+environment.plist
+environment_preprocess.h
 /android/build/
 /android/react-native-bluetooth.iml
