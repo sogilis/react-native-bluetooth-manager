@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.util.HashMap;
@@ -31,6 +32,17 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private static final String STATE_DISABLED = "disabled";
 
     @Override public String getName() { return "ReactNativeBluetooth"; }
+
+    @ReactMethod
+    public void notifyCurrentState() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
+            notifyStateChange(STATE_ENABLED);
+        } else {
+            notifyStateChange(STATE_DISABLED);
+        }
+    }
 
     private void notifyStateChange(String newState) {
         getReactApplicationContext().
