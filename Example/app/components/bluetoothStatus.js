@@ -8,9 +8,13 @@ const BluetoothStatus = React.createClass({
   },
 
   componentWillMount() {
-    Bluetooth.didChangeState(function(newState) {
+    this.unsubscribeStateChanges = Bluetooth.didChangeState(function(newState) {
       this.setState({bluetoothState: newState});
     }.bind(this));
+  },
+
+  componentWillUnmount() {
+    this.unsubscribeStateChanges();
   },
 
   render() {
