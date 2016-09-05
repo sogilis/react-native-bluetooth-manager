@@ -1,3 +1,6 @@
-const ReactNativeBluetooth = require('react-native').NativeModules.ReactNativeBluetooth;
 
-module.exports = ReactNativeBluetooth;
+import { NativeAppEventEmitter, NativeModules } from 'react-native';
+const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
+
+export default {
+};
