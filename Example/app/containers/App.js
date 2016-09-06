@@ -10,10 +10,6 @@ const App = React.createClass({
     };
   },
 
-  bluetoothIsEnabled() {
-    return this.state.bluetoothState == "enabled";
-  },
-
   componentWillMount() {
     this.unsubscribe = Bluetooth.didChangeState(newState => {
       this.setState({bluetoothState: newState});
