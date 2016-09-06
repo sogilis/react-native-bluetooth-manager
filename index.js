@@ -18,7 +18,6 @@ const didChangeState = (callback) => {
 
 const DefaultScanOptions = {
   uuids: [],
-  timeout: 10000,
 };
 
 const Scan = {
