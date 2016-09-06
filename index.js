@@ -30,15 +30,15 @@ const Scan = {
           .then(resolve)
           .catch(console.log.bind(console));
       }, timeout);
-    })
-  }
-}
+    });
+  },
+};
 
 const startScan = (customOptions = {}) => {
   let options = Object.assign({}, DefaultScanOptions, customOptions);
 
   return ReactNativeBluetooth.startScan(options.uuids).then(() => Scan);
-}
+};
 
 const didDiscoverDevice = (callback) => {
   return unsubscription(NativeAppEventEmitter.addListener(
