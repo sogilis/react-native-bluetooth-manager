@@ -3,17 +3,19 @@
 import { NativeAppEventEmitter, NativeModules } from 'react-native';
 const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
 
+const unsubscription = (listener) => {
+  return () => listener.remove();
+};
+
 const didChangeState = (callback) => {
-  var subscription = NativeAppEventEmitter.addListener(
+  var listener = NativeAppEventEmitter.addListener(
     ReactNativeBluetooth.StateChanged,
     callback
   );
 
   ReactNativeBluetooth.notifyCurrentState();
 
-  return function() {
-    subscription.remove();
-  };
+  return unsubscription(listener);
 };
 
 const DefaultScanOptions = {
@@ -39,14 +41,10 @@ const startScan = (customOptions = {}) => {
 }
 
 const didDiscoverDevice = (callback) => {
-  var subscription = NativeAppEventEmitter.addListener(
+  return unsubscription(NativeAppEventEmitter.addListener(
     ReactNativeBluetooth.DeviceDiscovered,
     callback
-  );
-
-  return function() {
-    subscription.remove();
-  };
+  ));
 };
 
 export default {
