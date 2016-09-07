@@ -35,6 +35,7 @@ const DeviceDiscovery = React.createClass({
   },
 
   componentWillUnmount() {
+    Bluetooth.stopScan();
     this.unsubscribe();
   },
 

@@ -18,8 +18,11 @@ public class BluetoothActions: NSObject {
     private var onStateChange: (BluetoothServiceReturn -> Void)?
     private var onStopScanComplete: (() -> Void)?
     private var onDeviceDiscovered: (BluetoothServiceReturn -> Void)?
-    private var onDeviceConnected: (BluetoothServiceReturn -> Void)?
+//    private var onDeviceConnected: (BluetoothServiceReturn -> Void)?
     private var onDeviceDisconnected: (BluetoothServiceReturn -> Void)?
+
+    private var discoveredPeripherals = [CBPeripheral]()
+
 
     public var bluetoothState: String {
         get {
@@ -44,17 +47,29 @@ public class BluetoothActions: NSObject {
     public func stopScan(onStopScanComplete: () -> Void) {
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.stopScan()
+            self.cleanConnections()
+            self.discoveredPeripherals.removeAll()
+
             onStopScanComplete()
             print("Bluetooth scan stopped")
         })
     }
 
     public func connect(device: [String: AnyObject], onConnection: () -> Void) {
-        onConnection()
+        centralEventHandler.onDeviceConnected { device in
+            device.delegate = self.peripheralEventHandler
+            onConnection()
+        }
+
+//        centralManager.connectPeripheral(nil, options: nil)
     }
 
     public func disconnect(device: [String: AnyObject], onDisconnection: () -> Void) {
         onDisconnection()
+    }
+
+    public func discoverServices(device: [String: AnyObject], onDiscoverStarted: () -> Void) {
+        onDiscoverStarted()
     }
 
     public func onChangeState(handler: String -> Void) {
@@ -95,12 +110,12 @@ public class BluetoothActions: NSObject {
         }
     }
 
-    public func onDeviceConnected(handler: BluetoothServiceReturn -> Void) {
-        centralEventHandler.onDeviceConnected { device in
-            device.delegate = self.peripheralEventHandler
-            handler(OutputBuilder.asDevice(device))
-        }
-    }
+//    public func onDeviceConnected(handler: BluetoothServiceReturn -> Void) {
+//        centralEventHandler.onDeviceConnected { device in
+//            device.delegate = self.peripheralEventHandler
+//            handler(OutputBuilder.asDevice(device))
+//        }
+//    }
 
     public func onDeviceDisconnected(handler: BluetoothServiceReturn -> Void) {
         centralEventHandler.onDeviceDisconnected { device in
@@ -109,8 +124,34 @@ public class BluetoothActions: NSObject {
     }
 
     public func onDeviceDiscovered(handler: BluetoothServiceReturn -> Void) {
-        centralEventHandler.onDeviceDiscovered { device in
+        centralEventHandler.onDeviceDiscovered { [unowned self] device in
+            if !self.discoveredPeripherals.contains(device) {
+                self.discoveredPeripherals.append(device)
+            }
+
             handler(OutputBuilder.asDevice(device))
+        }
+    }
+
+    func cleanConnections() {
+        self.discoveredPeripherals.forEach { [unowned self] peripheral in
+            guard peripheral.state == .Connected else {
+                return
+            }
+
+            guard let services = peripheral.services else {
+                self.centralManager.cancelPeripheralConnection(peripheral)
+                return
+            }
+
+            services
+                .filter { $0.characteristics != nil }
+                .map { $0.characteristics!}
+                .forEach { characteristics in
+                    characteristics.filter { $0.isNotifying }.forEach {
+                        peripheral.setNotifyValue(false, forCharacteristic: $0)
+                    }
+            }
         }
     }
 }

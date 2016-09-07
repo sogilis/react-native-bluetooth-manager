@@ -29,6 +29,7 @@ const Scan = {
   stopAfter: (timeout) => {
     return new Promise(resolve => {
       setTimeout(() => {
+        // TODO: Check for connection first
         ReactNativeBluetooth.stopScan()
           .then(resolve)
           .catch(console.log.bind(console));
@@ -43,6 +44,29 @@ const startScan = (customOptions = {}) => {
   return ReactNativeBluetooth.startScan(options.uuids).then(() => Scan);
 };
 
+const stopScan = () => {
+  return ReactNativeBluetooth.stopScan();
+};
+
+const discoverServices = (device, callback) => {
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.ServiceDiscovered,
+    callback
+  );
+
+  ReactNativeBluetooth.discoverServices(device);
+
+  return unsubscription(listener);
+}
+
+const connect = (device) => {
+  return ReactNativeBluetooth.connect(device);
+}
+
+const disconnect = (device) => {
+  return ReactNativeBluetooth.disconnect(device);
+}
+
 const didDiscoverDevice = (callback) => {
   return unsubscription(NativeAppEventEmitter.addListener(
     ReactNativeBluetooth.DeviceDiscovered,
@@ -53,5 +77,9 @@ const didDiscoverDevice = (callback) => {
 export default {
   didChangeState,
   startScan,
+  stopScan,
   didDiscoverDevice,
+  discoverServices,
+  connect,
+  disconnect,
 };

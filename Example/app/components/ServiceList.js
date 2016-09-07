@@ -15,6 +15,8 @@ const makeDataSource = services => {
 };
 
 const renderServiceRow = service => {
+  if (!service) return <View />;
+
   return (
     <TouchableOpacity
       onPress={() => {}}
@@ -41,7 +43,7 @@ const scrollComponent = props => {
 const ServiceList = ({services}) => (
   <ListView
     dataSource={makeDataSource(services)}
-    renderRow={renderServiceRow()}
+    renderRow={renderServiceRow}
     renderScrollComponent={scrollComponent}
     renderSeparator={renderSeparator}
     enableEmptySections={true}>

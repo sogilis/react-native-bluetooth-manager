@@ -1,35 +1,82 @@
-import React from 'react';
-import { Text, View, StyleSheet} from 'react-native';
+import React, { PropTypes } from 'react';
+import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity} from 'react-native';
 import TopBar from '../components/TopBar';
-// import ServiceList from '../components/ServiceList';
+import ServiceList from '../components/ServiceList';
 import Bluetooth from 'react-native-bluetooth';
 import { getAppState, setAppState } from '../lib/GlobalState';
 
 const DeviceDetail = React.createClass({
   propTypes: {
-    // navigator: PropTypes.func.isRequired,
+    navigator: PropTypes.func.isRequired,
   },
 
   getInitialState() {
     const { selectedDevice } = getAppState();
-    console.log('Device', selectedDevice);
+    this.unsubscribe = () => {};
 
     return {
       device: selectedDevice,
       error: null,
+      services: [],
+      isConnected: false,
+      connectionInProgress: false,
     };
   },
 
   componentWillMount() {
-    // TODO: button for connect?
-    Bluetooth.connect(this.state.device);
   },
 
   componentWillUnmount() {
+    this.unsubscribe();
+
     Bluetooth.disconnect(this.state.device);
 
     setAppState({
       selectedDevice: null,
+    });
+  },
+
+  connect() {
+    if (this.state.isConnected) {
+      this.setState({
+        isConnected: false,
+        connectionInProgress: true,
+      });
+
+      Bluetooth.disconnect(this.state.device)
+      .then(() => {
+        this.setState({
+          isConnected: true,
+          connectionInProgress: false,
+        });
+
+      });
+
+      return;
+    }
+
+    this.setState({
+      isConnected: false,
+      connectionInProgress: true,
+    });
+
+    Bluetooth.connect(this.state.device)
+    .then(() => {
+      this.setState({
+        isConnected: true,
+        connectionInProgress: false,
+      });
+
+      this.unsubscribe = Bluetooth.discoverServices(this.state.device, service => {
+        this.setState({
+          services: [...this.state.services, service]
+        });
+      });
+    })
+    .catch(error => {
+      this.setState({
+        error: error,
+      });
     });
   },
 
@@ -43,24 +90,53 @@ const DeviceDetail = React.createClass({
     return (<Text style={styles.errorText}>{this.state.error}</Text>);
   },
 
+  renderStatus() {
+    if (this.state.connectionInProgress)
+    {
+        return <ActivityIndicator animating={true} />;
+    }
+
+    return (
+      <View style={styles.statusContainer}>
+        <TouchableOpacity onPress={this.connect}>
+          <Text style={styles.statusText}>{this.state.isConnected ? 'Disconnect' : 'Connect'}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  },
+
   render() {
     return (
       <View style={styles.container}>
-        <TopBar headerText={"Device - " + this.state.device.name} />
+        <TopBar
+          headerText={"Device - " + this.state.device.name}
+          backAction={() => this.props.navigator('DeviceDiscovery')} />
         {this.renderError()}
-        <Text>Device name - {this.state.device.name}</Text>
+        {this.renderStatus()}
+        <ServiceList services={this.state.services} />
       </View>
     );
   },
 });
 
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     color: 'red',
   },
+  statusText: {
+    fontSize: 20,
+    color: '#00AFEE',
+  },
   container: {
     flex: 1,
+  },
+  statusContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 5,
+    marginBottom: 15,
   },
 });
 
