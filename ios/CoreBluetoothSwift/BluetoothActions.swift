@@ -49,6 +49,14 @@ public class BluetoothActions: NSObject {
         })
     }
 
+    public func connect(device: [String: AnyObject], onConnection: () -> Void) {
+        onConnection()
+    }
+
+    public func disconnect(device: [String: AnyObject], onDisconnection: () -> Void) {
+        onDisconnection()
+    }
+
     public func onChangeState(handler: String -> Void) {
         centralEventHandler.onStateChange { [unowned self] state in
             self.lastState = state

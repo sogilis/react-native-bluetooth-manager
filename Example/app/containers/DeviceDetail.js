@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View, StyleSheet} from 'react-native';
 import TopBar from '../components/TopBar';
-// import Bluetooth from 'react-native-bluetooth';
+// import ServiceList from '../components/ServiceList';
+import Bluetooth from 'react-native-bluetooth';
 import { getAppState, setAppState } from '../lib/GlobalState';
 
 const DeviceDetail = React.createClass({
@@ -20,9 +21,13 @@ const DeviceDetail = React.createClass({
   },
 
   componentWillMount() {
+    // TODO: button for connect?
+    Bluetooth.connect(this.state.device);
   },
 
   componentWillUnmount() {
+    Bluetooth.disconnect(this.state.device);
+
     setAppState({
       selectedDevice: null,
     });
@@ -41,9 +46,9 @@ const DeviceDetail = React.createClass({
   render() {
     return (
       <View style={styles.container}>
-        <TopBar headerText="Device List" />
+        <TopBar headerText={"Device - " + this.state.device.name} />
         {this.renderError()}
-        <Text>TODO:</Text>
+        <Text>Device name - {this.state.device.name}</Text>
       </View>
     );
   },
@@ -55,9 +60,6 @@ var styles = StyleSheet.create({
     color: 'red',
   },
   container: {
-    flex: 1,
-  },
-  deviceListContainer: {
     flex: 1,
   },
 });
