@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Text, View } from 'react-native';
-import DeviceDiscovery from './DeviceDiscovery';
+import React from 'react';
+import { Text } from 'react-native';
+import Routes from '../lib/Routes';
 import Bluetooth from 'react-native-bluetooth';
 
 const App = React.createClass({
@@ -23,7 +23,7 @@ const App = React.createClass({
   render() {
     if (this.state.bluetoothState == "enabled") {
       return (
-        <DeviceDiscovery />
+        <Routes />
       );
     } else {
       return (

@@ -1,20 +1,18 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import { Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 import DeviceList from '../components/DeviceList';
 import TopBar from '../components/TopBar';
 import Bluetooth from 'react-native-bluetooth';
+import { setAppState } from '../lib/GlobalState';
 
 const ScanOptions = {
-  // uuids: ["C40D40D2-AEA2-61B7-8A42-0C410D105395"],
   uuids: null,
 };
 
 const DeviceDiscovery = React.createClass({
-  // propTypes: {
-  //   onPress: PropTypes.func,
-  //   style: View.propTypes.style,
-  //   children: PropTypes.string,
-  // },
+  propTypes: {
+    navigator: PropTypes.func.isRequired,
+  },
 
   getInitialState() {
     return {
@@ -44,6 +42,14 @@ const DeviceDiscovery = React.createClass({
     return this.state.error == null && this.state.status != "Done";
   },
 
+  deviceSelected(device) {
+    setAppState({
+      selectedDevice: device,
+    });
+
+    this.props.navigator('DeviceDetail');
+  },
+
   renderError() {
     if (this.state.error == null) return null;
 
@@ -57,7 +63,7 @@ const DeviceDiscovery = React.createClass({
         {this.renderError()}
         <View style={styles.deviceListContainer}>
           <ActivityIndicator animating={this.scanInProgress()} />
-          <DeviceList devices={this.state.devices} selectDevice={device => console.log(device)} />
+          <DeviceList devices={this.state.devices} selectDevice={this.deviceSelected} />
         </View>
       </View>
     );
