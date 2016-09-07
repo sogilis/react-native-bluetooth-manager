@@ -10,12 +10,12 @@
 		3308EA791D799E9300007DE7 /* ReactNativeBluetooth.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3308EA781D799E9300007DE7 /* ReactNativeBluetooth.h */; };
 		3308EA7B1D799E9300007DE7 /* ReactNativeBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 3308EA7A1D799E9300007DE7 /* ReactNativeBluetooth.m */; };
 		3308EBD21D79BAFC00007DE7 /* CoreBluetoothSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3308EBB71D79B97000007DE7 /* CoreBluetoothSwift.framework */; };
-		3308EBF01D7D977400007DE7 /* PeripheralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EBEF1D7D977400007DE7 /* PeripheralEventHandler.swift */; };
-		3308EBF91D7D981200007DE7 /* BluetoothActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EBF61D7D981200007DE7 /* BluetoothActions.swift */; };
-		3308EBFA1D7D981200007DE7 /* CentralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EBF71D7D981200007DE7 /* CentralEventHandler.swift */; };
 		3308EC0D1D7D9CFA00007DE7 /* CoreBluetoothSwift.h in Headers */ = {isa = PBXBuildFile; fileRef = 3308EC0C1D7D9CFA00007DE7 /* CoreBluetoothSwift.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3308EC221D7DAF7E00007DE7 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EC211D7DAF7E00007DE7 /* Aliases.swift */; };
-		3308EC261D7DAFC900007DE7 /* OutputBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EC251D7DAFC900007DE7 /* OutputBuilder.swift */; };
+		3308EDEF1D7FF40F00007DE7 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEA1D7FF40F00007DE7 /* Aliases.swift */; };
+		3308EDF01D7FF40F00007DE7 /* BluetoothActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEB1D7FF40F00007DE7 /* BluetoothActions.swift */; };
+		3308EDF11D7FF40F00007DE7 /* CentralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */; };
+		3308EDF21D7FF40F00007DE7 /* OutputBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */; };
+		3308EDF31D7FF40F00007DE7 /* PeripheralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,12 +47,12 @@
 		3308EA7A1D799E9300007DE7 /* ReactNativeBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactNativeBluetooth.m; sourceTree = "<group>"; };
 		3308EBB71D79B97000007DE7 /* CoreBluetoothSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreBluetoothSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3308EBBB1D79B97000007DE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3308EBEF1D7D977400007DE7 /* PeripheralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PeripheralEventHandler.swift; path = CoreBluetoothSwift/PeripheralEventHandler.swift; sourceTree = "<group>"; };
-		3308EBF61D7D981200007DE7 /* BluetoothActions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BluetoothActions.swift; path = CoreBluetoothSwift/BluetoothActions.swift; sourceTree = "<group>"; };
-		3308EBF71D7D981200007DE7 /* CentralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CentralEventHandler.swift; path = CoreBluetoothSwift/CentralEventHandler.swift; sourceTree = "<group>"; };
 		3308EC0C1D7D9CFA00007DE7 /* CoreBluetoothSwift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreBluetoothSwift.h; sourceTree = "<group>"; };
-		3308EC211D7DAF7E00007DE7 /* Aliases.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Aliases.swift; path = CoreBluetoothSwift/Aliases.swift; sourceTree = "<group>"; };
-		3308EC251D7DAFC900007DE7 /* OutputBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OutputBuilder.swift; path = CoreBluetoothSwift/OutputBuilder.swift; sourceTree = "<group>"; };
+		3308EDEA1D7FF40F00007DE7 /* Aliases.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
+		3308EDEB1D7FF40F00007DE7 /* BluetoothActions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothActions.swift; sourceTree = "<group>"; };
+		3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CentralEventHandler.swift; sourceTree = "<group>"; };
+		3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputBuilder.swift; sourceTree = "<group>"; };
+		3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeripheralEventHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,9 +77,7 @@
 		3308EA6C1D799E9300007DE7 = {
 			isa = PBXGroup;
 			children = (
-				3308EB881D79AE3E00007DE7 /* Dependencies */,
 				3308EBB81D79B97000007DE7 /* CoreBluetoothSwift */,
-				3308EAF41D79A49500007DE7 /* Frameworks */,
 				3308EA761D799E9300007DE7 /* Products */,
 				3308EA771D799E9300007DE7 /* ReactNativeBluetooth */,
 			);
@@ -103,30 +101,16 @@
 			path = ReactNativeBluetooth;
 			sourceTree = "<group>";
 		};
-		3308EAF41D79A49500007DE7 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		3308EB881D79AE3E00007DE7 /* Dependencies */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Dependencies;
-			sourceTree = "<group>";
-		};
 		3308EBB81D79B97000007DE7 /* CoreBluetoothSwift */ = {
 			isa = PBXGroup;
 			children = (
+				3308EDEA1D7FF40F00007DE7 /* Aliases.swift */,
+				3308EDEB1D7FF40F00007DE7 /* BluetoothActions.swift */,
+				3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */,
+				3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */,
+				3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */,
 				3308EC0C1D7D9CFA00007DE7 /* CoreBluetoothSwift.h */,
-				3308EBF61D7D981200007DE7 /* BluetoothActions.swift */,
-				3308EBF71D7D981200007DE7 /* CentralEventHandler.swift */,
 				3308EBBB1D79B97000007DE7 /* Info.plist */,
-				3308EBEF1D7D977400007DE7 /* PeripheralEventHandler.swift */,
-				3308EC211D7DAF7E00007DE7 /* Aliases.swift */,
-				3308EC251D7DAFC900007DE7 /* OutputBuilder.swift */,
 			);
 			path = CoreBluetoothSwift;
 			sourceTree = "<group>";
@@ -239,11 +223,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3308EBFA1D7D981200007DE7 /* CentralEventHandler.swift in Sources */,
-				3308EC261D7DAFC900007DE7 /* OutputBuilder.swift in Sources */,
-				3308EBF91D7D981200007DE7 /* BluetoothActions.swift in Sources */,
-				3308EC221D7DAF7E00007DE7 /* Aliases.swift in Sources */,
-				3308EBF01D7D977400007DE7 /* PeripheralEventHandler.swift in Sources */,
+				3308EDF01D7FF40F00007DE7 /* BluetoothActions.swift in Sources */,
+				3308EDF21D7FF40F00007DE7 /* OutputBuilder.swift in Sources */,
+				3308EDEF1D7FF40F00007DE7 /* Aliases.swift in Sources */,
+				3308EDF11D7FF40F00007DE7 /* CentralEventHandler.swift in Sources */,
+				3308EDF31D7FF40F00007DE7 /* PeripheralEventHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +415,7 @@
 				3308EBBE1D79B97000007DE7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
