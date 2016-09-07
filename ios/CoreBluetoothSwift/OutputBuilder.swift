@@ -52,8 +52,8 @@ class OutputBuilder {
     static func asDevice(device: CBPeripheral) -> BluetoothServiceReturn {
         return [
             "name" : device.name ?? "Unknown",
-            "identifieer" : device.identifier,
-            "address" : "00:00:00:00:00:00",
+            "id" : device.identifier,
+            "address" : device.identifier,
         ]
     }
 }

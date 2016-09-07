@@ -1,54 +1,79 @@
-import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import React from 'react';
+import { Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 import DeviceList from '../components/DeviceList';
+import TopBar from '../components/TopBar';
 import Bluetooth from 'react-native-bluetooth';
 
 const ScanOptions = {
-  uuids: ["C40D40D2-AEA2-61B7-8A42-0C410D105395"],
+  // uuids: ["C40D40D2-AEA2-61B7-8A42-0C410D105395"],
+  uuids: null,
 };
 
 const DeviceDiscovery = React.createClass({
+  // propTypes: {
+  //   onPress: PropTypes.func,
+  //   style: View.propTypes.style,
+  //   children: PropTypes.string,
+  // },
+
   getInitialState() {
     return {
-      devicesByAddress: {},
+      devices: [],
       error: null,
     };
   },
 
   componentWillMount() {
     this.unsubscribe = Bluetooth.didDiscoverDevice((device) => {
-      this.setState(Object.assign({}, this.state, {
-        devicesByAddress: Object.assign({}, this.state.devicesByAddress, {
-          address: device,
-        }),
-      }));
+      this.setState({
+        devices: [...this.state.devices, device]
+      });
     });
 
     Bluetooth.startScan(ScanOptions)
-      .then(scan => scan.stopAfter(3000))
-      .then(() => this.setState({...this.state, status: "Done"}))
-      .catch(error => this.setState({...this.state, "error": error}));
+      .then(scan => scan.stopAfter(15000))
+      .then(() => this.setState({status: "Done"}))
+      .catch(error => this.setState({"error": error}));
   },
 
   componentWillUnmount() {
     this.unsubscribe();
   },
 
-  status() {
-    if (this.state.error != null) {
-      return this.state.error;
-    } else {
-      return "Scanning for bluetooth devices...";
-    }
+  scanInProgress() {
+    return this.state.error == null && this.state.status != "Done";
+  },
+
+  renderError() {
+    if (this.state.error == null) return null;
+
+    return (<Text style={styles.errorText}>{this.state.error}</Text>);
   },
 
   render() {
     return (
-      <View>
-        <DeviceList devices={Object.values(this.state.devicesByAddress)} />
-        <Text>{this.status()}</Text>
+      <View style={styles.container}>
+        <TopBar headerText="Device List" />
+        {this.renderError()}
+        <View style={styles.deviceListContainer}>
+          <ActivityIndicator animating={this.scanInProgress()} />
+          <DeviceList devices={this.state.devices} selectDevice={device => console.log(device)} />
+        </View>
       </View>
     );
+  },
+});
+
+var styles = StyleSheet.create({
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+  },
+  container: {
+    flex: 1,
+  },
+  deviceListContainer: {
+    flex: 1,
   },
 });
 

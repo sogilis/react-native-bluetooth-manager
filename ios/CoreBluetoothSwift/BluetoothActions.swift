@@ -37,6 +37,7 @@ public class BluetoothActions: NSObject {
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.scanForPeripheralsWithServices(mappedIds, options: nil)
             onScanStarted()
+            print("Bluetooth scan started")
         })
     }
 
@@ -44,6 +45,7 @@ public class BluetoothActions: NSObject {
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.stopScan()
             onStopScanComplete()
+            print("Bluetooth scan stopped")
         })
     }
 
