@@ -104,8 +104,8 @@ typedef NSDictionary<NSString *, id> * BluetoothServiceReturn;
 }
 
 
-RCT_EXPORT_METHOD(startScan:(RCTPromiseResolveBlock)resolve rejector:(RCTPromiseRejectBlock) reject) {
-    [actions startScan:@[@"", @""] onScanStarted:^{
+RCT_EXPORT_METHOD(startScan:(NSArray *)params resover:(RCTPromiseResolveBlock)resolve rejector:(RCTPromiseRejectBlock) reject) {
+    [actions startScan:params onScanStarted:^{
         resolve([NSNull null]);
     }];
 }
