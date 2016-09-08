@@ -48,13 +48,13 @@ const stopScan = () => {
   return ReactNativeBluetooth.stopScan();
 };
 
-const discoverServices = (device, callback) => {
+const discoverServices = (device, serviceIds, callback) => {
   const listener = EventEmitter.addListener(
     ReactNativeBluetooth.ServiceDiscovered,
     callback
   );
 
-  ReactNativeBluetooth.discoverServices(device);
+  ReactNativeBluetooth.discoverServices(device, serviceIds);
 
   return unsubscription(listener);
 }
@@ -66,6 +66,15 @@ const connect = (device) => {
 const disconnect = (device) => {
   return ReactNativeBluetooth.disconnect(device);
 }
+
+const deviceDidDisconnect = (callback) => {
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.DeviceDisonnected,
+    callback
+  );
+
+  return unsubscription(listener);
+};
 
 const didDiscoverDevice = (callback) => {
   return unsubscription(NativeAppEventEmitter.addListener(

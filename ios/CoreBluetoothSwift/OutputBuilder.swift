@@ -6,10 +6,15 @@
 import Foundation
 import CoreBluetooth
 
+private func getServiceName(serviceId: CBUUID) -> String {
+    return "Custom Service"
+}
+
 class OutputBuilder {
-    static func asService(info: PeripheralInfo) -> BluetoothServiceReturn {
+    static func asService(service: CBService) -> BluetoothServiceReturn {
         return [
-            "name" : info.peripheral.name ?? "Unknown"
+            "id": getServiceName(service.UUID),
+            "name": "Unknown"
         ]
     }
 
@@ -52,8 +57,8 @@ class OutputBuilder {
     static func asDevice(device: CBPeripheral) -> BluetoothServiceReturn {
         return [
             "name" : device.name ?? "Unknown",
-            "id" : device.identifier,
-            "address" : device.identifier,
+            "id" : device.identifier.UUIDString,
+            "address" : device.identifier.UUIDString,
         ]
     }
 }

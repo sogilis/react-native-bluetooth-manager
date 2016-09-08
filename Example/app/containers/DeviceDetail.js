@@ -67,7 +67,7 @@ const DeviceDetail = React.createClass({
         connectionInProgress: false,
       });
 
-      this.unsubscribe = Bluetooth.discoverServices(this.state.device, service => {
+      this.unsubscribe = Bluetooth.discoverServices(this.state.device, null, service => {
         this.setState({
           services: [...this.state.services, service]
         });
@@ -113,7 +113,9 @@ const DeviceDetail = React.createClass({
           backAction={() => this.props.navigator('DeviceDiscovery')} />
         {this.renderError()}
         {this.renderStatus()}
-        <ServiceList services={this.state.services} />
+        <View style={styles.listContainer}>
+          <ServiceList services={this.state.services} />
+        </View>
       </View>
     );
   },
@@ -131,8 +133,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  statusContainer: {
+  listContainer: {
     flex: 1,
+  },
+  statusContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 5,
