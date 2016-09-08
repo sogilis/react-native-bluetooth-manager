@@ -3,6 +3,7 @@ package com.sogilis.ReactNativeBluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -143,6 +144,14 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         deviceMap.putString("name", device.getName());
 
         emit(eventName, deviceMap);
+    }
+
+    private void emit(String eventName, BluetoothGattService service) {
+        WritableMap serviceMap = new WritableNativeMap();
+
+        serviceMap.putString("uuid", service.getUuid().toString());
+
+        emit(eventName, serviceMap);
     }
 
     private void emit(String eventName, Object eventData) {
