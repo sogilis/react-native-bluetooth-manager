@@ -142,7 +142,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     private void emit(String eventName) {
-        emit(eventName, null);
+        emit(eventName, (Object) null);
     }
 
     private void emitError(String eventName, String errorMessage) {
