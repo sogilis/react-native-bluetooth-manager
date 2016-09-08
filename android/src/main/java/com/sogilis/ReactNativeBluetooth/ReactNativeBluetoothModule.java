@@ -168,7 +168,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void connect(final ReadableMap device) {
+    public void connect(final ReadableMap deviceMap) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
@@ -182,7 +182,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void disconnect(final ReadableMap device) {
+    public void disconnect(final ReadableMap deviceMap) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
@@ -196,7 +196,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void discoverServices(final ReadableMap device) {
+    public void discoverServices(final ReadableMap deviceMap) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
