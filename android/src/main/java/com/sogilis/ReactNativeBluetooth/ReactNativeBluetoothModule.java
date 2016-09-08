@@ -133,6 +133,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         emit(eventName, null);
     }
 
+    private void emitError(String eventName, String errorMessage) {
+        WritableMap errorMap = new WritableNativeMap();
+        errorMap.putString("error", errorMessage);
+        emit(eventName, errorMap);
+    }
+
     @ReactMethod
     public void stopScan(final Promise promise) {
         new BluetoothAction() {
