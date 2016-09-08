@@ -2,6 +2,7 @@ package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private HashMap<String, BluetoothDevice> discoveredDevices = new HashMap<>();
+    private HashMap<String, BluetoothGatt> gattClients = new HashMap<>();
 
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
         super(reactContext);
