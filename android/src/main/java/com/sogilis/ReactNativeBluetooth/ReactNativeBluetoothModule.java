@@ -91,13 +91,20 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        UUID[] uuids = new UUID[uuidStrings.size()];
-        for(int i=0; i<uuidStrings.size(); i++) {
-            uuids[i] = UUID.fromString(uuidStrings.getString(i));
-        }
-
-        bluetoothAdapter.startLeScan(uuids, scanCallback);
+        bluetoothAdapter.startLeScan(this.uuidsFromStrings(uuidStrings), scanCallback);
         promise.resolve(null);
+    }
+
+    private UUID[] uuidsFromStrings(ReadableArray uuidStrings) {
+        if (uuidStrings != null) {
+            UUID[] uuids = new UUID[uuidStrings.size()];
+            for (int i = 0; i < uuidStrings.size(); i++) {
+                uuids[i] = UUID.fromString(uuidStrings.getString(i));
+            }
+            return uuids;
+        } else {
+            return new UUID[0];
+        }
     }
 
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
