@@ -61,6 +61,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     private void notifyStateChange(String newState) {
+
         getReactApplicationContext().
                 getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
                 emit(EVENT_STATE_CHANGED, newState);
@@ -126,9 +127,13 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         deviceMap.putString("address", device.getAddress());
         deviceMap.putString("name", device.getName());
 
+        emit(EVENT_DEVICE_DISCOVERED, deviceMap);
+    }
+
+    private void emit(String eventName, Object eventData) {
         getReactApplicationContext().
                 getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
-                emit(EVENT_DEVICE_DISCOVERED, deviceMap);
+                emit(eventName, eventData);
     }
 
     @ReactMethod
