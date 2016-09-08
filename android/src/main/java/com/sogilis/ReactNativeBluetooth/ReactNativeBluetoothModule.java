@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -41,7 +40,20 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             ReactNativeBluetoothModule.class.getCanonicalName() + ".EVENT_";
 
     private static final String EVENT_STATE_CHANGED = EVENT_BASE_NAME + "STATE_CHANGED";
+    private static final String EVENT_SCAN_STARTED = EVENT_BASE_NAME + "SCAN_STARTED";
+    private static final String EVENT_SCAN_STOPPED = EVENT_BASE_NAME + "SCAN_STOPPED";
     private static final String EVENT_DEVICE_DISCOVERED = EVENT_BASE_NAME + "DEVICE_DISCOVERED";
+
+    @Override public Map<String, Object> getConstants() {
+        final Map<String, Object> constants = new HashMap<>();
+
+        constants.put("StateChanged", EVENT_STATE_CHANGED);
+        constants.put("ScanStarted", EVENT_SCAN_STARTED);
+        constants.put("ScanStopped", EVENT_SCAN_STOPPED);
+        constants.put("DeviceDiscovered", EVENT_DEVICE_DISCOVERED);
+
+        return constants;
+    }
 
     // States
     private static final String STATE_ENABLED = "enabled";
@@ -75,17 +87,17 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     };
 
     @ReactMethod
-    public void startScan(final ReadableArray uuidStrings, final Promise promise) {
+    public void startScan(final ReadableArray uuidStrings) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
-                promise.resolve(null);
+                emit(EVENT_SCAN_STARTED);
             }
 
             @Override
             public void withoutBluetooth(String message) {
-                promise.reject(message);
+                emitError(EVENT_SCAN_STARTED, message);
             }
         };
     }
@@ -140,72 +152,60 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void stopScan(final Promise promise) {
+    public void stopScan() {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
                 discoveredDevices.clear();
-                promise.resolve(null);
+                emit(EVENT_SCAN_STOPPED);
             }
             @Override
             public void withoutBluetooth(String message) {
-                promise.reject(message);
+                emitError(EVENT_SCAN_STOPPED, message);
             }
         };
     }
 
     @ReactMethod
-    public void connect(final ReadableMap device, final Promise promise) {
+    public void connect(final ReadableMap device) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 // TODO
-                promise.resolve(null);
             }
             @Override
             public void withoutBluetooth(String message) {
-                promise.reject(message);
+                // TODO
             }
         };
     }
 
     @ReactMethod
-    public void disconnect(final ReadableMap device, final Promise promise) {
+    public void disconnect(final ReadableMap device) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 // TODO
-                promise.resolve(null);
             }
             @Override
             public void withoutBluetooth(String message) {
-                promise.reject(message);
+                // TODO
             }
         };
     }
 
     @ReactMethod
-    public void discoverServices(final ReadableMap device, final Promise promise) {
+    public void discoverServices(final ReadableMap device) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 // TODO
-                promise.resolve(null);
             }
             @Override
             public void withoutBluetooth(String message) {
-                promise.reject(message);
+                // TODO
             }
         };
-    }
-
-    @Override public Map<String, Object> getConstants() {
-        final Map<String, Object> constants = new HashMap<>();
-
-        constants.put("StateChanged", EVENT_STATE_CHANGED);
-        constants.put("DeviceDiscovered", EVENT_DEVICE_DISCOVERED);
-
-        return constants;
     }
 }
