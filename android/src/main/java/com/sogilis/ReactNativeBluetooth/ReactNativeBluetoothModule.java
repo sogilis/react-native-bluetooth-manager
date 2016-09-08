@@ -3,7 +3,9 @@ package com.sogilis.ReactNativeBluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -199,6 +201,29 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
         };
     }
+
+    private BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            BluetoothDevice device = gatt.getDevice();
+            String address = device.getAddress();
+
+            if (status == BluetoothProfile.STATE_CONNECTED) {
+                gattClients.put(address, gatt);
+                emit(EVENT_DEVICE_CONNECTED, device);
+            } else if (status == BluetoothProfile.STATE_DISCONNECTED) {
+                gattClients.remove(address);
+                emit(EVENT_DEVICE_DISCONNECTED, device);
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            for (BluetoothGattService service: gatt.getServices()) {
+                emit(EVENT_SERVICE_DISCOVERED, service);
+            }
+        }
+    };
 
     @ReactMethod
     public void disconnect(final ReadableMap deviceMap) {
