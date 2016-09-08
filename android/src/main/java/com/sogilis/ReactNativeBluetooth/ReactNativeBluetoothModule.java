@@ -24,6 +24,8 @@ import java.util.UUID;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
+    private HashMap<String, BluetoothDevice> discoveredDevices = new HashMap<>();
+
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
@@ -109,7 +111,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.d(TAG, "Device discovered: \"" + device.getName() + "\" @" + device.getAddress());
-            notifyDeviceDiscovered(device);
+
+            if (! discoveredDevices.containsKey(device.getAddress())) {
+                discoveredDevices.put(device.getAddress(), device);
+                notifyDeviceDiscovered(device);
+            }
         }
     };
 
@@ -130,6 +136,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
+                discoveredDevices.clear();
                 promise.resolve(null);
             }
             @Override
