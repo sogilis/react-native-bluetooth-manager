@@ -129,6 +129,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 emit(eventName, eventData);
     }
 
+    private void emit(String eventName) {
+        emit(eventName, null);
+    }
+
     @ReactMethod
     public void stopScan(final Promise promise) {
         new BluetoothAction() {
