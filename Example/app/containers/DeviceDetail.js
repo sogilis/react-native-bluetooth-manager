@@ -46,8 +46,9 @@ const DeviceDetail = React.createClass({
       Bluetooth.disconnect(this.state.device)
       .then(() => {
         this.setState({
-          isConnected: true,
+          isConnected: false,
           connectionInProgress: false,
+          services: [],
         });
 
       });

@@ -49,19 +49,37 @@ const stopScan = () => {
 };
 
 const discoverServices = (device, serviceIds, callback) => {
-  const listener = EventEmitter.addListener(
-    ReactNativeBluetooth.ServiceDiscovered,
-    callback
-  );
+  return new Promise((resolve, reject) => {
+    const listener = EventEmitter.addListener(
+      ReactNativeBluetooth.ServiceDiscovered,
+      callback
+    );
 
-  ReactNativeBluetooth.discoverServices(device, serviceIds);
+    let startupListener;
 
-  return unsubscription(listener);
+    const onStartedCaught = detail => {
+      if ("error" in detail) {
+        reject(detail["error"]);
+        return;
+      }
+
+      if (startupListener) {
+        startupListener.remove();
+      }
+    }
+
+    startupListener = EventEmitter.addListener(
+      ReactNativeBluetooth.ServiceDiscoveryStarted,
+      onStartedCaught
+    );
+
+    ReactNativeBluetooth.discoverServices(device, serviceIds);
+
+    resolve(unsubscription(listener));
+  });
 }
 
 const idsAreSame = (set1, set2) => ("id" in set1) && ("id" in set2) && set1["id"] == set2["id"];
-
-
 
 const connect = (device) => {
   return new Promise((resolve, reject) => {
@@ -97,11 +115,11 @@ const disconnect = (device) => {
     let unsubscribe;
 
     const onDisconnectionCaught = detail => {
-      if (!idsAreSame(device, connectedDetail))
+      if (!idsAreSame(device, detail))
         return;
 
       if ("error" in detail) {
-        reject(connectedDetail["error"]);
+        reject(detail["error"]);
         return;
       }
 
@@ -120,7 +138,7 @@ const disconnect = (device) => {
 
 const deviceDidDisconnect = (callback) => {
   const listener = EventEmitter.addListener(
-    ReactNativeBluetooth.DeviceDisonnected,
+    ReactNativeBluetooth.DeviceDisconnected,
     callback
   );
 
