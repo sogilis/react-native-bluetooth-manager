@@ -43,6 +43,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private static final String EVENT_SCAN_STARTED = EVENT_BASE_NAME + "SCAN_STARTED";
     private static final String EVENT_SCAN_STOPPED = EVENT_BASE_NAME + "SCAN_STOPPED";
     private static final String EVENT_DEVICE_DISCOVERED = EVENT_BASE_NAME + "DEVICE_DISCOVERED";
+    private static final String EVENT_DEVICE_CONNECTED = EVENT_BASE_NAME + "DEVICE_CONNECTED";
+    private static final String EVENT_DEVICE_DISCONNECTED = EVENT_BASE_NAME + "DEVICE_DISCONNECTED";
+    private static final String EVENT_SERVICE_DISCOVERY_STARTED = EVENT_BASE_NAME + "SERVICE_DISCOVERY_STARTED";
+    private static final String EVENT_SERVICE_DISCOVERED = EVENT_BASE_NAME + "SERVICE_DISCOVERED";
 
     @Override public Map<String, Object> getConstants() {
         final Map<String, Object> constants = new HashMap<>();
@@ -51,6 +55,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("ScanStarted", EVENT_SCAN_STARTED);
         constants.put("ScanStopped", EVENT_SCAN_STOPPED);
         constants.put("DeviceDiscovered", EVENT_DEVICE_DISCOVERED);
+        constants.put("DeviceConnected", EVENT_DEVICE_CONNECTED);
+        constants.put("DeviceDisconnected", EVENT_DEVICE_DISCONNECTED);
+        constants.put("ServiceDiscoveryStarted", EVENT_SERVICE_DISCOVERY_STARTED);
+        constants.put("ServiceDiscovered", EVENT_SERVICE_DISCOVERED);
 
         return constants;
     }
