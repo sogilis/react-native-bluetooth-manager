@@ -78,21 +78,19 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     };
 
     @ReactMethod
-    public void startScan(ReadableArray uuidStrings, Promise promise) {
-        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    public void startScan(final ReadableArray uuidStrings, final Promise promise) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
+                promise.resolve(null);
+            }
 
-        if (bluetoothAdapter == null) {
-            promise.reject("Bluetooth not supported");
-            return;
-        }
-
-        if (!bluetoothAdapter.isEnabled()) {
-            promise.reject("Bluetooth disabled");
-            return;
-        }
-
-        bluetoothAdapter.startLeScan(this.uuidsFromStrings(uuidStrings), scanCallback);
-        promise.resolve(null);
+            @Override
+            public void withoutBluetooth(String message) {
+                promise.reject(message);
+            }
+        };
     }
 
     private UUID[] uuidsFromStrings(ReadableArray uuidStrings) {
@@ -127,21 +125,18 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void stopScan(Promise promise) {
-        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (bluetoothAdapter == null) {
-            promise.reject("Bluetooth not supported");
-            return;
-        }
-
-        if (!bluetoothAdapter.isEnabled()) {
-            promise.reject("Bluetooth disabled");
-            return;
-        }
-
-        bluetoothAdapter.stopLeScan(this.scanCallback);
-        promise.resolve(null);
+    public void stopScan(final Promise promise) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                bluetoothAdapter.stopLeScan(scanCallback);
+                promise.resolve(null);
+            }
+            @Override
+            public void withoutBluetooth(String message) {
+                promise.reject(message);
+            }
+        };
     }
 
     @Override public Map<String, Object> getConstants() {
