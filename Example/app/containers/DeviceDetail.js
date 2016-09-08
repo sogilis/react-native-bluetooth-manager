@@ -67,12 +67,13 @@ const DeviceDetail = React.createClass({
         connectionInProgress: false,
       });
 
-      this.unsubscribe = Bluetooth.discoverServices(this.state.device, null, service => {
-        this.setState({
-          services: [...this.state.services, service]
+      return Bluetooth.discoverServices(this.state.device, null, service => {
+          this.setState({
+            services: [...this.state.services, service]
+          });
         });
-      });
     })
+    .then(unsubscribe => this.unsubscribe = unsubscribe)
     .catch(error => {
       this.setState({
         error: error,

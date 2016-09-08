@@ -93,7 +93,6 @@ public class BluetoothActions: NSObject {
             onDeviceDisconnectedHandler([
                 "error": "No device found"]
             )
-
             return
         }
 
