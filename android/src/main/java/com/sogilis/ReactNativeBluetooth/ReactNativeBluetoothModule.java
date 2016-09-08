@@ -13,6 +13,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -129,6 +130,51 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
+                promise.resolve(null);
+            }
+            @Override
+            public void withoutBluetooth(String message) {
+                promise.reject(message);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void connect(final ReadableMap device, final Promise promise) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                // TODO
+                promise.resolve(null);
+            }
+            @Override
+            public void withoutBluetooth(String message) {
+                promise.reject(message);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void disconnect(final ReadableMap device, final Promise promise) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                // TODO
+                promise.resolve(null);
+            }
+            @Override
+            public void withoutBluetooth(String message) {
+                promise.reject(message);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void discoverServices(final ReadableMap device, final Promise promise) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                // TODO
                 promise.resolve(null);
             }
             @Override
