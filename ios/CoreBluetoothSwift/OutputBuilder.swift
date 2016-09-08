@@ -14,6 +14,7 @@ class OutputBuilder {
     static func asService(service: CBService) -> BluetoothServiceReturn {
         return [
             "id": getServiceName(service.UUID),
+            "deviceId": service.peripheral.identifier.UUIDString ?? "Unknown",
             "name": "Unknown"
         ]
     }

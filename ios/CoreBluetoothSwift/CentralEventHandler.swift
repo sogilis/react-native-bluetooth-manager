@@ -6,10 +6,12 @@
 import Foundation
 import CoreBluetooth
 
+
 class CentralEventHandler: NSObject, CBCentralManagerDelegate {
     private var onStateChange: (CBCentralManagerState -> Void)?
     private var onDeviceDiscovered: (CBPeripheral -> Void)?
     private var onDeviceConnected: (CBPeripheral -> Void)?
+    private var onDeviceConnectedOnce: (CBPeripheral -> Void)?
     private var onDeviceDisconnected: (CBPeripheral -> Void)?
 
     func onStateChange(handler: CBCentralManagerState -> Void) -> Void {

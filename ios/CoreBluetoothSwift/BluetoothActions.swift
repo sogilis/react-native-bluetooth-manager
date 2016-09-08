@@ -13,13 +13,10 @@ public class BluetoothActions: NSObject {
 
     private let backgroundQueue = dispatch_queue_create("rnBluetooth", DISPATCH_QUEUE_SERIAL)
 
-    private var lastState = CBCentralManagerState.Unknown
+    private var onDeviceConnectedHandler: BluetoothServiceReturn -> Void = { _ in }
+    private var onDeviceDisconnectedHandler: BluetoothServiceReturn -> Void = { _ in }
 
-    private var onStateChange: (BluetoothServiceReturn -> Void)?
-    private var onStopScanComplete: (() -> Void)?
-    private var onDeviceDiscovered: (BluetoothServiceReturn -> Void)?
-//    private var onDeviceConnected: (BluetoothServiceReturn -> Void)?
-    private var onDeviceDisconnected: (BluetoothServiceReturn -> Void)?
+    private var lastState = CBCentralManagerState.Unknown
 
     private var discoveredPeripherals = [NSUUID: CBPeripheral]()
 
@@ -33,6 +30,26 @@ public class BluetoothActions: NSObject {
     override init() {
         centralManager.delegate = centralEventHandler
     }
+
+    private func getDevice(lookup: [String: AnyObject]) -> CBPeripheral? {
+        guard let deviceIdString = lookup["id"] as? String else {
+            print("No device id found.")
+            return nil
+        }
+
+        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
+            print("Invalid device id found.")
+            return nil
+        }
+
+        guard let device = self.discoveredPeripherals[deviceId] else {
+            print("No device found", deviceId, discoveredPeripherals)
+            return nil
+        }
+
+        return device
+    }
+
 
     public func startScan(serviceUUIDs: [String], onScanStarted: () -> Void) {
         let mappedIds = serviceUUIDs.map { CBUUID(string: $0) }
@@ -56,28 +73,13 @@ public class BluetoothActions: NSObject {
         })
     }
 
-    public func connect(device: [String: AnyObject], onConnection: () -> Void) {
-        guard let deviceIdString = device["id"] as? String else {
-            print("No device id found. Can not connect")
-            onConnection()
+    public func connect(deviceLookup: [String: AnyObject]) {
+        guard let device = getDevice(deviceLookup) else {
+            print("No device found. Can not connect")
+            onDeviceConnectedHandler([
+                "error": "No device found"]
+            )
             return
-        }
-
-        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
-            print("Invalid device id found. Can not connect")
-            onConnection()
-            return
-        }
-
-        guard let device = self.discoveredPeripherals[deviceId] else {
-            print("No device found. Can not connect", deviceId, discoveredPeripherals)
-            onConnection()
-            return
-        }
-
-        centralEventHandler.onDeviceConnected { device in
-            device.delegate = self.peripheralEventHandler
-            onConnection()
         }
 
         dispatch_async(backgroundQueue, { [unowned self] in
@@ -85,62 +87,39 @@ public class BluetoothActions: NSObject {
         })
     }
 
-    public func disconnect(device: [String: AnyObject], onDisconnection: () -> Void) {
-        guard let deviceIdString = device["id"] as? String else {
-            print("No device id found. Can not disconnect")
-            onDisconnection()
+    public func disconnect(deviceLookup: [String: AnyObject]) {
+        guard let device = getDevice(deviceLookup) else {
+            print("No device found. Can not discover services")
+            onDeviceDisconnectedHandler([
+                "error": "No device found"]
+            )
+
             return
         }
 
-        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
-            print("Invalid device id found. Can not disconnect")
-            onDisconnection()
-            return
-        }
-
-        guard let device = self.discoveredPeripherals[deviceId] else {
-            print("No device found. Can not disconnect")
-            onDisconnection()
-            return
-        }
-        // todo: this won't work on multiple disconnect calls
-
-        centralEventHandler.onDeviceConnected { device in
-            onDisconnection()
-        }
-
-        centralManager.cancelPeripheralConnection(device)
-
+        dispatch_async(backgroundQueue, { [unowned self] in
+            self.centralManager.cancelPeripheralConnection(device)
+        })
     }
 
-    public func discoverServices(device: [String: AnyObject],
+    public func discoverServices(deviceLookup: [String: AnyObject],
                                  services: [String]?,
-                                 onDiscoverStarted: () -> Void) {
+                                 onDiscoverStarted: (BluetoothServiceReturn) -> Void) {
 
-        guard let deviceIdString = device["id"] as? String else {
-            print("No device id found. Can not start service discovery.")
+        guard let device = getDevice(deviceLookup) else {
+            print("No device found. Can not discover services")
+            onDiscoverStarted([
+                "error": "No device found"
+                ])
             return
         }
-
-        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
-            print("Invalid device id found. Can not start service discovery.")
-            onDiscoverStarted()
-            return
-        }
-
-        guard let device = self.discoveredPeripherals[deviceId] else {
-            print("No device found. Can not start service discovery.")
-            return
-        }
-
 
         dispatch_async(backgroundQueue, {
             let serviceIds = services?.map { CBUUID(string: $0) }
             print("Discovering service ids", serviceIds)
             device.discoverServices(serviceIds)
-            onDiscoverStarted()
+            onDiscoverStarted(BluetoothServiceReturn())
         })
-
     }
 
     public func onChangeState(handler: String -> Void) {
@@ -189,14 +168,18 @@ public class BluetoothActions: NSObject {
         }
     }
 
-//    public func onDeviceConnected(handler: BluetoothServiceReturn -> Void) {
-//        centralEventHandler.onDeviceConnected { device in
-//            device.delegate = self.peripheralEventHandler
-//            handler(OutputBuilder.asDevice(device))
-//        }
-//    }
+    public func onDeviceConnected(handler: BluetoothServiceReturn -> Void) {
+        onDeviceConnectedHandler = handler
+
+        centralEventHandler.onDeviceConnected { device in
+            device.delegate = self.peripheralEventHandler
+            handler(OutputBuilder.asDevice(device))
+        }
+    }
 
     public func onDeviceDisconnected(handler: BluetoothServiceReturn -> Void) {
+        onDeviceDisconnectedHandler = handler
+
         centralEventHandler.onDeviceDisconnected { device in
             handler(OutputBuilder.asDevice(device))
         }
@@ -212,7 +195,7 @@ public class BluetoothActions: NSObject {
         }
     }
 
-    func cleanConnections() {
+    public func cleanConnections() {
         self.discoveredPeripherals
             .map { $0.1 }
             .forEach { [unowned self] peripheral in
@@ -235,5 +218,6 @@ public class BluetoothActions: NSObject {
                     }
             }
         }
+        self.discoveredPeripherals.removeAll()
     }
 }
