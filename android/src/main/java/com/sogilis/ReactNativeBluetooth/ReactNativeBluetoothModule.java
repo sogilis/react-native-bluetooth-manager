@@ -54,17 +54,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-            notifyStateChange(STATE_ENABLED);
+            emit(EVENT_STATE_CHANGED, STATE_ENABLED);
         } else {
-            notifyStateChange(STATE_DISABLED);
+            emit(EVENT_STATE_CHANGED, STATE_DISABLED);
         }
-    }
-
-    private void notifyStateChange(String newState) {
-
-        getReactApplicationContext().
-                getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
-                emit(EVENT_STATE_CHANGED, newState);
     }
 
     private BroadcastReceiver stateChangeReceiver = new BroadcastReceiver() {
@@ -74,9 +67,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             if (newStateCode == BluetoothAdapter.STATE_ON) {
-                notifyStateChange(STATE_ENABLED);
+                emit(EVENT_STATE_CHANGED, STATE_ENABLED);
             } else if (newStateCode == BluetoothAdapter.STATE_OFF) {
-                notifyStateChange(STATE_DISABLED);
+                emit(EVENT_STATE_CHANGED, STATE_DISABLED);
             }
         }
     };
