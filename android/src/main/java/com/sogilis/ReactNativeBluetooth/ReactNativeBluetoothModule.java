@@ -193,11 +193,19 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
-                // TODO
+                String address = deviceMap.getString("address");
+                BluetoothDevice device = discoveredDevices.get(address);
+
+                if (device == null) {
+                    emitError(EVENT_DEVICE_CONNECTED, "No such device: " + address);
+                    return;
+                }
+
+                device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
             @Override
             public void withoutBluetooth(String message) {
-                // TODO
+                emitError(EVENT_DEVICE_CONNECTED, message);
             }
         };
     }
