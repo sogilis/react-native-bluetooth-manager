@@ -37,10 +37,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private static final String TAG = ReactNativeBluetoothModule.class.getSimpleName();
 
     // Events
-    private static final String EVENT_STATE_CHANGED =
-            ReactNativeBluetoothModule.class.getCanonicalName() + ".EVENT_STATE_CHANGED";
-    private static final String EVENT_DEVICE_DISCOVERED =
-            ReactNativeBluetoothModule.class.getCanonicalName() + ".EVENT_DEVICE_DISCOVERED";
+    private static final String EVENT_BASE_NAME =
+            ReactNativeBluetoothModule.class.getCanonicalName() + ".EVENT_";
+
+    private static final String EVENT_STATE_CHANGED = EVENT_BASE_NAME + "STATE_CHANGED";
+    private static final String EVENT_DEVICE_DISCOVERED = EVENT_BASE_NAME + "DEVICE_DISCOVERED";
 
     // States
     private static final String STATE_ENABLED = "enabled";
