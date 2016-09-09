@@ -68,7 +68,7 @@ const ServiceDetail = React.createClass({
         <View style={styles.listContainer}>
           <CharacteristicList
             characteristics={this.state.characteristics}
-            selectedCharacteristic={this.characteristicSelected} />
+            selectCharacteristic={this.characteristicSelected} />
         </View>
       </View>
     );
