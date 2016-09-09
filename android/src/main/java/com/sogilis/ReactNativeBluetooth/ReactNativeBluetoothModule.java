@@ -184,7 +184,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             for (BluetoothGattService service: gatt.getServices()) {
-                eventEmitter.emit(EventNames.SERVICE_DISCOVERED, service);
+                eventEmitter.emit(EventNames.SERVICE_DISCOVERED, gatt.getDevice(), service);
             }
         }
     };

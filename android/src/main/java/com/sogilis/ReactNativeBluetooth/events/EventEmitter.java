@@ -28,10 +28,11 @@ public class EventEmitter {
         emit(eventName, deviceMap);
     }
 
-    public void emit(String eventName, BluetoothGattService service) {
+    public void emit(String eventName, BluetoothDevice device, BluetoothGattService service) {
         WritableMap serviceMap = new WritableNativeMap();
 
         serviceMap.putString("id", service.getUuid().toString());
+        serviceMap.putString("deviceId", device.getAddress());
 
         emit(eventName, serviceMap);
     }
