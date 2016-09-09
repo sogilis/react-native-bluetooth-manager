@@ -11,6 +11,11 @@ public class EventNames {
     public static final String DEVICE_DISCONNECTED = name("DEVICE_DISCONNECTED");
     public static final String SERVICE_DISCOVERY_STARTED = name("SERVICE_DISCOVERY_STARTED");
     public static final String SERVICE_DISCOVERED = name("SERVICE_DISCOVERED");
+    public static final String CHARACTERISTIC_DISCOVERY_STARTED = name("CHARACTERISTIC_DISCOVERY_STARTED");
+    public static final String CHARACTERISTIC_DISCOVERED = name("CHARACTERISTIC_DISCOVERED");
+    public static final String CHARACTERISTIC_READ = name("CHARACTERISTIC_READ");
+    public static final String CHARACTERISTIC_WRITTEN = name("CHARACTERISTIC_WRITTEN");
+    public static final String CHARACTERISTIC_NOTIFIED = name("CHARACTERISTIC_NOTIFIED");
 
     private static final String name(String customNamePart) {
         return MODULE_NAME + "." + customNamePart;

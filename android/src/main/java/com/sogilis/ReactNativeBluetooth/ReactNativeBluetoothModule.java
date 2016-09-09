@@ -49,6 +49,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("DeviceDisconnected", EventNames.DEVICE_DISCONNECTED);
         constants.put("ServiceDiscoveryStarted", EventNames.SERVICE_DISCOVERY_STARTED);
         constants.put("ServiceDiscovered", EventNames.SERVICE_DISCOVERED);
+        constants.put("CharacteristicDiscoveryStarted", EventNames.CHARACTERISTIC_DISCOVERY_STARTED);
+        constants.put("CharacteristicDiscovered", EventNames.CHARACTERISTIC_DISCOVERED);
+        constants.put("CharacteristicRead", EventNames.CHARACTERISTIC_READ);
+        constants.put("CharacteristicWritten", EventNames.CHARACTERISTIC_WRITTEN);
+        constants.put("CharacteristicNotified", EventNames.CHARACTERISTIC_NOTIFIED);
 
         return constants;
     }
