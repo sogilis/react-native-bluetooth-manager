@@ -62,9 +62,10 @@ const ServiceDetail = React.createClass({
     return (
       <View style={styles.container}>
         <TopBar
-          headerText={"Service - " + this.state.service.id}
+          headerText={"Service Detail"}
           backAction={() => this.props.navigator('DeviceDetail')} />
         {this.renderError()}
+        <Text style={styles.labelText}>Characteristics</Text>
         <View style={styles.listContainer}>
           <CharacteristicList
             characteristics={this.state.characteristics}
@@ -79,6 +80,11 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     color: 'red',
+  },
+  labelText: {
+    fontSize: 20,
+    color: 'grey',
+    marginLeft: 15,
   },
   container: {
     flex: 1,
