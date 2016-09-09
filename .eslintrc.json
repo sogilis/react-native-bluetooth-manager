@@ -1,0 +1,46 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "spread": true,
+      "binaryLiterals": true,
+      "blockBindings": true,
+      "templateStrings": true,
+      "modules": true,
+      "destructuring": true,
+      "generators": true,
+      "experimentalObjectRestSpread": true,
+      "impliedStrict": true
+    }
+  },
+  "plugins": [
+    "react",
+    "react-native"
+  ],
+  "globals": {
+    "__DEV__": false
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "semi": [
+      2,
+      "always"
+    ],
+    "no-console": 0,
+    "react-native/no-unused-styles": 2,
+    "react-native/split-platform-components": 2,
+    "react-native/no-inline-styles": 2,
+    "react-native/no-color-literals": 0,
+    "react/display-name": 0
+  }
+}

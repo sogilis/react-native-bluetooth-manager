@@ -17,9 +17,14 @@
   },
   "homepage": "https://github.com/sogilis/react-native-bluetooth#readme",
   "scripts": {
-    "module-watch": "nodemon -w index.js -e js -x rsync -rtv index.js Example/node_modules/react-native-bluetooth/index.js"
+    "module-watch": "nodemon -w index.js -e js -x rsync -rtv index.js Example/node_modules/react-native-bluetooth/index.js",
+    "lint": "eslint .",
+    "lint-example": "eslint Example/app"
   },
   "devDependencies": {
+    "eslint": "^3.4.0",
+    "eslint-plugin-react": "^6.2.0",
+    "eslint-plugin-react-native": "^2.0.0",
     "nodemon": "^1.10.2"
   }
 }
