@@ -140,6 +140,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private void emit(String eventName, BluetoothDevice device) {
         WritableMap deviceMap = new WritableNativeMap();
 
+        deviceMap.putString("id", device.getAddress());
         deviceMap.putString("address", device.getAddress());
         deviceMap.putString("name", device.getName());
 
