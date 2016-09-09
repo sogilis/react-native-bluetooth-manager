@@ -22,7 +22,7 @@ const renderServiceRow = service => {
       onPress={() => {}}
       key={service.id}
       style={styles.textHolder}>
-    <Text style={styles.serviceText}>{service.name}</Text>
+    <Text style={styles.serviceText}>{service.id}</Text>
   </TouchableOpacity>
   );
 };
