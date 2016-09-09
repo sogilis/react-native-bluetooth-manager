@@ -18,7 +18,7 @@ const DeviceDetail = React.createClass({
       device: selectedDevice,
       error: null,
       services: [],
-      isConnected: false,
+      isConnected: false, //TODO: this needs to come from global state.
       connectionInProgress: false,
     };
   },
@@ -28,12 +28,6 @@ const DeviceDetail = React.createClass({
 
   componentWillUnmount() {
     this.unsubscribe();
-
-    // Bluetooth.disconnect(this.state.device);
-
-    setAppState({
-      selectedDevice: null,
-    });
   },
 
   connect() {
@@ -89,6 +83,16 @@ const DeviceDetail = React.createClass({
     this.props.navigator('ServiceDetail');
   },
 
+  goBack() {
+    Bluetooth.disconnect(this.state.device);
+
+    setAppState({
+      selectedDevice: null,
+    });
+
+    this.props.navigator('DeviceDiscovery');
+  },
+
   renderError() {
     if (this.state.error == null) return null;
 
@@ -114,7 +118,7 @@ const DeviceDetail = React.createClass({
       <View style={styles.container}>
         <TopBar
           headerText={"Device - " + this.state.device.name}
-          backAction={() => this.props.navigator('DeviceDiscovery')} />
+          backAction={ this.goBack } />
         {this.renderError()}
         {this.renderStatus()}
         <View style={styles.listContainer}>
