@@ -39,13 +39,39 @@ const Scan = {
 };
 
 const startScan = (customOptions = {}) => {
-  let options = Object.assign({}, DefaultScanOptions, customOptions);
+  return new Promise((resolve, reject) => {
+    let options = Object.assign({}, DefaultScanOptions, customOptions);
 
-  return ReactNativeBluetooth.startScan(options.uuids).then(() => Scan);
+    let listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStarted, (error) => {
+      if (listener) {
+        listener.remove();
+      }
+
+      if (error) {
+        reject(error.error);
+      } else {
+        resolve(Scan);
+      }
+    });
+
+    ReactNativeBluetooth.startScan(options.uuids);
+  });
 };
 
 const stopScan = () => {
-  return ReactNativeBluetooth.stopScan();
+  return new Promise((resolve, reject) => {
+    let listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, (error) => {
+      if (listener) {
+        listener.remove();
+      }
+
+      if (error) {
+        reject(error.error);
+      } else {
+        resolve(null);
+      }
+    });
+  });
 };
 
 const discoverServices = (device, serviceIds, callback) => {
