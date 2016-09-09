@@ -234,10 +234,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothDevice device = gatt.getDevice();
             String address = device.getAddress();
 
-            if (status == BluetoothProfile.STATE_CONNECTED) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
                 gattClients.put(address, gatt);
                 emit(EVENT_DEVICE_CONNECTED, device);
-            } else if (status == BluetoothProfile.STATE_DISCONNECTED) {
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gattClients.remove(address);
                 emit(EVENT_DEVICE_DISCONNECTED, device);
             }
