@@ -204,6 +204,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
+                gattClients.clear();
                 emitError(EVENT_DEVICE_CONNECTED, message);
             }
         };
@@ -242,6 +243,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
+                gattClients.clear();
                 emitError(EVENT_DEVICE_DISCONNECTED, message);
             }
         };
@@ -257,6 +259,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
+                gattClients.clear();
                 emitError(EVENT_SERVICE_DISCOVERY_STARTED, message);
             }
         };
