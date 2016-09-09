@@ -29,7 +29,7 @@ const DeviceDetail = React.createClass({
   componentWillUnmount() {
     this.unsubscribe();
 
-    Bluetooth.disconnect(this.state.device);
+    // Bluetooth.disconnect(this.state.device);
 
     setAppState({
       selectedDevice: null,
@@ -50,7 +50,6 @@ const DeviceDetail = React.createClass({
           connectionInProgress: false,
           services: [],
         });
-
       });
 
       return;
@@ -82,8 +81,12 @@ const DeviceDetail = React.createClass({
     });
   },
 
-  scanInProgress() {
-    return this.state.error == null && this.state.status != "Done";
+  serviceSelected(service) {
+    setAppState({
+      selectedService: service,
+    });
+
+    this.props.navigator('ServiceDetail');
   },
 
   renderError() {
@@ -93,9 +96,8 @@ const DeviceDetail = React.createClass({
   },
 
   renderStatus() {
-    if (this.state.connectionInProgress)
-    {
-        return <ActivityIndicator animating={true} />;
+    if (this.state.connectionInProgress) {
+      return <ActivityIndicator animating={true} />;
     }
 
     return (
@@ -116,7 +118,7 @@ const DeviceDetail = React.createClass({
         {this.renderError()}
         {this.renderStatus()}
         <View style={styles.listContainer}>
-          <ServiceList services={this.state.services} />
+          <ServiceList services={this.state.services} selectService={this.serviceSelected} />
         </View>
       </View>
     );

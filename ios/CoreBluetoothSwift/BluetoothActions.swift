@@ -118,6 +118,39 @@ public class BluetoothActions: NSObject {
         })
     }
 
+    public func discoverCharacteristics(service: [String: AnyObject],
+                                        characteristics: [String]?,
+                                        onDiscoverStarted: (BluetoothServiceReturn) -> Void) {
+        print("Discovering characteristics.")
+
+        guard let device = getDevice(["id" : service["deviceId"] ?? "unknown"]) else {
+            print("No device found. Can not discover characteristics")
+            onDiscoverStarted([
+                "error": "No device found"
+                ])
+            return
+        }
+
+        let getService: Void -> CBService? = {
+            return  device.services?.filter {
+                $0.UUID.UUIDString == (service["id"] as? String) ?? "_"
+            } .first
+        }
+
+        guard let requiredService = getService() else {
+            print("No service found. Can not discover characteristics", service, device)
+            onDiscoverStarted([
+                "error": "No service found"
+                ])
+            return
+        }
+
+        dispatch_async(backgroundQueue, {
+            let characteristicIds = characteristics?.map { CBUUID(string: $0) }
+            device.discoverCharacteristics(characteristicIds, forService: requiredService)
+        })
+    }
+
     public func onChangeState(handler: String -> Void) {
         centralEventHandler.onStateChange { [unowned self] state in
             self.lastState = state
@@ -140,9 +173,24 @@ public class BluetoothActions: NSObject {
         }
     }
 
+    public func onCharacteristicDiscovered(handler: BluetoothServiceReturn -> Void) {
+        peripheralEventHandler.onCharacteristicDiscovered { characteristicInfo in
+
+            let lastCharacteristic = characteristicInfo.1.characteristics?.last
+
+            guard let characteristic = lastCharacteristic else {
+                print ("Characteristic discovered but unable to look up detail.")
+                return
+            }
+
+            handler(OutputBuilder.asCharacteristic(characteristic))
+        }
+    }
+
     public func onCharacteristicRead(handler: BluetoothServiceReturn -> Void) {
         peripheralEventHandler.onCharacteristicValueUpdated { newValue in
-            handler(OutputBuilder.asCharacteristicValue(newValue))
+            //TODO: do we need the error here?
+            handler(OutputBuilder.asCharacteristicValue(newValue.1))
         }
     }
 
@@ -160,7 +208,7 @@ public class BluetoothActions: NSObject {
 
     public func onCharacteristicNotified(handler: BluetoothServiceReturn -> Void) {
         peripheralEventHandler.onCharacteristicNotify { characteristicInfo in
-            handler(OutputBuilder.asCharacteristic(characteristicInfo))
+            handler(OutputBuilder.asCharacteristic(characteristicInfo.1))
         }
     }
 

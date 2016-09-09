@@ -92,6 +92,8 @@ const discoverServices = (device, serviceIds, callback) => {
       if (startupListener) {
         startupListener.remove();
       }
+
+      resolve(unsubscription(listener));
     };
 
     startupListener = EventEmitter.addListener(
@@ -100,8 +102,37 @@ const discoverServices = (device, serviceIds, callback) => {
     );
 
     ReactNativeBluetooth.discoverServices(device, serviceIds);
+  });
+};
 
-    resolve(unsubscription(listener));
+const discoverCharacteristics = (service, characteristicIds, callback) => {
+  return new Promise((resolve, reject) => {
+    const listener = EventEmitter.addListener(
+      ReactNativeBluetooth.CharacteristicDiscovered,
+      callback
+    );
+
+    let startupListener;
+
+    const onStartedCaught = detail => {
+      if ("error" in detail) {
+        reject(detail["error"]);
+        return;
+      }
+
+      if (startupListener) {
+        startupListener.remove();
+      }
+
+      resolve(unsubscription(listener));
+    };
+
+    startupListener = EventEmitter.addListener(
+      ReactNativeBluetooth.CharacteristicDiscoveryStarted,
+      onStartedCaught
+    );
+
+    ReactNativeBluetooth.discoverCharacteristics(service, characteristicIds);
   });
 };
 
@@ -184,6 +215,7 @@ export default {
   stopScan,
   didDiscoverDevice,
   discoverServices,
+  discoverCharacteristics,
   connect,
   disconnect,
 };

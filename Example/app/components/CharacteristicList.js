@@ -8,22 +8,22 @@ import {
   View,
 } from 'react-native';
 
-const makeDataSource = services => {
+const makeDataSource = characteristics => {
   const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-  return ds.cloneWithRows(services);
+  return ds.cloneWithRows(characteristics);
 };
 
-const renderServiceRow = selectService => {
-  return  service => {
-    if (!service) return <View />;
+const renderCharacteristicRow = selectCharacteristic => {
+  return characteristic => {
+    if (!characteristic) return <View />;
 
     return (
       <TouchableOpacity
-        onPress={() => selectService(service)}
-        key={service.id}
+        onPress={() => selectCharacteristic(characteristic)}
+        key={characteristic.id}
         style={styles.textHolder}>
-      <Text style={styles.serviceText}>{service.id}</Text>
+      <Text style={styles.characteristicText}>{characteristic.id}</Text>
     </TouchableOpacity>
     );
   };
@@ -42,23 +42,23 @@ const scrollComponent = props => {
   return (<RecyclerViewBackedScrollView {...props} />);
 };
 
-const ServiceList = ({services, selectService}) => (
+const CharacteristicList = ({characteristics, selectCharacteristic}) => (
   <ListView
-    dataSource={makeDataSource(services)}
-    renderRow={renderServiceRow(selectService)}
+    dataSource={makeDataSource(characteristics)}
+    renderRow={renderCharacteristicRow(selectCharacteristic)}
     renderScrollComponent={scrollComponent}
     renderSeparator={renderSeparator}
     enableEmptySections={true}>
   </ListView>
 );
 
-ServiceList.propTypes = {
-  services: PropTypes.array.isRequired,
-  selectService: PropTypes.func.isRequired,
+CharacteristicList.propTypes = {
+  characteristics: PropTypes.array.isRequired,
+  selectCharacteristic: PropTypes.func.isRequired,
 };
 
 var styles = StyleSheet.create({
-  serviceText: {
+  characteristicText: {
     fontSize: 18,
     color: 'grey',
   },
@@ -73,4 +73,4 @@ var styles = StyleSheet.create({
   },
 });
 
-export default ServiceList;
+export default CharacteristicList;

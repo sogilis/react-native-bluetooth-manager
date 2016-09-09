@@ -13,7 +13,7 @@ private func getServiceName(serviceId: CBUUID) -> String {
 class OutputBuilder {
     static func asService(service: CBService) -> BluetoothServiceReturn {
         return [
-            "id": getServiceName(service.UUID),
+            "id": service.UUID.UUIDString,
             "deviceId": service.peripheral.identifier.UUIDString ?? "Unknown",
             "name": "Unknown"
         ]
@@ -36,15 +36,19 @@ class OutputBuilder {
         }
     }
 
-    static func asCharacteristic(info: CharacteristicInfo) -> BluetoothServiceReturn {
+    static func asCharacteristic(characteristic: CBCharacteristic) -> BluetoothServiceReturn {
         return [
-            "name" : info.peripheral.name ?? "Unknown"
+            "id": characteristic.UUID.UUIDString,
+            "deviceId": characteristic.service.peripheral.identifier.UUIDString,
+            "serviceId": characteristic.service.UUID.UUIDString,
+            "supports": "READ|WRITE|NOTIFY",
         ]
     }
 
-    static func asCharacteristicValue(info: CharacteristicInfo) -> BluetoothServiceReturn {
+    static func asCharacteristicValue(characteristic: CBCharacteristic) -> BluetoothServiceReturn {
         return [
-            "name" : info.peripheral.name ?? "Unknown"
+            "id": characteristic.UUID.UUIDString,
+            "deviceId": characteristic.service.peripheral.identifier.UUIDString,
         ]
     }
 

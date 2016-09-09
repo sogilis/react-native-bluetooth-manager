@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigator } from 'react-native';
 import DeviceDiscovery from '../containers/DeviceDiscovery';
 import DeviceDetail from '../containers/DeviceDetail';
+import ServiceDetail from '../containers/ServiceDetail';
 
 const renderScene = (route, navigator) => {
   const navigate = routeName => navigator.replace( { name: routeName } );
@@ -12,7 +13,9 @@ const renderScene = (route, navigator) => {
   if (route.name == 'DeviceDetail') {
     return <DeviceDetail navigator={navigate} />;
   }
-
+  if (route.name == 'ServiceDetail') {
+    return <ServiceDetail navigator={navigate} />;
+  }
 };
 
 const Routes = () => (
