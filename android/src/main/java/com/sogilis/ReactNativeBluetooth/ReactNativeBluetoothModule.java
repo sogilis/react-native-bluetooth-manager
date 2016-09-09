@@ -257,24 +257,29 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 }
 
                 eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, serviceMap);
-                for (int index=0; index < characteristicIds.size(); index++) {
-                    UUID uuid = UUID.fromString(characteristicIds.getString(index));
-                    BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
 
-                    if (characteristic == null) {
-                        eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERED,
-                                "No such characteristic: " + uuid.toString() +
-                                "(device: " + deviceId + ", " +
-                                "service: " + serviceId + ")");
-                    } else {
-                        eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERED, device, service, characteristic);
-                    }
-                }
+                discoverRequestedCharacteristics(device, service, characteristicIds);
             }
             @Override
             public void withoutBluetooth(String message) {
                 eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, message);
             }
         };
+    }
+
+    private void discoverRequestedCharacteristics(BluetoothDevice device, BluetoothGattService service, ReadableArray characteristicIds) {
+        for (int index = 0; index < characteristicIds.size(); index++) {
+            UUID uuid = UUID.fromString(characteristicIds.getString(index));
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
+
+            if (characteristic == null) {
+                eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERED,
+                        "No such characteristic: " + uuid.toString() +
+                                "(device: " + device.getAddress() + ", " +
+                                "service: " + service.getUuid().toString() + ")");
+            } else {
+                eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERED, device, service, characteristic);
+            }
+        }
     }
 }
