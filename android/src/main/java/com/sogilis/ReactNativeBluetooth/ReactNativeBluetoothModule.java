@@ -269,7 +269,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void discoverServices(final ReadableMap deviceMap) {
+    public void discoverServices(final ReadableMap deviceMap, final ReadableArray serviceIds) {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
