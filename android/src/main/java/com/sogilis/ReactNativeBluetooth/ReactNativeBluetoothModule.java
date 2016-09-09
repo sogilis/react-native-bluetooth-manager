@@ -10,16 +10,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
+import com.sogilis.ReactNativeBluetooth.events.EventNames;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,41 +27,27 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private HashMap<String, BluetoothDevice> discoveredDevices = new HashMap<>();
     private HashMap<String, BluetoothGatt> gattClients = new HashMap<>();
+    private EventEmitter eventEmitter;
 
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        eventEmitter = new EventEmitter(reactContext);
 
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
-    // Logging
-    private static final String TAG = ReactNativeBluetoothModule.class.getSimpleName();
-
-    // Events
-    private static final String EVENT_BASE_NAME =
-            ReactNativeBluetoothModule.class.getCanonicalName() + ".EVENT_";
-
-    private static final String EVENT_STATE_CHANGED = EVENT_BASE_NAME + "STATE_CHANGED";
-    private static final String EVENT_SCAN_STARTED = EVENT_BASE_NAME + "SCAN_STARTED";
-    private static final String EVENT_SCAN_STOPPED = EVENT_BASE_NAME + "SCAN_STOPPED";
-    private static final String EVENT_DEVICE_DISCOVERED = EVENT_BASE_NAME + "DEVICE_DISCOVERED";
-    private static final String EVENT_DEVICE_CONNECTED = EVENT_BASE_NAME + "DEVICE_CONNECTED";
-    private static final String EVENT_DEVICE_DISCONNECTED = EVENT_BASE_NAME + "DEVICE_DISCONNECTED";
-    private static final String EVENT_SERVICE_DISCOVERY_STARTED = EVENT_BASE_NAME + "SERVICE_DISCOVERY_STARTED";
-    private static final String EVENT_SERVICE_DISCOVERED = EVENT_BASE_NAME + "SERVICE_DISCOVERED";
-
     @Override public Map<String, Object> getConstants() {
         final Map<String, Object> constants = new HashMap<>();
 
-        constants.put("StateChanged", EVENT_STATE_CHANGED);
-        constants.put("ScanStarted", EVENT_SCAN_STARTED);
-        constants.put("ScanStopped", EVENT_SCAN_STOPPED);
-        constants.put("DeviceDiscovered", EVENT_DEVICE_DISCOVERED);
-        constants.put("DeviceConnected", EVENT_DEVICE_CONNECTED);
-        constants.put("DeviceDisconnected", EVENT_DEVICE_DISCONNECTED);
-        constants.put("ServiceDiscoveryStarted", EVENT_SERVICE_DISCOVERY_STARTED);
-        constants.put("ServiceDiscovered", EVENT_SERVICE_DISCOVERED);
+        constants.put("StateChanged", EventNames.STATE_CHANGED);
+        constants.put("ScanStarted", EventNames.SCAN_STARTED);
+        constants.put("ScanStopped", EventNames.SCAN_STOPPED);
+        constants.put("DeviceDiscovered", EventNames.DEVICE_DISCOVERED);
+        constants.put("DeviceConnected", EventNames.DEVICE_CONNECTED);
+        constants.put("DeviceDisconnected", EventNames.DEVICE_DISCONNECTED);
+        constants.put("ServiceDiscoveryStarted", EventNames.SERVICE_DISCOVERY_STARTED);
+        constants.put("ServiceDiscovered", EventNames.SERVICE_DISCOVERED);
 
         return constants;
     }
@@ -79,9 +63,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-            emit(EVENT_STATE_CHANGED, STATE_ENABLED);
+            eventEmitter.emit(EventNames.STATE_CHANGED, STATE_ENABLED);
         } else {
-            emit(EVENT_STATE_CHANGED, STATE_DISABLED);
+            eventEmitter.emit(EventNames.STATE_CHANGED, STATE_DISABLED);
         }
     }
 
@@ -92,9 +76,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             if (newStateCode == BluetoothAdapter.STATE_ON) {
-                emit(EVENT_STATE_CHANGED, STATE_ENABLED);
+                eventEmitter.emit(EventNames.STATE_CHANGED, STATE_ENABLED);
             } else if (newStateCode == BluetoothAdapter.STATE_OFF) {
-                emit(EVENT_STATE_CHANGED, STATE_DISABLED);
+                eventEmitter.emit(EventNames.STATE_CHANGED, STATE_DISABLED);
             }
         }
     };
@@ -105,12 +89,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
-                emit(EVENT_SCAN_STARTED);
+                eventEmitter.emit(EventNames.SCAN_STARTED);
             }
 
             @Override
             public void withoutBluetooth(String message) {
-                emitError(EVENT_SCAN_STARTED, message);
+                eventEmitter.emitError(EventNames.SCAN_STARTED, message);
             }
         };
     }
@@ -132,63 +116,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             if (! discoveredDevices.containsKey(device.getAddress())) {
                 discoveredDevices.put(device.getAddress(), device);
-                emit(EVENT_DEVICE_DISCOVERED, device);
+                eventEmitter.emit(EventNames.DEVICE_DISCOVERED, device);
             }
         }
     };
-
-    private void emit(String eventName, BluetoothDevice device) {
-        WritableMap deviceMap = new WritableNativeMap();
-
-        deviceMap.putString("id", device.getAddress());
-        deviceMap.putString("address", device.getAddress());
-        deviceMap.putString("name", device.getName());
-
-        emit(eventName, deviceMap);
-    }
-
-    private void emit(String eventName, BluetoothGattService service) {
-        WritableMap serviceMap = new WritableNativeMap();
-
-        serviceMap.putString("id", service.getUuid().toString());
-
-        emit(eventName, serviceMap);
-    }
-
-    private void emit(String eventName, Object eventData) {
-        getReactApplicationContext().
-                getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
-                emit(eventName, eventData);
-    }
-
-    private void emit(String eventName) {
-        logEvent(eventName, null);
-        emit(eventName, (Object) null);
-    }
-
-    private void emit(String eventName, ReadableMap eventMap) {
-        logEvent(eventName, eventMap);
-        emit(eventName, (Object) eventMap);
-    }
-
-    private void logEvent(String eventName, ReadableMap eventMap) {
-        String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
-
-        if (eventMap == null) {
-            Log.d(TAG, shortEventName);
-        } else if (eventMap.hasKey("error")) {
-            Log.e(TAG, shortEventName + ": " + eventMap.getString("error"));
-        } else {
-            Log.d(TAG, shortEventName + ": " + eventMap.toString());
-        }
-    }
-
-    private void emitError(String eventName, String errorMessage) {
-        Log.e(TAG, eventName + ": " + errorMessage);
-        WritableMap errorMap = new WritableNativeMap();
-        errorMap.putString("error", errorMessage);
-        emit(eventName, errorMap);
-    }
 
     @ReactMethod
     public void stopScan() {
@@ -197,11 +128,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
                 discoveredDevices.clear();
-                emit(EVENT_SCAN_STOPPED);
+                eventEmitter.emit(EventNames.SCAN_STOPPED);
             }
             @Override
             public void withoutBluetooth(String message) {
-                emitError(EVENT_SCAN_STOPPED, message);
+                eventEmitter.emitError(EventNames.SCAN_STOPPED, message);
             }
         };
     }
@@ -215,7 +146,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothDevice device = discoveredDevices.get(address);
 
                 if (device == null) {
-                    emitError(EVENT_DEVICE_CONNECTED, "No such device: " + address);
+                    eventEmitter.emitError(EventNames.DEVICE_CONNECTED, "No such device: " + address);
                     return;
                 }
 
@@ -224,7 +155,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withoutBluetooth(String message) {
                 gattClients.clear();
-                emitError(EVENT_DEVICE_CONNECTED, message);
+                eventEmitter.emitError(EventNames.DEVICE_CONNECTED, message);
             }
         };
     }
@@ -237,17 +168,17 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 gattClients.put(address, gatt);
-                emit(EVENT_DEVICE_CONNECTED, device);
+                eventEmitter.emit(EventNames.DEVICE_CONNECTED, device);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gattClients.remove(address);
-                emit(EVENT_DEVICE_DISCONNECTED, device);
+                eventEmitter.emit(EventNames.DEVICE_DISCONNECTED, device);
             }
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             for (BluetoothGattService service: gatt.getServices()) {
-                emit(EVENT_SERVICE_DISCOVERED, service);
+                eventEmitter.emit(EventNames.SERVICE_DISCOVERED, service);
             }
         }
     };
@@ -263,7 +194,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withoutBluetooth(String message) {
                 gattClients.clear();
-                emitError(EVENT_DEVICE_DISCONNECTED, message);
+                eventEmitter.emitError(EventNames.DEVICE_DISCONNECTED, message);
             }
         };
     }
@@ -275,12 +206,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 BluetoothGatt gatt = gattClients.get(deviceMap.getString("address"));
                 gatt.discoverServices();
-                emit(EVENT_SERVICE_DISCOVERY_STARTED, gatt.getDevice());
+                eventEmitter.emit(EventNames.SERVICE_DISCOVERY_STARTED, gatt.getDevice());
             }
             @Override
             public void withoutBluetooth(String message) {
                 gattClients.clear();
-                emitError(EVENT_SERVICE_DISCOVERY_STARTED, message);
+                eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED, message);
             }
         };
     }
