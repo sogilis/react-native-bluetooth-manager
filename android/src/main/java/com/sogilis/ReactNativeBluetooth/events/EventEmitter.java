@@ -65,7 +65,6 @@ public class EventEmitter {
     }
 
     public void emitError(String eventName, String errorMessage) {
-        Log.e(MODULE_NAME, eventName + ": " + errorMessage);
         WritableMap errorMap = new WritableNativeMap();
         errorMap.putString("error", errorMessage);
         emit(eventName, errorMap);
