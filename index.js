@@ -30,7 +30,7 @@ const Scan = {
     return new Promise(resolve => {
       setTimeout(() => {
         // TODO: Check for connection first
-        ReactNativeBluetooth.stopScan()
+        stopScan()
           .then(resolve)
           .catch(console.log.bind(console));
       }, timeout);
