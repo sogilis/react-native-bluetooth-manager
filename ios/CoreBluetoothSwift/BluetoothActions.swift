@@ -51,24 +51,21 @@ public class BluetoothActions: NSObject {
     }
 
 
-    public func startScan(serviceUUIDs: [String], onScanStarted: () -> Void) {
+    public func startScan(serviceUUIDs: [String], onScanStarted: (BluetoothServiceReturn) -> Void) {
         let mappedIds = serviceUUIDs.map { CBUUID(string: $0) }
 
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.scanForPeripheralsWithServices(mappedIds, options: nil)
-            onScanStarted()
+            onScanStarted([String:String]())
             print("Bluetooth scan started")
         })
     }
 
-    public func stopScan(onStopScanComplete: () -> Void) {
+    public func stopScan(onStopScanComplete: (BluetoothServiceReturn) -> Void) {
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.stopScan()
-            // Where do we do this?
-//            self.cleanConnections()
-//            self.discoveredPeripherals.removeAll()
 
-            onStopScanComplete()
+            onStopScanComplete([String:String]())
             print("Bluetooth scan stopped")
         })
     }
