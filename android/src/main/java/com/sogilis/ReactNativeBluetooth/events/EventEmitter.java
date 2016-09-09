@@ -9,12 +9,9 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.sogilis.ReactNativeBluetooth.ReactNativeBluetoothModule;
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 public class EventEmitter {
-    // Logging
-    static final String TAG = EventEmitter.class.getSimpleName();
-
     private final ReactApplicationContext reactContext;
 
     public EventEmitter(ReactApplicationContext reactContext) {
@@ -59,16 +56,16 @@ public class EventEmitter {
         String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
 
         if (eventMap == null) {
-            Log.d(EventEmitter.TAG, shortEventName);
+            Log.d(MODULE_NAME, shortEventName);
         } else if (eventMap.hasKey("error")) {
-            Log.e(EventEmitter.TAG, shortEventName + ": " + eventMap.getString("error"));
+            Log.e(MODULE_NAME, shortEventName + ": " + eventMap.getString("error"));
         } else {
-            Log.d(EventEmitter.TAG, shortEventName + ": " + eventMap.toString());
+            Log.d(MODULE_NAME, shortEventName + ": " + eventMap.toString());
         }
     }
 
     public void emitError(String eventName, String errorMessage) {
-        Log.e(EventEmitter.TAG, eventName + ": " + errorMessage);
+        Log.e(MODULE_NAME, eventName + ": " + errorMessage);
         WritableMap errorMap = new WritableNativeMap();
         errorMap.putString("error", errorMessage);
         emit(eventName, errorMap);
