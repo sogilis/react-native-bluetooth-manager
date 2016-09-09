@@ -11,14 +11,14 @@ const DeviceDetail = React.createClass({
   },
 
   getInitialState() {
-    const { selectedDevice } = getAppState();
+    const { selectedDevice, isConnected } = getAppState();
     this.unsubscribe = () => {};
 
     return {
       device: selectedDevice,
       error: null,
       services: [],
-      isConnected: false, //TODO: this needs to come from global state.
+      isConnected: isConnected || false,
       connectionInProgress: false,
     };
   },
@@ -39,6 +39,8 @@ const DeviceDetail = React.createClass({
 
       Bluetooth.disconnect(this.state.device)
       .then(() => {
+        setAppState({ isConnected: false });
+
         this.setState({
           isConnected: false,
           connectionInProgress: false,
@@ -49,6 +51,7 @@ const DeviceDetail = React.createClass({
       return;
     }
 
+    setAppState({ isConnected: false });
     this.setState({
       isConnected: false,
       connectionInProgress: true,
@@ -56,6 +59,8 @@ const DeviceDetail = React.createClass({
 
     Bluetooth.connect(this.state.device)
     .then(() => {
+      setAppState({ isConnected: true });
+
       this.setState({
         isConnected: true,
         connectionInProgress: false,
