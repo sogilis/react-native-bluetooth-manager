@@ -166,6 +166,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     private void emitError(String eventName, String errorMessage) {
+        Log.e(TAG, eventName + ": " + errorMessage);
         WritableMap errorMap = new WritableNativeMap();
         errorMap.putString("error", errorMessage);
         emit(eventName, errorMap);
