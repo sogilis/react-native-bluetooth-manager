@@ -245,8 +245,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     return;
                 }
 
-                eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED);
-
                 String serviceId = serviceMap.getString("id");
                 BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
                 if (service == null) {
