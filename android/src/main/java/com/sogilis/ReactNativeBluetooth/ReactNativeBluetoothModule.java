@@ -18,6 +18,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import com.sogilis.ReactNativeBluetooth.events.EventNames;
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private static final String STATE_ENABLED = "enabled";
     private static final String STATE_DISABLED = "disabled";
 
-    @Override public String getName() { return "ReactNativeBluetooth"; }
+    @Override public String getName() { return MODULE_NAME; }
 
     @ReactMethod
     public void notifyCurrentState() {
