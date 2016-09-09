@@ -258,7 +258,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
                 eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, device, service);
 
-                discoverRequestedCharacteristics(device, service, characteristicIds);
+                if (characteristicIds.size() == 0) {
+                    discoverAllCharacteristics(device, service);
+                } else {
+                    discoverRequestedCharacteristics(device, service, characteristicIds);
+                }
             }
             @Override
             public void withoutBluetooth(String message) {
@@ -280,6 +284,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             } else {
                 eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERED, device, service, characteristic);
             }
+        }
+    }
+
+    private void discoverAllCharacteristics(BluetoothDevice device, BluetoothGattService service) {
+        for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
+            eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERED, device, service, characteristic);
         }
     }
 }
