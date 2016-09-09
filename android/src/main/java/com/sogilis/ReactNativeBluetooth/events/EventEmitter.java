@@ -1,6 +1,7 @@
 package com.sogilis.ReactNativeBluetooth.events;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
@@ -35,6 +36,16 @@ public class EventEmitter {
         serviceMap.putString("deviceId", device.getAddress());
 
         emit(eventName, serviceMap);
+    }
+
+    public void emit(String eventName, BluetoothDevice device, BluetoothGattService service, BluetoothGattCharacteristic characteristic) {
+        WritableMap characteristicMap = new WritableNativeMap();
+
+        characteristicMap.putString("id", characteristic.getUuid().toString());
+        characteristicMap.putString("serviceId", service.getUuid().toString());
+        characteristicMap.putString("deviceId", device.getAddress());
+
+        emit(eventName, characteristicMap);
     }
 
     public void emit(String eventName, Object eventData) {
