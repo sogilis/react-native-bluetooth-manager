@@ -19,6 +19,17 @@ public class EventEmitter {
         this.reactContext = reactContext;
     }
 
+    public void emit(String eventName) {
+        logEvent(eventName, null);
+        jsEmit(eventName, null);
+    }
+
+    public void emit(String eventName, String eventData) {
+        String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
+        Log.d(MODULE_NAME, shortEventName + ": " + eventData);
+        jsEmit(eventName, eventData);
+    }
+
     public void emit(String eventName, BluetoothDevice device) {
         WritableMap deviceMap = new WritableNativeMap();
 
@@ -26,7 +37,7 @@ public class EventEmitter {
         deviceMap.putString("address", device.getAddress());
         deviceMap.putString("name", device.getName());
 
-        emit(eventName, deviceMap);
+        emitMap(eventName, deviceMap);
     }
 
     public void emit(String eventName, BluetoothDevice device, BluetoothGattService service) {
@@ -35,7 +46,7 @@ public class EventEmitter {
         serviceMap.putString("id", service.getUuid().toString());
         serviceMap.putString("deviceId", device.getAddress());
 
-        emit(eventName, serviceMap);
+        emitMap(eventName, serviceMap);
     }
 
     public void emit(String eventName, BluetoothDevice device, BluetoothGattService service, BluetoothGattCharacteristic characteristic) {
@@ -45,23 +56,24 @@ public class EventEmitter {
         characteristicMap.putString("serviceId", service.getUuid().toString());
         characteristicMap.putString("deviceId", device.getAddress());
 
-        emit(eventName, characteristicMap);
+        emitMap(eventName, characteristicMap);
     }
 
-    public void emit(String eventName, Object eventData) {
+    public void emitError(String eventName, String errorMessage) {
+        WritableMap errorMap = new WritableNativeMap();
+        errorMap.putString("error", errorMessage);
+        emitMap(eventName, errorMap);
+    }
+
+    public void emitMap(String eventName, ReadableMap eventMap) {
+        logEvent(eventName, eventMap);
+        jsEmit(eventName, eventMap);
+    }
+
+    private void jsEmit(String eventName, Object eventData) {
         reactContext.
                 getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
                 emit(eventName, eventData);
-    }
-
-    public void emit(String eventName) {
-        logEvent(eventName, null);
-        emit(eventName, (Object) null);
-    }
-
-    public void emit(String eventName, ReadableMap eventMap) {
-        logEvent(eventName, eventMap);
-        emit(eventName, (Object) eventMap);
     }
 
     private void logEvent(String eventName, ReadableMap eventMap) {
@@ -75,11 +87,4 @@ public class EventEmitter {
             Log.d(MODULE_NAME, shortEventName + ": " + eventMap.toString());
         }
     }
-
-    public void emitError(String eventName, String errorMessage) {
-        WritableMap errorMap = new WritableNativeMap();
-        errorMap.putString("error", errorMessage);
-        emit(eventName, errorMap);
-    }
-
 }
