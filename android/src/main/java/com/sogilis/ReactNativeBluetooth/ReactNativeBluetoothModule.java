@@ -258,7 +258,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
                 eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, device, service);
 
-                if (characteristicIds.size() == 0) {
+                if (characteristicIds == null || characteristicIds.size() == 0) {
                     discoverAllCharacteristics(device, service);
                 } else {
                     discoverRequestedCharacteristics(device, service, characteristicIds);
