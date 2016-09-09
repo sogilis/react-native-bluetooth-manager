@@ -1,0 +1,13 @@
+{
+    "env": {
+      "development": {
+        "presets": ["react-native"],
+      },
+      "production": {
+        "presets": ["react-native"],
+      },
+      "test": {
+        "presets": ["react-native"],
+      }
+    }
+}

@@ -17,14 +17,24 @@
   },
   "homepage": "https://github.com/sogilis/react-native-bluetooth#readme",
   "scripts": {
+    "test": "BABEL_ENV=test ./node_modules/babel-tape-runner/bin/babel-tape-runner ./test/*.js | tap-spec",
     "module-watch": "nodemon -w index.js -e js -x rsync -rtv index.js Example/node_modules/react-native-bluetooth/index.js",
     "lint": "eslint .",
     "lint-example": "eslint Example/app"
   },
   "devDependencies": {
+    "babel-preset-es2016": "^6.11.3",
+    "babel-preset-react-native": "^1.9.0",
+    "babel-preset-react-native-stage-0": "^1.0.1",
+    "babel-runtime": "^6.6.1",
+    "babel-tape-runner": "^2.0.1",
+    "blue-tape": "^1.0.0",
     "eslint": "^3.4.0",
     "eslint-plugin-react": "^6.2.0",
     "eslint-plugin-react-native": "^2.0.0",
-    "nodemon": "^1.10.2"
+    "mockery": "^1.7.0",
+    "nodemon": "^1.10.2",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.0"
   }
 }
