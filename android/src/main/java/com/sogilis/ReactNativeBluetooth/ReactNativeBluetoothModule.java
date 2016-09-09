@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -218,6 +219,61 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void withoutBluetooth(String message) {
                 gattClients.clear();
                 eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED, message);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void discoverCharacteristics(final ReadableMap serviceMap, final ReadableArray characteristicIds) {
+        new BluetoothAction() {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+                String deviceId = serviceMap.getString("deviceId");
+                BluetoothDevice device = discoveredDevices.get(deviceId);
+
+                if (device == null) {
+                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                            "No such device: " + deviceId);
+                    return;
+                }
+
+                BluetoothGatt gatt = gattClients.get(device.getAddress());
+
+                if (gatt == null) {
+                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                            "Cannot discover characteristics: device is disconnected: " + deviceId);
+                    return;
+                }
+
+                eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED);
+
+                String serviceId = serviceMap.getString("id");
+                BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
+                if (service == null) {
+                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                            "Cannot discover characteristics: no such service: " + serviceId +
+                            " (device: " + deviceId + ")");
+                    return;
+                }
+
+                eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, serviceMap);
+                for (int index=0; index < characteristicIds.size(); index++) {
+                    UUID uuid = UUID.fromString(characteristicIds.getString(index));
+                    BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
+
+                    if (characteristic == null) {
+                        eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERED,
+                                "No such characteristic: " + uuid.toString() +
+                                "(device: " + deviceId + ", " +
+                                "service: " + serviceId + ")");
+                    } else {
+                        eventEmitter.emit(EventNames.CHARACTERISTIC_DISCOVERED, device, service, characteristic);
+                    }
+                }
+            }
+            @Override
+            public void withoutBluetooth(String message) {
+                eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, message);
             }
         };
     }
