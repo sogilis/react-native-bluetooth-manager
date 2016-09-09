@@ -238,7 +238,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
-                BluetoothGatt gatt = gattClients.get(deviceMap.getString("address"));
+                BluetoothGatt gatt = gattClients.remove(deviceMap.getString("address"));
                 gatt.disconnect();
             }
             @Override
