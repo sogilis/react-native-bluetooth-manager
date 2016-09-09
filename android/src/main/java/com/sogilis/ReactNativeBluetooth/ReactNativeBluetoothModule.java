@@ -131,7 +131,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             if (! discoveredDevices.containsKey(device.getAddress())) {
-                Log.d(TAG, "Device discovered: \"" + device.getName() + "\" @" + device.getAddress());
                 discoveredDevices.put(device.getAddress(), device);
                 emit(EVENT_DEVICE_DISCOVERED, device);
             }
@@ -162,7 +161,25 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     private void emit(String eventName) {
+        logEvent(eventName, null);
         emit(eventName, (Object) null);
+    }
+
+    private void emit(String eventName, ReadableMap eventMap) {
+        logEvent(eventName, eventMap);
+        emit(eventName, (Object) eventMap);
+    }
+
+    private void logEvent(String eventName, ReadableMap eventMap) {
+        String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
+
+        if (eventMap == null) {
+            Log.d(TAG, shortEventName);
+        } else if (eventMap.hasKey("error")) {
+            Log.e(TAG, shortEventName + ": " + eventMap.getString("error"));
+        } else {
+            Log.d(TAG, shortEventName + ": " + eventMap.toString());
+        }
     }
 
     private void emitError(String eventName, String errorMessage) {
