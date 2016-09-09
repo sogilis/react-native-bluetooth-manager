@@ -130,9 +130,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            Log.d(TAG, "Device discovered: \"" + device.getName() + "\" @" + device.getAddress());
-
             if (! discoveredDevices.containsKey(device.getAddress())) {
+                Log.d(TAG, "Device discovered: \"" + device.getName() + "\" @" + device.getAddress());
                 discoveredDevices.put(device.getAddress(), device);
                 emit(EVENT_DEVICE_DISCOVERED, device);
             }
