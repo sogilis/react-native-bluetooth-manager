@@ -93,6 +93,7 @@ const DeviceDetail = React.createClass({
 
     setAppState({
       selectedDevice: null,
+      isConnected: false,
     });
 
     this.props.navigator('DeviceDiscovery');
