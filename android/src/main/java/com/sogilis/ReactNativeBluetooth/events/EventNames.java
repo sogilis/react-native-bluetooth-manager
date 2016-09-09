@@ -1,5 +1,7 @@
 package com.sogilis.ReactNativeBluetooth.events;
 
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
+
 public class EventNames {
     public static final String STATE_CHANGED = name("STATE_CHANGED");
     public static final String SCAN_STARTED = name("SCAN_STARTED");
@@ -11,6 +13,6 @@ public class EventNames {
     public static final String SERVICE_DISCOVERED = name("SERVICE_DISCOVERED");
 
     private static final String name(String customNamePart) {
-        return EventNames.class.getCanonicalName() + "." + customNamePart;
+        return MODULE_NAME + "." + customNamePart;
     }
 }
