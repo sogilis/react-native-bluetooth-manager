@@ -274,6 +274,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 BluetoothGatt gatt = gattClients.get(deviceMap.getString("address"));
                 gatt.discoverServices();
+                emit(EVENT_SERVICE_DISCOVERY_STARTED);
             }
             @Override
             public void withoutBluetooth(String message) {
