@@ -11,13 +11,13 @@ const DeviceDetail = React.createClass({
   },
 
   getInitialState() {
-    const { selectedDevice, isConnected } = getAppState();
+    const { selectedDevice, isConnected, services } = getAppState();
     this.unsubscribe = () => {};
 
     return {
       device: selectedDevice,
       error: null,
-      services: [],
+      services: services || [],
       isConnected: isConnected || false,
       connectionInProgress: false,
     };
@@ -83,6 +83,7 @@ const DeviceDetail = React.createClass({
   serviceSelected(service) {
     setAppState({
       selectedService: service,
+      services: this.state.services,
     });
 
     this.props.navigator('ServiceDetail');
@@ -94,6 +95,7 @@ const DeviceDetail = React.createClass({
     setAppState({
       selectedDevice: null,
       isConnected: false,
+      services: [],
     });
 
     this.props.navigator('DeviceDiscovery');
