@@ -24,7 +24,7 @@ const ServiceDetail = React.createClass({
   componentWillMount() {
     Bluetooth.discoverCharacteristics(this.state.service, null, characteristic => {
       this.setState({
-        characteristics: [...this.state.characteristic, characteristic]
+        characteristics: [...this.state.characteristics, characteristic]
       });
     })
     .then(unsubscribe => this.unsubscribe = unsubscribe)
