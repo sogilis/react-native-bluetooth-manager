@@ -228,7 +228,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         };
     }
 
-    private BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+    private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             BluetoothDevice device = gatt.getDevice();
