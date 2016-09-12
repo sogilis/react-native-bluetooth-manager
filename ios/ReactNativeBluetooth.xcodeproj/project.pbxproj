@@ -16,6 +16,7 @@
 		3308EDF11D7FF40F00007DE7 /* CentralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */; };
 		3308EDF21D7FF40F00007DE7 /* OutputBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */; };
 		3308EDF31D7FF40F00007DE7 /* PeripheralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */; };
+		3308EEA91D86B6B900007DE7 /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EEA81D86B6B900007DE7 /* DictionaryExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CentralEventHandler.swift; sourceTree = "<group>"; };
 		3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputBuilder.swift; sourceTree = "<group>"; };
 		3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeripheralEventHandler.swift; sourceTree = "<group>"; };
+		3308EEA81D86B6B900007DE7 /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,10 +109,11 @@
 				3308EDEA1D7FF40F00007DE7 /* Aliases.swift */,
 				3308EDEB1D7FF40F00007DE7 /* BluetoothActions.swift */,
 				3308EDEC1D7FF40F00007DE7 /* CentralEventHandler.swift */,
+				3308EC0C1D7D9CFA00007DE7 /* CoreBluetoothSwift.h */,
+				3308EEA81D86B6B900007DE7 /* DictionaryExtensions.swift */,
+				3308EBBB1D79B97000007DE7 /* Info.plist */,
 				3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */,
 				3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */,
-				3308EC0C1D7D9CFA00007DE7 /* CoreBluetoothSwift.h */,
-				3308EBBB1D79B97000007DE7 /* Info.plist */,
 			);
 			path = CoreBluetoothSwift;
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3308EDF01D7FF40F00007DE7 /* BluetoothActions.swift in Sources */,
+				3308EEA91D86B6B900007DE7 /* DictionaryExtensions.swift in Sources */,
 				3308EDF21D7FF40F00007DE7 /* OutputBuilder.swift in Sources */,
 				3308EDEF1D7FF40F00007DE7 /* Aliases.swift in Sources */,
 				3308EDF11D7FF40F00007DE7 /* CentralEventHandler.swift in Sources */,
