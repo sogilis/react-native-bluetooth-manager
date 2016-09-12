@@ -212,7 +212,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
-                BluetoothGatt gatt = gattClients.get(deviceMap.getString("address"));
+                String address = deviceMap.getString("address");
+                BluetoothGatt gatt = gattClients.get(address);
+
+                if (gatt == null) {
+                    eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED,
+                            "Not connection to device: " + address);
+                    return;
+                }
+
                 gatt.discoverServices();
                 eventEmitter.emit(EventNames.SERVICE_DISCOVERY_STARTED, gatt.getDevice());
             }
