@@ -35,7 +35,7 @@ public class BluetoothActions: NSObject {
     }
 
     private func getDevice(lookup: [String: AnyObject]) -> CBPeripheral? {
-        guard let deviceIdString = lookup.eitherOr("deviceId", "id") as? String else {
+        guard let deviceIdString = lookup.eitherOr("deviceId", key2: "id") as? String else {
             print("No device id found.")
             return nil
         }
@@ -54,7 +54,7 @@ public class BluetoothActions: NSObject {
     }
 
     private func getService(device: CBPeripheral, lookup: [String: AnyObject]) -> CBService? {
-        guard let serviceIdString = lookup.eitherOr("serviceId", "id") as? String else {
+        guard let serviceIdString = lookup.eitherOr("serviceId", key2: "id") as? String else {
             print("No service id found.")
             return nil
         }
