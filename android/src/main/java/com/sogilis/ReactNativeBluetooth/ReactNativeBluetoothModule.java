@@ -17,6 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.sogilis.ReactNativeBluetooth.data.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import com.sogilis.ReactNativeBluetooth.events.EventNames;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
@@ -29,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private ConcurrentHashMap<String, BluetoothDevice> discoveredDevices = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, BluetoothGatt> gattClients = new ConcurrentHashMap<>();
+    private GattCollection gattCollection = new GattCollection();
     private EventEmitter eventEmitter;
 
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
@@ -162,7 +163,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattClients.clear();
+                gattCollection.clear();
                 eventEmitter.emitError(EventNames.DEVICE_CONNECTED, message);
             }
         };
@@ -175,10 +176,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             String address = device.getAddress();
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                gattClients.put(address, gatt);
+                gattCollection.add(gatt);
                 eventEmitter.emit(EventNames.DEVICE_CONNECTED, device);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                gattClients.remove(address);
+                gattCollection.removeByDeviceAddress(address);
                 eventEmitter.emit(EventNames.DEVICE_DISCONNECTED, device);
             }
         }
@@ -196,12 +197,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction() {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
-                BluetoothGatt gatt = gattClients.remove(deviceMap.getString("address"));
+                BluetoothGatt gatt = gattCollection.removeByDeviceAddress(deviceMap.getString("address"));
                 gatt.disconnect();
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattClients.clear();
+                gattCollection.clear();
                 eventEmitter.emitError(EventNames.DEVICE_DISCONNECTED, message);
             }
         };
@@ -213,7 +214,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String address = deviceMap.getString("address");
-                BluetoothGatt gatt = gattClients.get(address);
+                BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 if (gatt == null) {
                     eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED,
@@ -226,7 +227,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattClients.clear();
+                gattCollection.clear();
                 eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED, message);
             }
         };
@@ -246,7 +247,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     return;
                 }
 
-                BluetoothGatt gatt = gattClients.get(device.getAddress());
+                BluetoothGatt gatt = gattCollection.findByDevice(device);
 
                 if (gatt == null) {
                     eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
