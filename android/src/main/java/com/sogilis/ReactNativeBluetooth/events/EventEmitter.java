@@ -3,6 +3,7 @@ package com.sogilis.ReactNativeBluetooth.events;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -86,5 +87,17 @@ public class EventEmitter {
         } else {
             Log.d(MODULE_NAME, shortEventName + ": " + eventMap.toString());
         }
+    }
+
+    public void emitCharacteristicValue(String eventName, BluetoothDevice device, BluetoothGattService service, BluetoothGattCharacteristic characteristic) {
+        String value = Base64.encodeToString(characteristic.getValue(), Base64.DEFAULT);
+        WritableMap valueMap = new WritableNativeMap();
+
+        valueMap.putString("value", value);
+        valueMap.putString("characteristicId", characteristic.getUuid().toString());
+        valueMap.putString("serviceId", service.getUuid().toString());
+        valueMap.putString("deviceId", device.getAddress());
+
+        emitMap(eventName, valueMap);
     }
 }
