@@ -24,11 +24,12 @@ import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
-    private HashMap<String, BluetoothDevice> discoveredDevices = new HashMap<>();
-    private HashMap<String, BluetoothGatt> gattClients = new HashMap<>();
+    private ConcurrentHashMap<String, BluetoothDevice> discoveredDevices = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, BluetoothGatt> gattClients = new ConcurrentHashMap<>();
     private EventEmitter eventEmitter;
 
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
