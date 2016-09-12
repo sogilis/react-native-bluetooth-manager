@@ -136,6 +136,22 @@ const discoverCharacteristics = (service, characteristicIds, callback) => {
   });
 };
 
+const readCharacteristicValue = (characteristic) => {
+  console.log(characteristic);
+  return new Promise();
+};
+
+const writeCharacteristicValue = (characteristic, buffer) => {
+  console.log(characteristic, buffer);
+  return new Promise();
+};
+
+const characteristicDidNotify = (characteristic, cb) => {
+  console.log(characteristic, cb);
+  // cb(error, buffer)
+  // return unscubscription
+};
+
 const idsAreSame = (set1, set2) => ("id" in set1) && ("id" in set2) && set1["id"] == set2["id"];
 
 const connect = (device) => {
@@ -216,6 +232,9 @@ export default {
   didDiscoverDevice,
   discoverServices,
   discoverCharacteristics,
+  readCharacteristicValue,
+  writeCharacteristicValue,
+  characteristicDidNotify,
   connect,
   disconnect,
 };
