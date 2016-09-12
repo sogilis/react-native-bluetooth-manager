@@ -141,8 +141,8 @@ const readCharacteristicValue = (characteristic) => {
   return new Promise();
 };
 
-const writeCharacteristicValue = (characteristic, buffer) => {
-  console.log(characteristic, buffer);
+const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
+  console.log(characteristic, buffer, withResponse);
   return new Promise();
 };
 
