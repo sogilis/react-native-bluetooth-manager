@@ -85,12 +85,22 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
             if (newStateCode == BluetoothAdapter.STATE_ON) {
-                eventEmitter.emit(EventNames.STATE_CHANGED, STATE_ENABLED);
+                didEnableBluetooth();
+
             } else if (newStateCode == BluetoothAdapter.STATE_OFF) {
-                eventEmitter.emit(EventNames.STATE_CHANGED, STATE_DISABLED);
+                didDisableBluetooth();
             }
         }
     };
+
+    private void didEnableBluetooth() {
+        eventEmitter.emit(EventNames.STATE_CHANGED, STATE_ENABLED);
+    }
+
+    private void didDisableBluetooth() {
+        gattCollection.clear();
+        eventEmitter.emit(EventNames.STATE_CHANGED, STATE_DISABLED);
+    }
 
     @ReactMethod
     public void startScan(final ReadableArray uuidStrings) {
@@ -163,7 +173,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattCollection.clear();
                 eventEmitter.emitError(EventNames.DEVICE_CONNECTED, message);
             }
         };
@@ -210,7 +219,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattCollection.clear();
                 eventEmitter.emitError(EventNames.DEVICE_DISCONNECTED, message);
             }
         };
@@ -235,7 +243,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                gattCollection.clear();
                 eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED, message);
             }
         };
