@@ -42,7 +42,9 @@ const startScan = (customOptions = {}) => {
   return new Promise((resolve, reject) => {
     let options = Object.assign({}, DefaultScanOptions, customOptions);
 
-    let listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStarted, (error) => {
+    let listener;
+
+    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStarted, (error) => {
       if (listener) {
         listener.remove();
       }
@@ -60,7 +62,9 @@ const startScan = (customOptions = {}) => {
 
 const stopScan = () => {
   return new Promise((resolve, reject) => {
-    let listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, (error) => {
+    let listener;
+
+    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, (error) => {
       if (listener) {
         listener.remove();
       }
@@ -136,23 +140,70 @@ const discoverCharacteristics = (service, characteristicIds, callback) => {
   });
 };
 
-const readCharacteristicValue = (characteristic) => {
-  console.log(characteristic);
-  return new Promise();
+const readCharacteristicValue = characteristic => {
+  return new Promise((resolve, reject) => {
+    let listener = EventEmitter.addListener(ReactNativeBluetooth.CharacteristicRead, detail => {
+      if (!idsAreSame(characteristic, detail))
+        return;
+
+      if (listener) {
+        listener.remove();
+      }
+
+      if ("error" in detail) {
+        reject(detail.error);
+      } else {
+        // TODO: make buffer
+        resolve(detail);
+      }
+    });
+
+    ReactNativeBluetooth.readCharacteristicValue(characteristic);
+  });
 };
 
-const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
-  console.log(characteristic, buffer, withResponse);
-  return new Promise();
-};
+const writeCharacteristicValue = (characteristic, value, withResponse) => {
+  return new Promise((resolve, reject) => {
+    let listener = EventEmitter.addListener(ReactNativeBluetooth.CharacteristicWritten, detail => {
+      if (!idsAreSame(characteristic, detail))
+        return;
 
-const characteristicDidNotify = (characteristic, cb) => {
-  console.log(characteristic, cb);
-  // cb(error, buffer)
-  // return unscubscription
+      if (listener) {
+        listener.remove();
+      }
+
+      if ("error" in detail) {
+        reject(detail.error);
+      } else {
+        resolve(detail);
+      }
+    });
+
+    // todo make buffer
+    ReactNativeBluetooth.writeCharacteristicValue(characteristic, value, withResponse);
+  });
 };
 
 const idsAreSame = (set1, set2) => ("id" in set1) && ("id" in set2) && set1["id"] == set2["id"];
+
+const characteristicDidNotify = (characteristic, callback) => {
+
+  const onNotifyCaught = notified => {
+    if (!idsAreSame(characteristic, notified))
+      return;
+
+    // TODO: specify error? Convert value to buffer.
+    callback(notified);
+  };
+
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.CharacteristicNotified,
+    onNotifyCaught
+  );
+
+  return unsubscription(listener);
+};
+
 
 const connect = (device) => {
   return new Promise((resolve, reject) => {
