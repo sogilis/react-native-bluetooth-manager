@@ -2,6 +2,8 @@ package com.sogilis.ReactNativeBluetooth.data;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.sogilis.ReactNativeBluetooth.BluetoothException;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DeviceCollection {
@@ -19,11 +21,15 @@ public class DeviceCollection {
         devices.clear();
     }
 
-    public BluetoothDevice findByAddress(String address) {
+    public BluetoothDevice findByAddress(String address) throws BluetoothException {
         return findById(address);
     }
 
-    public BluetoothDevice findById(String id) {
-        return devices.get(id);
+    public BluetoothDevice findById(String id) throws BluetoothException {
+        if (devices.containsKey(id)) {
+            return devices.get(id);
+        } else {
+            throw new BluetoothException("No such device: " + id);
+        }
     }
 }

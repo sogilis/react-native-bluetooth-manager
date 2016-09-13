@@ -152,14 +152,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     public void connect(final ReadableMap deviceMap) {
         new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
             @Override
-            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
                 String address = deviceMap.getString("address");
                 BluetoothDevice device = discoveredDevices.findByAddress(address);
-
-                if (device == null) {
-                    eventEmitter.emitError(DEVICE_CONNECTED, "No such device: " + address);
-                    return;
-                }
 
                 device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
@@ -231,16 +226,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     public void discoverCharacteristics(final ReadableMap serviceMap, final ReadableArray characteristicIds) {
         new BluetoothAction(CHARACTERISTIC_DISCOVERY_STARTED, eventEmitter) {
             @Override
-            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
                 String deviceId = serviceMap.getString("deviceId");
                 BluetoothDevice device = discoveredDevices.findById(deviceId);
-
-                if (device == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
-                            "No such device: " + deviceId);
-                    return;
-                }
-
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
 
                 if (gatt == null) {
