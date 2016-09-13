@@ -24,6 +24,7 @@ import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findServiceById;
+import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findCharacteristicById;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -240,19 +241,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         };
     }
 
-    private void discoverRequestedCharacteristics(BluetoothDevice device, BluetoothGattService service, ReadableArray characteristicIds) {
+    private void discoverRequestedCharacteristics(BluetoothDevice device, BluetoothGattService service, ReadableArray characteristicIds) throws BluetoothException {
         for (int index = 0; index < characteristicIds.size(); index++) {
-            UUID uuid = UUID.fromString(characteristicIds.getString(index));
-            BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
+            BluetoothGattCharacteristic characteristic = findCharacteristicById(
+                    device, service, characteristicIds.getString(index));
 
-            if (characteristic == null) {
-                eventEmitter.emitError(CHARACTERISTIC_DISCOVERED,
-                        "No such characteristic: " + uuid.toString() +
-                                "(device: " + device.getAddress() + ", " +
-                                "service: " + service.getUuid().toString() + ")");
-            } else {
-                eventEmitter.emit(EventBuilder.characteristicDiscovered(device, service, characteristic));
-            }
+            eventEmitter.emit(EventBuilder.characteristicDiscovered(device, service, characteristic));
         }
     }
 
@@ -274,15 +268,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 String characteristicId = characteristicMap.getString("id");
-                BluetoothGattCharacteristic characteristic = service.getCharacteristic(
-                        UUID.fromString(characteristicId));
-                if(characteristic == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_READ,
-                            "No such characteristic: " + characteristicId +
-                            " (service: " + serviceId +
-                            ", device: " + address + ")");
-                    return;
-                }
+                BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
 
                 if (!gatt.readCharacteristic(characteristic)) {
                     eventEmitter.emitError(CHARACTERISTIC_READ,
