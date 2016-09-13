@@ -17,6 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.sogilis.ReactNativeBluetooth.data.DeviceCollection;
 import com.sogilis.ReactNativeBluetooth.data.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.EventBuilder;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
@@ -26,11 +27,10 @@ import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
-    private ConcurrentHashMap<String, BluetoothDevice> discoveredDevices = new ConcurrentHashMap<>();
+    private DeviceCollection discoveredDevices = new DeviceCollection();
     private GattCollection gattCollection = new GattCollection();
     private EventEmitter eventEmitter;
 
@@ -129,8 +129,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (! discoveredDevices.containsKey(device.getAddress())) {
-                discoveredDevices.put(device.getAddress(), device);
+            if (! discoveredDevices.includes(device)) {
+                discoveredDevices.add(device);
                 eventEmitter.emit(EventBuilder.deviceDiscovered(device));
             }
         }
@@ -154,7 +154,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String address = deviceMap.getString("address");
-                BluetoothDevice device = discoveredDevices.get(address);
+                BluetoothDevice device = discoveredDevices.findByAddress(address);
 
                 if (device == null) {
                     eventEmitter.emitError(DEVICE_CONNECTED, "No such device: " + address);
@@ -233,7 +233,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String deviceId = serviceMap.getString("deviceId");
-                BluetoothDevice device = discoveredDevices.get(deviceId);
+                BluetoothDevice device = discoveredDevices.findById(deviceId);
 
                 if (device == null) {
                     eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
