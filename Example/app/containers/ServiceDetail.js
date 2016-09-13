@@ -22,7 +22,6 @@ const ServiceDetail = React.createClass({
   },
 
   componentWillMount() {
-    console.log(getAppState());
     Bluetooth.discoverCharacteristics(this.state.service, null, characteristic => {
       this.setState({
         characteristics: [...this.state.characteristics, characteristic]
