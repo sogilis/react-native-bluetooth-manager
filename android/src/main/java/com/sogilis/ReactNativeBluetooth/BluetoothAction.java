@@ -8,7 +8,7 @@ public abstract class BluetoothAction {
     private String eventName;
     private EventEmitter eventEmitter;
 
-    public abstract void withBluetooth(BluetoothAdapter bluetoothAdapter);
+    public abstract void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException;
 
     public BluetoothAction(String eventName, EventEmitter eventEmitter) {
         this.eventName = eventName;
@@ -24,7 +24,12 @@ public abstract class BluetoothAction {
             emitError("Bluetooth disabled");
         }
 
-        this.withBluetooth(bluetoothAdapter);
+        try {
+            this.withBluetooth(bluetoothAdapter);
+        }
+        catch(BluetoothException e) {
+            emitError(e.getMessage());
+        }
     }
 
     private void emitError(String errorMessage) {
