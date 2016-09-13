@@ -64,9 +64,7 @@ public class BluetoothActions: NSObject {
             return nil
         }
 
-        device.services?.forEach { print("Service found", $0)}
-
-        return device.services?.filter { $0.UUID == serviceId }.first
+        return device.services?.filter { $0.UUID.UUIDString == serviceId.UUIDString }.first
     }
 
     private func getService(lookup: [String: AnyObject]) -> CBService? {
@@ -94,7 +92,7 @@ public class BluetoothActions: NSObject {
             return nil
         }
 
-        return service.characteristics?.filter { $0.UUID == charId }.first
+        return service.characteristics?.filter { $0.UUID.UUIDString == charId.UUIDString }.first
     }
 
 
@@ -262,28 +260,28 @@ public class BluetoothActions: NSObject {
     public func onServiceDiscovered(handler: BluetoothServiceReturn -> Void) {
         peripheralEventHandler.onServiceDiscovered { serviceInfo in
 
-            let lastService = serviceInfo.0.services?.last
-
-            guard let service = lastService else {
+            guard let services = serviceInfo.0.services else {
                 print ("Service discovered but unable to look up detail.")
                 return
             }
 
-            handler(OutputBuilder.asService(service))
+            services.forEach { service in
+                handler(OutputBuilder.asService(service))
+            }
         }
     }
 
     public func onCharacteristicDiscovered(handler: BluetoothServiceReturn -> Void) {
         peripheralEventHandler.onCharacteristicDiscovered { characteristicInfo in
 
-            let lastCharacteristic = characteristicInfo.1.characteristics?.last
-
-            guard let characteristic = lastCharacteristic else {
+            guard let characteristics = characteristicInfo.1.characteristics else {
                 print ("Characteristic discovered but unable to look up detail.")
                 return
             }
 
-            handler(OutputBuilder.asCharacteristic(characteristic))
+            characteristics.forEach { characteristic in
+                handler(OutputBuilder.asCharacteristic(characteristic))
+            }
         }
     }
 

@@ -19,8 +19,7 @@ const CharacteristicRead = React.createClass({
   showReadAlert(detail) {
     Alert.alert(
       'Read Characteristic Error',
-      // detail.error
-      JSON.Stringify(detail)
+      detail
     );
   },
 
@@ -43,7 +42,7 @@ const CharacteristicRead = React.createClass({
   },
 
   render() {
-    // if (!this.props.characteristic.properties.read) return null;
+    if (!this.props.characteristic.properties.read) return null;
 
     return (
       <View style={styles.container}>

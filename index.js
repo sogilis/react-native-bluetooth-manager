@@ -152,6 +152,7 @@ const readCharacteristicValue = characteristic => {
         listener = null;
       }
 
+      console.log("We have a characteristic value", detail);
       if ("error" in detail) {
         reject(detail.error);
       } else {
@@ -163,9 +164,7 @@ const readCharacteristicValue = characteristic => {
     setTimeout(() => {
       if (listener) {
         listener.remove();
-        reject({
-          error: "Timeout reading characteristic",
-        });
+        reject("Timeout reading characteristic");
       }}, 5000);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);

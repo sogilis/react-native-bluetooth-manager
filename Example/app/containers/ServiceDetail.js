@@ -28,11 +28,11 @@ const ServiceDetail = React.createClass({
       });
     })
     .then(unsubscribe => this.unsubscribe = unsubscribe)
-      .catch(error => {
-        this.setState({
-          error: error,
-        });
+    .catch(error => {
+      this.setState({
+        error: error,
       });
+    });
   },
 
   componentWillUnmount() {
