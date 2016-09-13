@@ -105,16 +105,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startScan(final ReadableArray uuidStrings) {
-        new BluetoothAction() {
+        new BluetoothAction(SCAN_STARTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
                 eventEmitter.emit(EventBuilder.scanStarted());
-            }
-
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(SCAN_STARTED, message);
             }
         };
     }
@@ -143,23 +138,19 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stopScan() {
-        new BluetoothAction() {
+        new BluetoothAction(SCAN_STOPPED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
                 discoveredDevices.clear();
                 eventEmitter.emit(EventBuilder.scanStopped());
             }
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(SCAN_STOPPED, message);
-            }
         };
     }
 
     @ReactMethod
     public void connect(final ReadableMap deviceMap) {
-        new BluetoothAction() {
+        new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String address = deviceMap.getString("address");
@@ -171,10 +162,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 }
 
                 device.connectGatt(getReactApplicationContext(), false, gattCallback);
-            }
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(DEVICE_CONNECTED, message);
             }
         };
     }
@@ -211,22 +198,18 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void disconnect(final ReadableMap deviceMap) {
-        new BluetoothAction() {
+        new BluetoothAction(DEVICE_DISCONNECTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 BluetoothGatt gatt = gattCollection.removeByDeviceAddress(deviceMap.getString("address"));
                 gatt.disconnect();
-            }
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(DEVICE_DISCONNECTED, message);
             }
         };
     }
 
     @ReactMethod
     public void discoverServices(final ReadableMap deviceMap, final ReadableArray serviceIds) {
-        new BluetoothAction() {
+        new BluetoothAction(SERVICE_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String address = deviceMap.getString("address");
@@ -241,16 +224,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 gatt.discoverServices();
                 eventEmitter.emit(EventBuilder.serviceDiscoveryStarted(gatt.getDevice()));
             }
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(SERVICE_DISCOVERY_STARTED, message);
-            }
         };
     }
 
     @ReactMethod
     public void discoverCharacteristics(final ReadableMap serviceMap, final ReadableArray characteristicIds) {
-        new BluetoothAction() {
+        new BluetoothAction(CHARACTERISTIC_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String deviceId = serviceMap.getString("deviceId");
@@ -287,10 +266,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     discoverRequestedCharacteristics(device, service, characteristicIds);
                 }
             }
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED, message);
-            }
         };
     }
 
@@ -318,7 +293,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void readCharacteristicValue(final ReadableMap characteristicMap) {
-        new BluetoothAction() {
+        new BluetoothAction(CHARACTERISTIC_READ, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 String address = characteristicMap.getString("deviceId");
@@ -354,11 +329,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     eventEmitter.emitError(CHARACTERISTIC_READ,
                             "Could not initiate characteristic read for unknown reason.");
                 }
-            }
-
-            @Override
-            public void withoutBluetooth(String message) {
-                eventEmitter.emitError(CHARACTERISTIC_READ, message);
             }
         };
     }

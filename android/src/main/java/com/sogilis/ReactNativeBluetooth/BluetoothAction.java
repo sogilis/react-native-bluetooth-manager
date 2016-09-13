@@ -2,21 +2,32 @@ package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 
-public abstract class BluetoothAction {
-    public abstract void withBluetooth(BluetoothAdapter bluetoothAdapter);
-    public abstract void withoutBluetooth(String message);
+import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
-    public BluetoothAction() {
+public abstract class BluetoothAction {
+    private String eventName;
+    private EventEmitter eventEmitter;
+
+    public abstract void withBluetooth(BluetoothAdapter bluetoothAdapter);
+
+    public BluetoothAction(String eventName, EventEmitter eventEmitter) {
+        this.eventName = eventName;
+        this.eventEmitter = eventEmitter;
+
         final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
-            this.withoutBluetooth("Bluetooth not supported");
+            emitError("Bluetooth not supported");
         }
 
         if (!bluetoothAdapter.isEnabled()) {
-            this.withoutBluetooth("Bluetooth disabled");
+            emitError("Bluetooth disabled");
         }
 
         this.withBluetooth(bluetoothAdapter);
+    }
+
+    private void emitError(String errorMessage) {
+        eventEmitter.emitError(eventName, errorMessage);
     }
 }
