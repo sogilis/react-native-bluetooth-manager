@@ -25,10 +25,10 @@ import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findServiceById;
 import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findCharacteristicById;
+import static com.sogilis.ReactNativeBluetooth.util.UUIDHelper.uuidsFromStrings;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
@@ -114,18 +114,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 eventEmitter.emit(EventBuilder.scanStarted());
             }
         };
-    }
-
-    private UUID[] uuidsFromStrings(ReadableArray uuidStrings) {
-        if (uuidStrings != null) {
-            UUID[] uuids = new UUID[uuidStrings.size()];
-            for (int i = 0; i < uuidStrings.size(); i++) {
-                uuids[i] = UUID.fromString(uuidStrings.getString(i));
-            }
-            return uuids;
-        } else {
-            return new UUID[0];
-        }
     }
 
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
