@@ -21,14 +21,11 @@ public class EventEmitter {
     }
 
     public void emit(String eventName) {
-        logEvent(eventName, null);
-        jsEmit(eventName, null);
+        emitEvent(new BluetoothEvent(eventName, null));
     }
 
     public void emit(String eventName, String eventData) {
-        String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
-        Log.d(MODULE_NAME, shortEventName + ": " + eventData);
-        jsEmit(eventName, eventData);
+        emitEvent(new BluetoothEvent(eventName, eventData));
     }
 
     public void emit(String eventName, BluetoothDevice device) {
@@ -67,25 +64,21 @@ public class EventEmitter {
     }
 
     public void emitMap(String eventName, ReadableMap eventMap) {
-        logEvent(eventName, eventMap);
-        jsEmit(eventName, eventMap);
+        emitEvent(new BluetoothEvent(eventName, eventMap));
     }
 
-    private void jsEmit(String eventName, Object eventData) {
+    public void emitEvent(BluetoothEvent event) {
+        logEvent(event);
         reactContext.
                 getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
-                emit(eventName, eventData);
+                emit(event.getName(), event.getData());
     }
 
-    private void logEvent(String eventName, ReadableMap eventMap) {
-        String shortEventName = eventName.substring(eventName.lastIndexOf(".") + 1);
-
-        if (eventMap == null) {
-            Log.d(MODULE_NAME, shortEventName);
-        } else if (eventMap.hasKey("error")) {
-            Log.e(MODULE_NAME, shortEventName + ": " + eventMap.getString("error"));
+    private void logEvent(BluetoothEvent event) {
+        if (event.isError()) {
+            Log.e(MODULE_NAME, event.toString());
         } else {
-            Log.d(MODULE_NAME, shortEventName + ": " + eventMap.toString());
+            Log.d(MODULE_NAME, event.toString());
         }
     }
 
