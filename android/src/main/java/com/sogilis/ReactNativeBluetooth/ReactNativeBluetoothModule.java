@@ -140,10 +140,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void connect(final ReadableMap deviceMap) {
+        final String address = deviceMap.getString("address");
+
         new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
-                String address = deviceMap.getString("address");
                 BluetoothDevice device = discoveredDevices.findByAddress(address);
 
                 device.connectGatt(getReactApplicationContext(), false, gattCallback);
@@ -183,10 +184,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void disconnect(final ReadableMap deviceMap) {
+        final String address = deviceMap.getString("address");
+
         new BluetoothAction(DEVICE_DISCONNECTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
-                BluetoothGatt gatt = gattCollection.removeByDeviceAddress(deviceMap.getString("address"));
+                BluetoothGatt gatt = gattCollection.removeByDeviceAddress(address);
                 gatt.disconnect();
             }
         };
@@ -194,10 +197,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void discoverServices(final ReadableMap deviceMap, final ReadableArray serviceIds) {
+        final String address = deviceMap.getString("address");
+
         new BluetoothAction(SERVICE_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
-                String address = deviceMap.getString("address");
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 gatt.discoverServices();
@@ -208,14 +212,14 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void discoverCharacteristics(final ReadableMap serviceMap, final ReadableArray characteristicIds) {
+        final String deviceId = serviceMap.getString("deviceId");
+        final String serviceId = serviceMap.getString("id");
+
         new BluetoothAction(CHARACTERISTIC_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
-                String deviceId = serviceMap.getString("deviceId");
                 BluetoothDevice device = discoveredDevices.findById(deviceId);
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
-
-                String serviceId = serviceMap.getString("id");
                 BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 eventEmitter.emit(EventBuilder.characteristicDiscoveryStarted(device, service));
@@ -246,16 +250,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void readCharacteristicValue(final ReadableMap characteristicMap) {
+        final String address = characteristicMap.getString("deviceId");
+        final String serviceId = characteristicMap.getString("serviceId");
+        final String characteristicId = characteristicMap.getString("id");
+
         new BluetoothAction(CHARACTERISTIC_READ, eventEmitter) {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
-                String address = characteristicMap.getString("deviceId");
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
-
-                String serviceId = characteristicMap.getString("serviceId");
                 BluetoothGattService service = findServiceById(gatt, serviceId);
-
-                String characteristicId = characteristicMap.getString("id");
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
 
                 if (!gatt.readCharacteristic(characteristic)) {
