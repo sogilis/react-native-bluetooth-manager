@@ -190,6 +190,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 emit(characteristicWritten(gatt.getDevice(), characteristic));
             }
         }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            emit(characteristicNotified(gatt.getDevice(), characteristic));
+        }
     };
 
     @ReactMethod

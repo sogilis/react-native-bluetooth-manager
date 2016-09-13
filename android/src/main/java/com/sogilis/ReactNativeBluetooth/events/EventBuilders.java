@@ -69,6 +69,12 @@ public class EventBuilders {
                 characteristicMap(device, characteristic));
     }
 
+    public static BluetoothEvent characteristicNotified(BluetoothDevice device,
+                                                        BluetoothGattCharacteristic characteristic) {
+        return new BluetoothEvent(CHARACTERISTIC_NOTIFIED,
+                characteristicMap(device, characteristic));
+    }
+
     public static BluetoothEvent error(String eventName, String errorMessage) {
         return new BluetoothEvent(eventName, errorMap(errorMessage));
     }
