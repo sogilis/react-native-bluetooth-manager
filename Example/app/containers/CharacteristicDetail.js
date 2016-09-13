@@ -25,10 +25,14 @@ const CharacteristicDetail = React.createClass({
 
   componentWillUnmount() {
     this.unsubscribe();
+  },
 
+  goBack() {
     setAppState({
       selectedCharacteristic: null,
     });
+
+    this.props.navigator('ServiceDetail');
   },
 
   renderError() {
@@ -54,7 +58,7 @@ const CharacteristicDetail = React.createClass({
       <View style={styles.container}>
         <TopBar
           headerText={"Characteristic Detail"}
-          backAction={() => this.props.navigator('ServiceDetail')} />
+          backAction={this.goBack} />
         {this.renderError()}
         <View style={styles.detailContainer}>
           <Text style={styles.detailText}>UUID: {this.state.characteristic.id}</Text>

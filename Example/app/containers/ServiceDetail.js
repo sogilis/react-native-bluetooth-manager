@@ -22,6 +22,7 @@ const ServiceDetail = React.createClass({
   },
 
   componentWillMount() {
+    console.log(getAppState());
     Bluetooth.discoverCharacteristics(this.state.service, null, characteristic => {
       this.setState({
         characteristics: [...this.state.characteristics, characteristic]
@@ -37,10 +38,6 @@ const ServiceDetail = React.createClass({
 
   componentWillUnmount() {
     this.unsubscribe();
-
-    setAppState({
-      selectedService: null,
-    });
   },
 
   characteristicSelected(characteristic) {
@@ -49,6 +46,15 @@ const ServiceDetail = React.createClass({
     });
 
     this.props.navigator('CharacteristicDetail');
+  },
+
+  goBack() {
+    setAppState({
+      selectedService: null,
+      characteristics: [],
+    });
+
+    this.props.navigator('DeviceDetail');
   },
 
   renderError() {
@@ -62,7 +68,7 @@ const ServiceDetail = React.createClass({
       <View style={styles.container}>
         <TopBar
           headerText={"Service Detail"}
-          backAction={() => this.props.navigator('DeviceDetail')} />
+          backAction={this.goBack} />
         {this.renderError()}
         <Text style={styles.labelText}>Characteristics</Text>
         <View style={styles.listContainer}>
