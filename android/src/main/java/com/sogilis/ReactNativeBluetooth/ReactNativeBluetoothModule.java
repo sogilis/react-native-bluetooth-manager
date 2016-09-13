@@ -20,7 +20,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.sogilis.ReactNativeBluetooth.data.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.EventBuilder;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
-import com.sogilis.ReactNativeBluetooth.events.EventNames;
+import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 import java.util.HashMap;
@@ -45,19 +45,19 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     @Override public Map<String, Object> getConstants() {
         final Map<String, Object> constants = new HashMap<>();
 
-        constants.put("StateChanged", EventNames.STATE_CHANGED);
-        constants.put("ScanStarted", EventNames.SCAN_STARTED);
-        constants.put("ScanStopped", EventNames.SCAN_STOPPED);
-        constants.put("DeviceDiscovered", EventNames.DEVICE_DISCOVERED);
-        constants.put("DeviceConnected", EventNames.DEVICE_CONNECTED);
-        constants.put("DeviceDisconnected", EventNames.DEVICE_DISCONNECTED);
-        constants.put("ServiceDiscoveryStarted", EventNames.SERVICE_DISCOVERY_STARTED);
-        constants.put("ServiceDiscovered", EventNames.SERVICE_DISCOVERED);
-        constants.put("CharacteristicDiscoveryStarted", EventNames.CHARACTERISTIC_DISCOVERY_STARTED);
-        constants.put("CharacteristicDiscovered", EventNames.CHARACTERISTIC_DISCOVERED);
-        constants.put("CharacteristicRead", EventNames.CHARACTERISTIC_READ);
-        constants.put("CharacteristicWritten", EventNames.CHARACTERISTIC_WRITTEN);
-        constants.put("CharacteristicNotified", EventNames.CHARACTERISTIC_NOTIFIED);
+        constants.put("StateChanged", STATE_CHANGED);
+        constants.put("ScanStarted", SCAN_STARTED);
+        constants.put("ScanStopped", SCAN_STOPPED);
+        constants.put("DeviceDiscovered", DEVICE_DISCOVERED);
+        constants.put("DeviceConnected", DEVICE_CONNECTED);
+        constants.put("DeviceDisconnected", DEVICE_DISCONNECTED);
+        constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
+        constants.put("ServiceDiscovered", SERVICE_DISCOVERED);
+        constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);
+        constants.put("CharacteristicDiscovered", CHARACTERISTIC_DISCOVERED);
+        constants.put("CharacteristicRead", CHARACTERISTIC_READ);
+        constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
+        constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
 
         return constants;
     }
@@ -114,7 +114,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.SCAN_STARTED, message);
+                eventEmitter.emitError(SCAN_STARTED, message);
             }
         };
     }
@@ -152,7 +152,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.SCAN_STOPPED, message);
+                eventEmitter.emitError(SCAN_STOPPED, message);
             }
         };
     }
@@ -166,7 +166,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothDevice device = discoveredDevices.get(address);
 
                 if (device == null) {
-                    eventEmitter.emitError(EventNames.DEVICE_CONNECTED, "No such device: " + address);
+                    eventEmitter.emitError(DEVICE_CONNECTED, "No such device: " + address);
                     return;
                 }
 
@@ -174,7 +174,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.DEVICE_CONNECTED, message);
+                eventEmitter.emitError(DEVICE_CONNECTED, message);
             }
         };
     }
@@ -219,7 +219,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.DEVICE_DISCONNECTED, message);
+                eventEmitter.emitError(DEVICE_DISCONNECTED, message);
             }
         };
     }
@@ -233,7 +233,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 if (gatt == null) {
-                    eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED,
+                    eventEmitter.emitError(SERVICE_DISCOVERY_STARTED,
                             "Not connection to device: " + address);
                     return;
                 }
@@ -243,7 +243,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.SERVICE_DISCOVERY_STARTED, message);
+                eventEmitter.emitError(SERVICE_DISCOVERY_STARTED, message);
             }
         };
     }
@@ -257,7 +257,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothDevice device = discoveredDevices.get(deviceId);
 
                 if (device == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
                             "No such device: " + deviceId);
                     return;
                 }
@@ -265,7 +265,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
 
                 if (gatt == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
                             "Cannot discover characteristics: device is disconnected: " + deviceId);
                     return;
                 }
@@ -273,7 +273,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 String serviceId = serviceMap.getString("id");
                 BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
                 if (service == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED,
+                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
                             "Cannot discover characteristics: no such service: " + serviceId +
                             " (device: " + deviceId + ")");
                     return;
@@ -289,7 +289,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, message);
+                eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED, message);
             }
         };
     }
@@ -300,7 +300,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(uuid);
 
             if (characteristic == null) {
-                eventEmitter.emitError(EventNames.CHARACTERISTIC_DISCOVERED,
+                eventEmitter.emitError(CHARACTERISTIC_DISCOVERED,
                         "No such characteristic: " + uuid.toString() +
                                 "(device: " + device.getAddress() + ", " +
                                 "service: " + service.getUuid().toString() + ")");
@@ -325,7 +325,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 if (gatt == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_READ,
+                    eventEmitter.emitError(CHARACTERISTIC_READ,
                             "Unknown or disconnected device: " + address);
                     return;
                 }
@@ -333,7 +333,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 String serviceId = characteristicMap.getString("serviceId");
                 BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
                 if (service == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_READ,
+                    eventEmitter.emitError(CHARACTERISTIC_READ,
                             "No such service: " + serviceId +
                                     " (device: " + address + ")");
                     return;
@@ -343,7 +343,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(
                         UUID.fromString(characteristicId));
                 if(characteristic == null) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_READ,
+                    eventEmitter.emitError(CHARACTERISTIC_READ,
                             "No such characteristic: " + characteristicId +
                             " (service: " + serviceId +
                             ", device: " + address + ")");
@@ -351,14 +351,14 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 }
 
                 if (!gatt.readCharacteristic(characteristic)) {
-                    eventEmitter.emitError(EventNames.CHARACTERISTIC_READ,
+                    eventEmitter.emitError(CHARACTERISTIC_READ,
                             "Could not initiate characteristic read for unknown reason.");
                 }
             }
 
             @Override
             public void withoutBluetooth(String message) {
-                eventEmitter.emitError(EventNames.CHARACTERISTIC_READ, message);
+                eventEmitter.emitError(CHARACTERISTIC_READ, message);
             }
         };
     }

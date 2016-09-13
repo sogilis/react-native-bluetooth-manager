@@ -9,54 +9,56 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
+import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
+
 public class EventBuilder {
     public static BluetoothEvent stateChanged(String newState) {
-        return new BluetoothEvent(EventNames.STATE_CHANGED, newState);
+        return new BluetoothEvent(STATE_CHANGED, newState);
     }
 
     public static BluetoothEvent scanStarted() {
-        return new BluetoothEvent(EventNames.SCAN_STARTED, null);
+        return new BluetoothEvent(SCAN_STARTED, null);
     }
 
     public static BluetoothEvent scanStopped() {
-        return new BluetoothEvent(EventNames.SCAN_STOPPED, null);
+        return new BluetoothEvent(SCAN_STOPPED, null);
     }
 
     public static BluetoothEvent deviceDiscovered(BluetoothDevice device) {
-        return new BluetoothEvent(EventNames.DEVICE_DISCOVERED, deviceMap(device));
+        return new BluetoothEvent(DEVICE_DISCOVERED, deviceMap(device));
     }
 
     public static BluetoothEvent deviceConnected(BluetoothDevice device) {
-        return new BluetoothEvent(EventNames.DEVICE_CONNECTED, deviceMap(device));
+        return new BluetoothEvent(DEVICE_CONNECTED, deviceMap(device));
     }
 
     public static BluetoothEvent deviceDisconnected(BluetoothDevice device) {
-        return new BluetoothEvent(EventNames.DEVICE_DISCONNECTED, deviceMap(device));
+        return new BluetoothEvent(DEVICE_DISCONNECTED, deviceMap(device));
     }
 
     public static BluetoothEvent serviceDiscoveryStarted(BluetoothDevice device) {
-        return new BluetoothEvent(EventNames.SERVICE_DISCOVERY_STARTED, deviceMap(device));
+        return new BluetoothEvent(SERVICE_DISCOVERY_STARTED, deviceMap(device));
     }
 
     public static BluetoothEvent serviceDiscovered(BluetoothDevice device, BluetoothGattService service) {
-        return new BluetoothEvent(EventNames.SERVICE_DISCOVERED, serviceMap(device, service));
+        return new BluetoothEvent(SERVICE_DISCOVERED, serviceMap(device, service));
     }
 
     public static BluetoothEvent characteristicDiscoveryStarted(BluetoothDevice device, BluetoothGattService service) {
-        return new BluetoothEvent(EventNames.CHARACTERISTIC_DISCOVERY_STARTED, serviceMap(device, service));
+        return new BluetoothEvent(CHARACTERISTIC_DISCOVERY_STARTED, serviceMap(device, service));
     }
 
     public static BluetoothEvent characteristicDiscovered(BluetoothDevice device,
                                                           BluetoothGattService service,
                                                           BluetoothGattCharacteristic characteristic) {
-        return new BluetoothEvent(EventNames.CHARACTERISTIC_DISCOVERED,
+        return new BluetoothEvent(CHARACTERISTIC_DISCOVERED,
                 characteristicMap(device, service, characteristic));
     }
 
     public static BluetoothEvent characteristicRead(BluetoothDevice device,
                                                     BluetoothGattService service,
                                                     BluetoothGattCharacteristic characteristic) {
-        return new BluetoothEvent(EventNames.CHARACTERISTIC_READ,
+        return new BluetoothEvent(CHARACTERISTIC_READ,
                 characteristicMap(device, service, characteristic));
     }
 
