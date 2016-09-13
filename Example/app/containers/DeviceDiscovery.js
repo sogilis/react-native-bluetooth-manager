@@ -23,6 +23,7 @@ const DeviceDiscovery = React.createClass({
 
   componentWillMount() {
     this.unsubscribe = Bluetooth.didDiscoverDevice((device) => {
+      console.log("Device!!");
       this.setState({
         devices: [...this.state.devices, device]
       });

@@ -52,8 +52,18 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[statusChangeEventName,
+             scanStartedEventName,
+             scanStoppedEventName,
+             serviceDiscoveredEventName,
+             serviceDiscoveryStartedEventName,
+             characteristicDiscoveryStartedEventName,
+             characteristicDiscoveredEventName,
+             characteristicReadEventName,
+             characteristicWrittenEventName,
+             characteristicReadEventName,
              deviceConnectedEventName,
-             deviceDiscoveredEventName
+             deviceDisconnectedEventName,
+             deviceDiscoveredEventName,
              ];
 }
 
@@ -146,7 +156,7 @@ RCT_EXPORT_METHOD(stopScan) {
     [actions stopScan:onScanStopped];
 }
 
-RCT_EXPORT_METHOD(discoverServices:(NSArray *)params services:(NSArray<NSString *> *)services) {
+RCT_EXPORT_METHOD(discoverServices:(NSDictionary<NSString *, id> *)params services:(NSArray<NSString *> *)services) {
     __block ReactNativeBluetooth *myself = self;
 
     void  (^onDiscoverStarted)(BluetoothServiceReturn) =
@@ -157,7 +167,7 @@ RCT_EXPORT_METHOD(discoverServices:(NSArray *)params services:(NSArray<NSString 
     [actions discoverServices:params services:services onDiscoverStarted:onDiscoverStarted];
 }
 
-RCT_EXPORT_METHOD(discoverCharacteristics:(NSArray *)params characteristics:(NSArray<NSString *> *)characteristics) {
+RCT_EXPORT_METHOD(discoverCharacteristics:(NSDictionary<NSString *, id> *)params characteristics:(NSArray<NSString *> *)characteristics) {
     __block ReactNativeBluetooth *myself = self;
 
     void  (^onDiscoverStarted)(BluetoothServiceReturn) =
@@ -168,19 +178,19 @@ RCT_EXPORT_METHOD(discoverCharacteristics:(NSArray *)params characteristics:(NSA
     [actions discoverCharacteristics:params characteristics:characteristics onDiscoverStarted:onDiscoverStarted];
 }
 
-RCT_EXPORT_METHOD(writeCharacteristicValue:(NSArray *)params value:(NSString *)value withResponse:(BOOL)withResponse) {
+RCT_EXPORT_METHOD(writeCharacteristicValue:(NSDictionary<NSString *, id> *)params value:(NSString *)value withResponse:(BOOL)withResponse) {
     [actions writeCharacteristicValue:params data:value withResponse:withResponse];
 }
 
-RCT_EXPORT_METHOD(readCharactaristicValue:(NSArray *)params) {
+RCT_EXPORT_METHOD(readCharacteristicValue:(NSDictionary<NSString *, id> *)params) {
     [actions readCharacteristicValue:params];
 }
 
-RCT_EXPORT_METHOD(connect:(NSArray *)params) {
+RCT_EXPORT_METHOD(connect:(NSDictionary<NSString *, id> *)params) {
     [actions connect:params];
 }
 
-RCT_EXPORT_METHOD(disconnect:(NSArray *)params) {
+RCT_EXPORT_METHOD(disconnect:(NSDictionary<NSString *, id> *)params) {
     [actions disconnect:params];
 }
 

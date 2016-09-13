@@ -36,19 +36,29 @@ class OutputBuilder {
         }
     }
 
+    private static func makeCharacteristicProperties(characteristic: CBCharacteristic) -> [String: AnyObject] {
+        let canRead = characteristic.properties.contains(CBCharacteristicProperties.Read)
+        let canWrite = characteristic.properties.contains(CBCharacteristicProperties.Write)
+        let canWriteNoResponse = characteristic.properties.contains(CBCharacteristicProperties.WriteWithoutResponse)
+        let canNotify = characteristic.properties.contains(CBCharacteristicProperties.Notify)
+        let canBroadcast = characteristic.properties.contains(CBCharacteristicProperties.Broadcast)
+
+        return [
+            "read": canRead,
+            "write": canWrite,
+            "writeNoResponse": canWriteNoResponse,
+            "notify": canNotify,
+            "broadcast": canBroadcast,
+        ]
+    }
+
     static func asCharacteristic(characteristic: CBCharacteristic) -> BluetoothServiceReturn {
         return [
             "id": characteristic.UUID.UUIDString,
             "deviceId": characteristic.service.peripheral.identifier.UUIDString,
             "serviceId": characteristic.service.UUID.UUIDString,
-            "supports": "READ|WRITE|NOTIFY",
-        ]
-    }
-
-    static func asCharacteristicValue(characteristic: CBCharacteristic) -> BluetoothServiceReturn {
-        return [
-            "id": characteristic.UUID.UUIDString,
-            "deviceId": characteristic.service.peripheral.identifier.UUIDString,
+            "properties": makeCharacteristicProperties(characteristic),
+            "value": characteristic.value?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions()) ?? "",
         ]
     }
 

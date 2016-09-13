@@ -64,6 +64,8 @@ public class BluetoothActions: NSObject {
             return nil
         }
 
+        device.services?.forEach { print("Service found", $0)}
+
         return device.services?.filter { $0.UUID == serviceId }.first
     }
 
@@ -78,17 +80,17 @@ public class BluetoothActions: NSObject {
 
     private func getCharacteristic(lookup: [String: AnyObject]) -> CBCharacteristic? {
         guard let service = getService(lookup) else {
-            print("Service not found when looking up characteristic")
+            print("Service not found when looking up characteristic", lookup)
             return nil
         }
 
         guard let charIdString = lookup["id"] as? String else {
-            print("No characteristic id found.")
+            print("No characteristic id found.", lookup)
             return nil
         }
 
         guard let charId = NSUUID(UUIDString: charIdString) else {
-            print("Invalid characteristic id found.")
+            print("Invalid characteristic id found.", lookup)
             return nil
         }
 
@@ -168,9 +170,11 @@ public class BluetoothActions: NSObject {
                                         onDiscoverStarted: (BluetoothServiceReturn) -> Void) {
         print("Discovering characteristics.")
 
-        guard let device = getDevice(["id" : service["deviceId"] ?? "unknown"]) else {
+        guard let device = getDevice(service) else {
             print("No device found. Can not discover characteristics")
+
             onDiscoverStarted([
+                "id": service.eitherOr("serviceId", key2: "id") ?? "",
                 "error": "No device found"
                 ])
             return
@@ -185,6 +189,7 @@ public class BluetoothActions: NSObject {
         guard let requiredService = getService() else {
             print("No service found. Can not discover characteristics", service, device)
             onDiscoverStarted([
+                "id": service.eitherOr("serviceId", key2: "id") ?? "",
                 "error": "No service found"
                 ])
             return
@@ -200,6 +205,7 @@ public class BluetoothActions: NSObject {
 
         guard let characteristic = getCharacteristic(lookup) else {
             onCharacteristicWriteHandler([
+                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
                 "error": "Unable to find characteristic to write to"
                 ])
             return
@@ -207,6 +213,7 @@ public class BluetoothActions: NSObject {
 
         guard let dataToSend = NSData(base64EncodedString: data, options: NSDataBase64DecodingOptions()) else {
             onCharacteristicWriteHandler([
+                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
                 "error": "Attempt to send invalid base64 string"
                 ])
             return
@@ -224,7 +231,16 @@ public class BluetoothActions: NSObject {
     public func readCharacteristicValue(lookup: [String: AnyObject]) {
         guard let characteristic = getCharacteristic(lookup) else {
             onCharacteristicReadHandler([
+                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
                 "error": "Unable to find characteristic to write to"
+                ])
+            return
+        }
+
+        guard characteristic.properties.contains(CBCharacteristicProperties.Read) else {
+            onCharacteristicReadHandler([
+                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
+                "error": "Trying to read from a characteristic that does not support reading."
                 ])
             return
         }
@@ -275,7 +291,7 @@ public class BluetoothActions: NSObject {
         onCharacteristicReadHandler = handler
 
         peripheralEventHandler.onCharacteristicValueUpdated { newValue in
-            handler(OutputBuilder.asCharacteristicValue(newValue.1))
+            handler(OutputBuilder.asCharacteristic(newValue.1))
         }
     }
 

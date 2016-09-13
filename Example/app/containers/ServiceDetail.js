@@ -48,8 +48,7 @@ const ServiceDetail = React.createClass({
       selectedCharacteristic: characteristic,
     });
 
-    console.log('Characteristic selected', characteristic);
-    // this.props.navigator('CharacteristicDetail');
+    this.props.navigator('CharacteristicDetail');
   },
 
   renderError() {

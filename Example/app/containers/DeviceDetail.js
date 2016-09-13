@@ -30,28 +30,32 @@ const DeviceDetail = React.createClass({
     this.unsubscribe();
   },
 
-  connect() {
-    if (this.state.isConnected) {
+  disconnect() {
+    this.setState({
+      isConnected: false,
+      connectionInProgress: true,
+    });
+
+    Bluetooth.disconnect(this.state.device)
+    .then(() => {
+      setAppState({ isConnected: false });
+
       this.setState({
         isConnected: false,
-        connectionInProgress: true,
+        connectionInProgress: false,
+        services: [],
       });
+    });
+  },
 
-      Bluetooth.disconnect(this.state.device)
-      .then(() => {
-        setAppState({ isConnected: false });
-
-        this.setState({
-          isConnected: false,
-          connectionInProgress: false,
-          services: [],
-        });
-      });
-
+  connect() {
+    if (this.state.isConnected) {
+      this.disconnect();
       return;
     }
 
     setAppState({ isConnected: false });
+
     this.setState({
       isConnected: false,
       connectionInProgress: true,
@@ -67,10 +71,10 @@ const DeviceDetail = React.createClass({
       });
 
       return Bluetooth.discoverServices(this.state.device, null, service => {
-          this.setState({
-            services: [...this.state.services, service]
-          });
+        this.setState({
+          services: [...this.state.services, service]
         });
+      });
     })
     .then(unsubscribe => this.unsubscribe = unsubscribe)
     .catch(error => {
@@ -121,6 +125,12 @@ const DeviceDetail = React.createClass({
     );
   },
 
+  renderServiceLabel() {
+    if (!this.state.isConnected) return null;
+
+    return <Text style={styles.labelText}>Services</Text>;
+  },
+
   render() {
     return (
       <View style={styles.container}>
@@ -129,6 +139,7 @@ const DeviceDetail = React.createClass({
           backAction={ this.goBack } />
         {this.renderError()}
         {this.renderStatus()}
+        {this.renderServiceLabel()}
         <View style={styles.listContainer}>
           <ServiceList services={this.state.services} selectService={this.serviceSelected} />
         </View>
@@ -151,6 +162,11 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+  },
+  labelText: {
+    fontSize: 20,
+    color: 'grey',
+    marginLeft: 15,
   },
   statusContainer: {
     flexDirection: 'row',
