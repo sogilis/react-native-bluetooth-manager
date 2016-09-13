@@ -244,6 +244,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 } else {
                     discoverRequestedCharacteristics(device, service, characteristicIds);
                 }
+
+                // FIXME
+                enableCharacteristicNotifications(gatt, service);
             }
         };
     }
@@ -260,6 +263,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private void discoverAllCharacteristics(BluetoothDevice device, BluetoothGattService service) {
         for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
             emit(characteristicDiscovered(device, characteristic));
+        }
+    }
+
+    private void enableCharacteristicNotifications(BluetoothGatt gatt, BluetoothGattService service) {
+        for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
+            gatt.setCharacteristicNotification(characteristic, true);
         }
     }
 
