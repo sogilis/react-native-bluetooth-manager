@@ -2,6 +2,7 @@ package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 
+import com.sogilis.ReactNativeBluetooth.domain.BluetoothException;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
 public abstract class BluetoothAction {

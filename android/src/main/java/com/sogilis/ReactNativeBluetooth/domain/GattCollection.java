@@ -1,9 +1,7 @@
-package com.sogilis.ReactNativeBluetooth.data;
+package com.sogilis.ReactNativeBluetooth.domain;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-
-import com.sogilis.ReactNativeBluetooth.BluetoothException;
 
 import java.util.concurrent.ConcurrentHashMap;
 

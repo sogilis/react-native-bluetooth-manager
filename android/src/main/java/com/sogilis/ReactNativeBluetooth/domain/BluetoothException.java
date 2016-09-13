@@ -1,4 +1,4 @@
-package com.sogilis.ReactNativeBluetooth;
+package com.sogilis.ReactNativeBluetooth.domain;
 
 public class BluetoothException extends Exception {
     public BluetoothException(String detailMessage) {

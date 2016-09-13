@@ -1,4 +1,4 @@
-package com.sogilis.ReactNativeBluetooth;
+package com.sogilis.ReactNativeBluetooth.domain;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
