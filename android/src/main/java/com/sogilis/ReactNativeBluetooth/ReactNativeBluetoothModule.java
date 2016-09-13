@@ -206,15 +206,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     public void discoverServices(final ReadableMap deviceMap, final ReadableArray serviceIds) {
         new BluetoothAction(SERVICE_DISCOVERY_STARTED, eventEmitter) {
             @Override
-            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
                 String address = deviceMap.getString("address");
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
-
-                if (gatt == null) {
-                    eventEmitter.emitError(SERVICE_DISCOVERY_STARTED,
-                            "Not connection to device: " + address);
-                    return;
-                }
 
                 gatt.discoverServices();
                 eventEmitter.emit(EventBuilder.serviceDiscoveryStarted(gatt.getDevice()));
@@ -230,12 +224,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 String deviceId = serviceMap.getString("deviceId");
                 BluetoothDevice device = discoveredDevices.findById(deviceId);
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
-
-                if (gatt == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
-                            "Cannot discover characteristics: device is disconnected: " + deviceId);
-                    return;
-                }
 
                 String serviceId = serviceMap.getString("id");
                 BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
@@ -283,15 +271,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     public void readCharacteristicValue(final ReadableMap characteristicMap) {
         new BluetoothAction(CHARACTERISTIC_READ, eventEmitter) {
             @Override
-            public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
                 String address = characteristicMap.getString("deviceId");
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
-
-                if (gatt == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_READ,
-                            "Unknown or disconnected device: " + address);
-                    return;
-                }
 
                 String serviceId = characteristicMap.getString("serviceId");
                 BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));

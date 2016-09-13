@@ -3,6 +3,8 @@ package com.sogilis.ReactNativeBluetooth.data;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 
+import com.sogilis.ReactNativeBluetooth.BluetoothException;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GattCollection {
@@ -16,11 +18,15 @@ public class GattCollection {
         return gatts.remove(address);
     }
 
-    public BluetoothGatt findByAddress(String address) {
-        return gatts.get(address);
+    public BluetoothGatt findByAddress(String address) throws BluetoothException {
+        if (gatts.containsKey(address)) {
+            return gatts.get(address);
+        } else {
+            throw new BluetoothException("Unknown or disconnected device: " + address);
+        }
     }
 
-    public BluetoothGatt findByDevice(BluetoothDevice device) {
+    public BluetoothGatt findByDevice(BluetoothDevice device) throws BluetoothException {
         return findByAddress(device.getAddress());
     }
 
