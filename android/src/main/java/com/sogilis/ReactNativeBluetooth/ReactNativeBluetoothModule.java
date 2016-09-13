@@ -23,6 +23,7 @@ import com.sogilis.ReactNativeBluetooth.events.EventBuilder;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
+import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findServiceById;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -226,13 +227,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
 
                 String serviceId = serviceMap.getString("id");
-                BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
-                if (service == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_DISCOVERY_STARTED,
-                            "Cannot discover characteristics: no such service: " + serviceId +
-                            " (device: " + deviceId + ")");
-                    return;
-                }
+                BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 eventEmitter.emit(EventBuilder.characteristicDiscoveryStarted(device, service));
 
@@ -276,13 +271,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 String serviceId = characteristicMap.getString("serviceId");
-                BluetoothGattService service = gatt.getService(UUID.fromString(serviceId));
-                if (service == null) {
-                    eventEmitter.emitError(CHARACTERISTIC_READ,
-                            "No such service: " + serviceId +
-                                    " (device: " + address + ")");
-                    return;
-                }
+                BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 String characteristicId = characteristicMap.getString("id");
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(
