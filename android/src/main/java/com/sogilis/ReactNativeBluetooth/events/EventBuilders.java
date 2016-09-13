@@ -5,11 +5,14 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Base64;
 
+import static android.bluetooth.BluetoothGattCharacteristic.*;
+
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.hasProperty;
 
 public class EventBuilders {
     public static BluetoothEvent stateChanged(String newState) {
@@ -92,6 +95,17 @@ public class EventBuilders {
         map.putString("id", characteristic.getUuid().toString());
         map.putString("serviceId", characteristic.getService().getUuid().toString());
         map.putString("deviceId", device.getAddress());
+        map.putMap("properties", propertiesMap(characteristic));
+
+        return map;
+    }
+
+    public static WritableMap propertiesMap(BluetoothGattCharacteristic characteristic) {
+        WritableMap map = new WritableNativeMap();
+
+        map.putBoolean("read", hasProperty(characteristic, PROPERTY_READ));
+        map.putBoolean("write", hasProperty(characteristic, PROPERTY_WRITE));
+        map.putBoolean("notify", hasProperty(characteristic, PROPERTY_NOTIFY));
 
         return map;
     }
