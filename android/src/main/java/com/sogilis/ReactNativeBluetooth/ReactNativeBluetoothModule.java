@@ -20,13 +20,13 @@ import com.facebook.react.bridge.ReadableMap;
 import com.sogilis.ReactNativeBluetooth.data.DeviceCollection;
 import com.sogilis.ReactNativeBluetooth.data.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.BluetoothEvent;
-import com.sogilis.ReactNativeBluetooth.events.EventBuilder;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findServiceById;
 import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findCharacteristicById;
 import static com.sogilis.ReactNativeBluetooth.util.UUIDHelper.uuidsFromStrings;
+import static com.sogilis.ReactNativeBluetooth.events.EventBuilder.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,9 +76,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-            emit(EventBuilder.stateChanged(STATE_ENABLED));
+            emit(stateChanged(STATE_ENABLED));
         } else {
-            emit(EventBuilder.stateChanged(STATE_DISABLED));
+            emit(stateChanged(STATE_DISABLED));
         }
     }
 
@@ -98,12 +98,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     };
 
     private void didEnableBluetooth() {
-        emit(EventBuilder.stateChanged(STATE_ENABLED));
+        emit(stateChanged(STATE_ENABLED));
     }
 
     private void didDisableBluetooth() {
         gattCollection.clear();
-        emit(EventBuilder.stateChanged(STATE_DISABLED));
+        emit(stateChanged(STATE_DISABLED));
     }
 
     @ReactMethod
@@ -112,7 +112,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
-                emit(EventBuilder.scanStarted());
+                emit(scanStarted());
             }
         };
     }
@@ -122,7 +122,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             if (! discoveredDevices.includes(device)) {
                 discoveredDevices.add(device);
-                emit(EventBuilder.deviceDiscovered(device));
+                emit(deviceDiscovered(device));
             }
         }
     };
@@ -134,7 +134,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
                 discoveredDevices.clear();
-                emit(EventBuilder.scanStopped());
+                emit(scanStopped());
             }
         };
     }
@@ -161,24 +161,24 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 gattCollection.add(gatt);
-                emit(EventBuilder.deviceConnected(device));
+                emit(deviceConnected(device));
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gattCollection.removeByDeviceAddress(address);
-                emit(EventBuilder.deviceDisconnected(device));
+                emit(deviceDisconnected(device));
             }
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             for (BluetoothGattService service: gatt.getServices()) {
-                emit(EventBuilder.serviceDiscovered(gatt.getDevice(), service));
+                emit(serviceDiscovered(gatt.getDevice(), service));
             }
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                emit(EventBuilder.characteristicRead(gatt.getDevice(), characteristic.getService(), characteristic));
+                emit(characteristicRead(gatt.getDevice(), characteristic.getService(), characteristic));
             }
         }
     };
@@ -206,7 +206,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByAddress(address);
 
                 gatt.discoverServices();
-                emit(EventBuilder.serviceDiscoveryStarted(gatt.getDevice()));
+                emit(serviceDiscoveryStarted(gatt.getDevice()));
             }
         };
     }
@@ -223,7 +223,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.findByDevice(device);
                 BluetoothGattService service = findServiceById(gatt, serviceId);
 
-                emit(EventBuilder.characteristicDiscoveryStarted(device, service));
+                emit(characteristicDiscoveryStarted(device, service));
 
                 if (characteristicIds == null || characteristicIds.size() == 0) {
                     discoverAllCharacteristics(device, service);
@@ -239,13 +239,13 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothGattCharacteristic characteristic = findCharacteristicById(
                     device, service, characteristicIds.getString(index));
 
-            emit(EventBuilder.characteristicDiscovered(device, service, characteristic));
+            emit(characteristicDiscovered(device, service, characteristic));
         }
     }
 
     private void discoverAllCharacteristics(BluetoothDevice device, BluetoothGattService service) {
         for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
-            emit(EventBuilder.characteristicDiscovered(device, service, characteristic));
+            emit(characteristicDiscovered(device, service, characteristic));
         }
     }
 
