@@ -44,7 +44,7 @@ RCT_EXPORT_MODULE();
              characteristicDiscoveredEventName: characteristicDiscoveredEventName,
              characteristicReadEventName: characteristicReadEventName,
              characteristicWrittenEventName: characteristicWrittenEventName,
-             characteristicReadEventName: characteristicNotifiedEventName,
+             characteristicNotifiedEventName: characteristicNotifiedEventName,
              deviceConnectedEventName: deviceConnectedEventName,
              deviceDisconnectedEventName: deviceDisconnectedEventName,
              deviceDiscoveredEventName: deviceDiscoveredEventName};
@@ -60,7 +60,7 @@ RCT_EXPORT_MODULE();
              characteristicDiscoveredEventName,
              characteristicReadEventName,
              characteristicWrittenEventName,
-             characteristicReadEventName,
+             characteristicNotifiedEventName,
              deviceConnectedEventName,
              deviceDisconnectedEventName,
              deviceDiscoveredEventName,

@@ -17,7 +17,7 @@ const CharacteristicWrite = React.createClass({
     };
   },
 
-  showReadAlert(detail) {
+  showWriteAlert(detail) {
     Alert.alert(
       'Write Characteristic Error',
       detail
@@ -38,7 +38,7 @@ const CharacteristicWrite = React.createClass({
       this.setState({
         characteristicStatus: "Write error",
       });
-      this.showReadAlert(e);
+      this.showWriteAlert(e);
     })
     .finally(() => this.setState({operationInProgress: false}));
   },

@@ -156,8 +156,7 @@ const readCharacteristicValue = characteristic => {
       if ("error" in detail) {
         reject(detail.error);
       } else {
-        // TODO: make buffer
-        resolve(detail);
+        resolve(new Buffer(detail, 'base64'));
       }
     });
 

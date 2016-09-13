@@ -30,7 +30,7 @@ const CharacteristicRead = React.createClass({
     });
 
     Bluetooth.readCharacteristicValue(this.props.characteristic)
-    .then(c => this.setState({characteristicValue: c.value || ""}))
+    .then(c => this.setState({characteristicValue: c.value.toString() || ""}))
     .catch(e => {
       this.setState({
         characteristicValue: "No Value",

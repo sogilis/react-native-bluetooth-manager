@@ -4,7 +4,7 @@ import Bluetooth from 'react-native-bluetooth';
 
 import Button from './Button';
 
-const CharacteristicRead = React.createClass({
+const CharacteristicNotify = React.createClass({
   propTypes: {
     characteristic: PropTypes.object.isRequired,
   },
@@ -12,32 +12,60 @@ const CharacteristicRead = React.createClass({
   getInitialState() {
     return {
       operationInProgress: false,
-      characteristicValue: "No Value",
+      characteristicStatus: "Not subscribed",
+      isSubscribed: false,
     };
   },
 
-  showReadAlert(detail) {
+  showNotifyAlert(detail) {
     Alert.alert(
-      'Read Characteristic Error',
+      'Notify Subscription Error',
       detail
     );
   },
 
-  readCharacteristicValue() {
+  componentWillMount() {
+    this.unsubscribe = () => {};
+  },
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  },
+
+  unsubscribeFromNotification() {
+    this.unsubscribe();
+
+    this.setState({
+      isSubscribed: false,
+      characteristicStatus: "Not subscribed",
+    });
+  },
+
+  onNotificationReceived(detail) {
+    this.setState({
+      characteristicStatus: detail.value || "Unable to read value",
+    });
+  },
+
+  subscribeToNotifyValue() {
+    if (this.state.isSubscribed) {
+      this.unsubscribeFromNotification();
+      return;
+    }
+
     this.setState({
       operationInProgress: true,
-      characteristicValue: "",
+      characteristicStatus: "",
     });
 
-    Bluetooth.readCharacteristicValue(this.props.characteristic)
-    .then(c => this.setState({characteristicValue: c.value || ""}))
-    .catch(e => {
-      this.setState({
-        characteristicValue: "No Value",
-      });
-      this.showReadAlert(e);
-    })
-    .finally(() => this.setState({operationInProgress: false}));
+    this.unsubscribe =
+      Bluetooth.characteristicDidNotify(this.props.characteristic, this.onNotificationReceived);
+
+    this.setState({
+          isConnected: true,
+          characteristicStatus: "Waiting for value",
+          operationInProgress: false,
+        });
   },
 
   render() {
@@ -45,8 +73,8 @@ const CharacteristicRead = React.createClass({
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.readCharacteristicValue} style={styles.buttonStyle}>Notify</Button>
-        <Text>{this.state.characteristicValue}</Text>
+        <Button onPress={this.subscribeToNotifyValue} style={styles.buttonStyle}>Notify</Button>
+        <Text>{this.state.characteristicStatus}</Text>
         <ActivityIndicator animating={this.state.operationInProgress} />
       </View>
     );
@@ -67,9 +95,9 @@ const styles = StyleSheet.create({
   }
 });
 
-CharacteristicRead.propTypes = {
+CharacteristicNotify.propTypes = {
   characteristic: PropTypes.object.isRequired,
   backAction: PropTypes.func,
 };
 
-export default CharacteristicRead;
+export default CharacteristicNotify;
