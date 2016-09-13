@@ -38,4 +38,8 @@ public class BluetoothHelpers {
 
         return characteristic;
     }
+
+    public static boolean hasProperty(BluetoothGattCharacteristic characteristic, int property) {
+        return (characteristic.getProperties() & property) != 0;
+    }
 }
