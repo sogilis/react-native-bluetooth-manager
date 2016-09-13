@@ -4,7 +4,7 @@ import com.facebook.react.bridge.ReadableArray;
 
 import java.util.UUID;
 
-public class UUIDHelper {
+public class UUIDHelpers {
     public static UUID[] uuidsFromStrings(ReadableArray uuidStrings) {
         if (uuidStrings != null) {
             UUID[] uuids = new UUID[uuidStrings.size()];

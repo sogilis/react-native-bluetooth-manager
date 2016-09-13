@@ -11,7 +11,7 @@ import com.facebook.react.bridge.WritableNativeMap;
 
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 
-public class EventBuilder {
+public class EventBuilders {
     public static BluetoothEvent stateChanged(String newState) {
         return new BluetoothEvent(STATE_CHANGED, newState);
     }

@@ -30,6 +30,6 @@ public class EventEmitter {
     }
 
     public void emitError(String eventName, String errorMessage) {
-        emit(EventBuilder.error(eventName, errorMessage));
+        emit(EventBuilders.error(eventName, errorMessage));
     }
 }

@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothGattService;
 
 import java.util.UUID;
 
-public class BluetoothHelper {
+public class BluetoothHelpers {
     public static String deviceId(BluetoothDevice device) {
         return device.getAddress();
     }

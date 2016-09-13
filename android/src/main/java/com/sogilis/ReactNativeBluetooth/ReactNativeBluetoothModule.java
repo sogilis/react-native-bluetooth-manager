@@ -23,10 +23,10 @@ import com.sogilis.ReactNativeBluetooth.events.BluetoothEvent;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
-import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findServiceById;
-import static com.sogilis.ReactNativeBluetooth.BluetoothHelper.findCharacteristicById;
-import static com.sogilis.ReactNativeBluetooth.util.UUIDHelper.uuidsFromStrings;
-import static com.sogilis.ReactNativeBluetooth.events.EventBuilder.*;
+import static com.sogilis.ReactNativeBluetooth.BluetoothHelpers.findServiceById;
+import static com.sogilis.ReactNativeBluetooth.BluetoothHelpers.findCharacteristicById;
+import static com.sogilis.ReactNativeBluetooth.util.UUIDHelpers.uuidsFromStrings;
+import static com.sogilis.ReactNativeBluetooth.events.EventBuilders.*;
 
 import java.util.HashMap;
 import java.util.Map;
