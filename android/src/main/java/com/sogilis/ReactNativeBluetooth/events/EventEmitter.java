@@ -20,14 +20,14 @@ public class EventEmitter {
         this.reactContext = reactContext;
     }
 
-    public void emitEvent(BluetoothEvent event) {
-        logEvent(event);
+    public void emit(BluetoothEvent event) {
+        log(event);
         reactContext.
                 getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).
                 emit(event.getName(), event.getData());
     }
 
-    private void logEvent(BluetoothEvent event) {
+    private void log(BluetoothEvent event) {
         if (event.isError()) {
             Log.e(MODULE_NAME, event.toString());
         } else {
@@ -35,11 +35,7 @@ public class EventEmitter {
         }
     }
 
-    public void emit(BluetoothEvent event) {
-        emitEvent(event);
-    }
-
     public void emitError(String eventName, String errorMessage) {
-        emitEvent(EventBuilder.error(eventName, errorMessage));
+        emit(EventBuilder.error(eventName, errorMessage));
     }
 }
