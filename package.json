@@ -36,5 +36,8 @@
     "nodemon": "^1.10.2",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.0"
+  },
+  "dependencies": {
+    "buffer": "^4.9.1"
   }
 }

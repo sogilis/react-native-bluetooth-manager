@@ -4,6 +4,8 @@ import TopBar from '../components/TopBar';
 import { getAppState, setAppState } from '../lib/GlobalState';
 
 import CharacteristicRead from '../components/CharacteristicRead';
+import CharacteristicWrite from '../components/CharacteristicWrite';
+import CharacteristicNotify from '../components/CharacteristicNotify';
 
 const CharacteristicDetail = React.createClass({
   propTypes: {
@@ -64,6 +66,8 @@ const CharacteristicDetail = React.createClass({
           <Text style={styles.detailText}>UUID: {this.state.characteristic.id}</Text>
           <Text style={styles.detailText}>Properties: {this.formatProperties()}</Text>
           <CharacteristicRead characteristic={this.state.characteristic} />
+          <CharacteristicWrite characteristic={this.state.characteristic} />
+          <CharacteristicNotify characteristic={this.state.characteristic} />
         </View>
       </View>
     );

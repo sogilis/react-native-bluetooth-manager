@@ -171,8 +171,13 @@ const readCharacteristicValue = characteristic => {
   });
 };
 
-const writeCharacteristicValue = (characteristic, value, withResponse) => {
+const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
   return new Promise((resolve, reject) => {
+    if (!withResponse) {
+      resolve();
+      return;
+    }
+
     let listener = EventEmitter.addListener(ReactNativeBluetooth.CharacteristicWritten, detail => {
       if (!idsAreSame(characteristic, detail))
         return;
@@ -188,8 +193,13 @@ const writeCharacteristicValue = (characteristic, value, withResponse) => {
       }
     });
 
-    // todo make buffer
-    ReactNativeBluetooth.writeCharacteristicValue(characteristic, value, withResponse);
+    setTimeout(() => {
+      if (listener) {
+        listener.remove();
+        reject("Timeout writing characteristic");
+      }}, 5000);
+
+    ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
   });
 };
 

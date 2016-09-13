@@ -1,10 +1,11 @@
 import React, { PropTypes } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, Alert } from 'react-native';
 import Bluetooth from 'react-native-bluetooth';
+import { Buffer } from 'buffer';
 
 import Button from './Button';
 
-const CharacteristicRead = React.createClass({
+const CharacteristicWrite = React.createClass({
   propTypes: {
     characteristic: PropTypes.object.isRequired,
   },
@@ -12,28 +13,30 @@ const CharacteristicRead = React.createClass({
   getInitialState() {
     return {
       operationInProgress: false,
-      characteristicValue: "No Value",
+      characteristicStatus: "Waiting for write",
     };
   },
 
   showReadAlert(detail) {
     Alert.alert(
-      'Read Characteristic Error',
+      'Write Characteristic Error',
       detail
     );
   },
 
-  readCharacteristicValue() {
+  writeCharacteristicValue() {
     this.setState({
       operationInProgress: true,
-      characteristicValue: "",
+      characteristicStatus: "In progress",
     });
 
-    Bluetooth.readCharacteristicValue(this.props.characteristic)
-    .then(c => this.setState({characteristicValue: c.value || ""}))
+    const valueToWrite = new Buffer("\0\u{01}\u{02}\u{03}\u{04}\u{05}\u{06}\u{07}");
+
+    Bluetooth.writeCharacteristicValue(this.props.characteristic, valueToWrite, true)
+    .then(() => this.setState({characteristicStatus: "Written"}))
     .catch(e => {
       this.setState({
-        characteristicValue: "No Value",
+        characteristicStatus: "Write error",
       });
       this.showReadAlert(e);
     })
@@ -41,12 +44,12 @@ const CharacteristicRead = React.createClass({
   },
 
   render() {
-    if (!this.props.characteristic.properties.read) return null;
+    if (!this.props.characteristic.properties.write) return null;
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.readCharacteristicValue} style={styles.buttonStyle}>Read</Button>
-        <Text>{this.state.characteristicValue}</Text>
+        <Button onPress={this.writeCharacteristicValue} style={styles.buttonStyle}>Write</Button>
+        <Text>{this.state.characteristicStatus}</Text>
         <ActivityIndicator animating={this.state.operationInProgress} />
       </View>
     );
@@ -67,9 +70,9 @@ const styles = StyleSheet.create({
   }
 });
 
-CharacteristicRead.propTypes = {
+CharacteristicWrite.propTypes = {
   characteristic: PropTypes.object.isRequired,
   backAction: PropTypes.func,
 };
 
-export default CharacteristicRead;
+export default CharacteristicWrite;

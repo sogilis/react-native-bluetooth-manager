@@ -24,12 +24,10 @@ const Button = React.createClass({
 
   onHighlight() {
     this.setState({active: true});
-    console.log("Highlight");
   },
 
   onUnhighlight() {
     this.setState({active: false});
-    console.log("Unhighlight");
   },
 
   render() {

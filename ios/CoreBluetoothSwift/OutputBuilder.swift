@@ -63,9 +63,20 @@ class OutputBuilder {
     }
 
     static func asCharacteristicWriteResult(info: CharacteristicInfo) -> BluetoothServiceReturn {
+        if let error = info.error {
+            return [
+                "id": info.characteristic.UUID.UUIDString,
+                "deviceId": info.characteristic.service.peripheral.identifier.UUIDString,
+                "serviceId": info.characteristic.service.UUID.UUIDString,
+                "error": error.localizedDescription,
+            ]
+        }
+
         return [
-            "success" : info.error == nil,
-            "error" : info.error?.localizedDescription ?? "Unknown",
+            "id": info.characteristic.UUID.UUIDString,
+            "deviceId": info.characteristic.service.peripheral.identifier.UUIDString,
+            "serviceId": info.characteristic.service.UUID.UUIDString,
+            "success": true,
         ]
     }
 

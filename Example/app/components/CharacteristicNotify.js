@@ -41,11 +41,11 @@ const CharacteristicRead = React.createClass({
   },
 
   render() {
-    if (!this.props.characteristic.properties.read) return null;
+    if (!this.props.characteristic.properties.notify) return null;
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.readCharacteristicValue} style={styles.buttonStyle}>Read</Button>
+        <Button onPress={this.readCharacteristicValue} style={styles.buttonStyle}>Notify</Button>
         <Text>{this.state.characteristicValue}</Text>
         <ActivityIndicator animating={this.state.operationInProgress} />
       </View>
