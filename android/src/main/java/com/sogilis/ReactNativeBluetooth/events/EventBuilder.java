@@ -49,17 +49,15 @@ public class EventBuilder {
     }
 
     public static BluetoothEvent characteristicDiscovered(BluetoothDevice device,
-                                                          BluetoothGattService service,
                                                           BluetoothGattCharacteristic characteristic) {
         return new BluetoothEvent(CHARACTERISTIC_DISCOVERED,
-                characteristicMap(device, service, characteristic));
+                characteristicMap(device, characteristic));
     }
 
     public static BluetoothEvent characteristicRead(BluetoothDevice device,
-                                                    BluetoothGattService service,
                                                     BluetoothGattCharacteristic characteristic) {
         return new BluetoothEvent(CHARACTERISTIC_READ,
-                characteristicMap(device, service, characteristic));
+                characteristicMap(device, characteristic));
     }
 
     public static BluetoothEvent error(String eventName, String errorMessage) {
@@ -85,14 +83,14 @@ public class EventBuilder {
         return map;
     }
 
-    public static ReadableMap characteristicMap(BluetoothDevice device, BluetoothGattService service, BluetoothGattCharacteristic characteristic) {
+    public static ReadableMap characteristicMap(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
         byte[] value = characteristic.getValue();
         String encodedValue = (value != null ? Base64.encodeToString(value, Base64.DEFAULT) : null);
         WritableMap map = new WritableNativeMap();
 
         map.putString("value", encodedValue);
         map.putString("id", characteristic.getUuid().toString());
-        map.putString("serviceId", service.getUuid().toString());
+        map.putString("serviceId", characteristic.getService().getUuid().toString());
         map.putString("deviceId", device.getAddress());
 
         return map;

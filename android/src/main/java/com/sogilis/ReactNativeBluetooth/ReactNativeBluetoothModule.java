@@ -178,7 +178,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                emit(characteristicRead(gatt.getDevice(), characteristic.getService(), characteristic));
+                emit(characteristicRead(gatt.getDevice(), characteristic));
             }
         }
     };
@@ -239,13 +239,13 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothGattCharacteristic characteristic = findCharacteristicById(
                     device, service, characteristicIds.getString(index));
 
-            emit(characteristicDiscovered(device, service, characteristic));
+            emit(characteristicDiscovered(device, characteristic));
         }
     }
 
     private void discoverAllCharacteristics(BluetoothDevice device, BluetoothGattService service) {
         for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
-            emit(characteristicDiscovered(device, service, characteristic));
+            emit(characteristicDiscovered(device, characteristic));
         }
     }
 
