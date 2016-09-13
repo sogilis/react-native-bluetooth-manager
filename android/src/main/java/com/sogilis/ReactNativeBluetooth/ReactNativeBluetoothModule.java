@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Base64;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -182,6 +183,13 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 emit(characteristicRead(gatt.getDevice(), characteristic));
             }
         }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                emit(characteristicWritten(gatt.getDevice(), characteristic));
+            }
+        }
     };
 
     @ReactMethod
@@ -266,6 +274,29 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 if (!gatt.readCharacteristic(characteristic)) {
                     eventEmitter.emitError(CHARACTERISTIC_READ,
                             "Could not initiate characteristic read for unknown reason.");
+                }
+            }
+        };
+    }
+
+    @ReactMethod
+    public void writeCharacteristicValue(final ReadableMap characteristicMap, final String base64Value, boolean withResponse) {
+        final String address = characteristicMap.getString("deviceId");
+        final String serviceId = characteristicMap.getString("serviceId");
+        final String characteristicId = characteristicMap.getString("id");
+
+        new BluetoothAction(CHARACTERISTIC_WRITTEN, eventEmitter) {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
+                BluetoothGatt gatt = gattCollection.findByAddress(address);
+                BluetoothGattService service = findServiceById(gatt, serviceId);
+                BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
+
+                characteristic.setValue(Base64.decode(base64Value, Base64.DEFAULT));
+
+                if (!gatt.writeCharacteristic(characteristic)) {
+                    eventEmitter.emitError(CHARACTERISTIC_WRITTEN,
+                            "Could not initiate characteristic write for unknown reason.");
                 }
             }
         };
