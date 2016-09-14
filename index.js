@@ -48,13 +48,13 @@ const startScan = (customOptions = {}) => {
 
     let listener;
 
-    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStarted, (error) => {
+    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStarted, (detail) => {
       if (listener) {
         listener.remove();
       }
 
-      if (error) {
-        reject(error.error);
+      if ("error" in detail) {
+        reject(new Error(detail.error));
       } else {
         resolve(Scan);
       }
@@ -74,7 +74,7 @@ const stopScan = () => {
       }
 
       if ("error" in detail) {
-        reject(detail.error);
+        reject(new Error(detail.error));
       } else {
         resolve(detail);
       }
@@ -95,7 +95,7 @@ const discoverServices = (device, serviceIds, callback) => {
 
     const onStartedCaught = detail => {
       if ("error" in detail) {
-        reject(detail["error"]);
+        reject(new Error(detail["error"]));
         return;
       }
 
@@ -127,7 +127,7 @@ const discoverCharacteristics = (service, characteristicIds, callback) => {
 
     const onStartedCaught = detail => {
       if ("error" in detail) {
-        reject(detail["error"]);
+        reject(new Error(detail["error"]));
         return;
       }
 
@@ -159,7 +159,7 @@ const readCharacteristicValue = characteristic => {
       }
 
       if ("error" in detail) {
-        reject(detail.error);
+        reject(new Error(detail.error));
       } else {
         const mappedDetail = {
           ...detail,
@@ -173,7 +173,7 @@ const readCharacteristicValue = characteristic => {
     setTimeout(() => {
       if (listener) {
         listener.remove();
-        reject("Timeout reading characteristic");
+        reject(new Error("Timeout reading characteristic"));
       }}, 5000);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);
@@ -196,7 +196,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
       }
 
       if ("error" in detail) {
-        reject(detail.error);
+        reject(new Error(detail.error));
       } else {
         resolve(detail);
       }
@@ -205,7 +205,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
     setTimeout(() => {
       if (listener) {
         listener.remove();
-        reject("Timeout writing characteristic");
+        reject(new Error("Timeout writing characteristic"));
       }}, 5000);
 
     ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
@@ -241,6 +241,22 @@ const characteristicDidNotify = (characteristic, callback) => {
   };
 };
 
+const deviceDidDisconnect = (device, callback) => {
+  const disconnectionCaught = detail => {
+    if (!idsAreSame(device, detail))
+      return;
+
+    callback(detail);
+  };
+
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.DeviceDisconnected,
+    disconnectionCaught
+  );
+
+  return unsubscription(listener);
+};
+
 
 const connect = (device) => {
   return new Promise((resolve, reject) => {
@@ -251,7 +267,7 @@ const connect = (device) => {
         return;
 
       if ("error" in connectedDetail) {
-        reject(connectedDetail["error"]);
+        reject(new Error(connectedDetail["error"]));
         return;
       }
 
@@ -272,38 +288,21 @@ const connect = (device) => {
 };
 
 const disconnect = (device) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let unsubscribe;
 
-    const onDisconnectionCaught = detail => {
-      if (!idsAreSame(device, detail))
-        return;
-
-      if ("error" in detail) {
-        reject(detail["error"]);
-        return;
-      }
-
-      resolve(detail);
-
+    let disconnectCallback = device => {
       if (unsubscribe) {
         unsubscribe();
       }
+
+      resolve(device);
     };
 
-    unsubscribe = deviceDidDisconnect(onDisconnectionCaught);
+    unsubscribe = deviceDidDisconnect(device, disconnectCallback);
 
     ReactNativeBluetooth.disconnect(device);
   });
-};
-
-const deviceDidDisconnect = (callback) => {
-  const listener = EventEmitter.addListener(
-    ReactNativeBluetooth.DeviceDisconnected,
-    callback
-  );
-
-  return unsubscription(listener);
 };
 
 const didDiscoverDevice = (callback) => {
@@ -325,4 +324,5 @@ export default {
   characteristicDidNotify,
   connect,
   disconnect,
+  deviceDidDisconnect,
 };

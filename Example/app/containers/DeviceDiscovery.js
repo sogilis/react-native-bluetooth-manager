@@ -18,20 +18,22 @@ const DeviceDiscovery = React.createClass({
     return {
       devices: [],
       error: null,
+      status: "",
     };
   },
 
   componentWillMount() {
     this.unsubscribe = Bluetooth.didDiscoverDevice((device) => {
       this.setState({
-        devices: [...this.state.devices, device]
+        devices: [...this.state.devices, device],
+        status: "Connecting",
       });
     });
 
     Bluetooth.startScan(ScanOptions)
       .then(scan => scan.stopAfter(15000))
       .then(() => this.setState({status: "Done"}))
-      .catch(error => this.setState({"error": error}));
+      .catch(error => this.setState({"error": error.message}));
   },
 
   componentWillUnmount() {
@@ -40,7 +42,7 @@ const DeviceDiscovery = React.createClass({
   },
 
   scanInProgress() {
-    return this.state.error == null && this.state.status != "Done";
+    return (this.state.error == null || this.state.error == "" ) && this.state.status != "Done";
   },
 
   deviceSelected(device) {
@@ -73,8 +75,10 @@ const DeviceDiscovery = React.createClass({
 
 var styles = StyleSheet.create({
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
+    marginBottom: 5,
+    padding: 5,
   },
   container: {
     flex: 1,

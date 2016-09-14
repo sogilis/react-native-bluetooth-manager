@@ -192,6 +192,10 @@ public class BluetoothActions: NSObject {
     private func changeCharacteristicNotification(lookup: [String: AnyObject], newState: Bool) {
         dispatch_async(backgroundQueue, { [unowned self] in
             guard let characteristic = self.peripheralStore.getCharacteristic(lookup) else {
+                self.onCharacteristicNotifyHandler([
+                    "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
+                    "error": "Unable to find characteristic when trying to notify."
+                    ])
                 print("Unable to find characteristic when changing notification")
                 return
             }

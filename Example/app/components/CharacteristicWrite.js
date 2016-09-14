@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, Alert, TextInput } from 'react-native';
 import Bluetooth from 'react-native-bluetooth';
 import { Buffer } from 'buffer';
 
@@ -14,26 +14,27 @@ const CharacteristicWrite = React.createClass({
     return {
       operationInProgress: false,
       characteristicStatus: "Waiting for write",
+      textToSend: "",
     };
   },
 
-  showWriteAlert(detail) {
+  showWriteAlert(error) {
     Alert.alert(
       'Write Characteristic Error',
-      detail
+      error.message
     );
   },
 
   writeCharacteristicValue() {
     this.setState({
       operationInProgress: true,
-      characteristicStatus: "In progress",
+      characteristicStatus: "",
     });
 
-    const valueToWrite = new Buffer("\0\u{01}\u{02}\u{03}\u{04}\u{05}\u{06}\u{07}");
+    const valueToWrite = new Buffer(this.state.textToSend);
 
     Bluetooth.writeCharacteristicValue(this.props.characteristic, valueToWrite, true)
-    .then(() => this.setState({characteristicStatus: "Written"}))
+    .then(() => this.setState({characteristicStatus: "\u2705"}))
     .catch(e => {
       this.setState({
         characteristicStatus: "Write error",
@@ -48,11 +49,17 @@ const CharacteristicWrite = React.createClass({
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.writeCharacteristicValue} style={styles.buttonStyle}>Write</Button>
-        <View style={ styles.resultHolder }>
-          <Text>{this.state.characteristicStatus}</Text>
+        <View style={styles.statusContainer}>
+          <Button onPress={this.writeCharacteristicValue} style={styles.buttonStyle}>Write</Button>
           <ActivityIndicator animating={this.state.operationInProgress} />
+          <Text>{this.state.characteristicStatus}</Text>
         </View>
+        <TextInput
+          placeHolder="Enter text to send."
+          style={styles.textEntry}
+          onChangeText={text => this.setState({ textToSend: text })}
+          value={this.state.textToSend}
+        />
       </View>
     );
   }
@@ -65,17 +72,22 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
   },
-  resultHolder: {
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textEntry: {
     borderWidth: 2,
     borderColor: 'grey',
     borderRadius: 5,
-    padding: 10,
-    flexDirection: 'row',
-    marginTop: 20,
-    justifyContent: 'center',
+    marginTop: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
+    height: 40,
   },
   buttonStyle: {
     width: 120,
+    marginRight: 20,
   }
 });
 

@@ -65,8 +65,8 @@ const CharacteristicDetail = React.createClass({
         <View style={styles.detailContainer}>
           <Text style={styles.detailText}>UUID: {this.state.characteristic.id}</Text>
           <Text style={styles.detailText}>Properties: {this.formatProperties()}</Text>
-          <CharacteristicRead characteristic={this.state.characteristic} />
           <CharacteristicWrite characteristic={this.state.characteristic} />
+          <CharacteristicRead characteristic={this.state.characteristic} />
           <CharacteristicNotify characteristic={this.state.characteristic} />
         </View>
       </View>
@@ -76,8 +76,10 @@ const CharacteristicDetail = React.createClass({
 
 const styles = StyleSheet.create({
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
+    marginBottom: 5,
+    padding: 5,
   },
   detailText: {
     fontSize: 16,

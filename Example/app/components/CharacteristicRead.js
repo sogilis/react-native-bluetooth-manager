@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   buttonStyle: {
     width: 120,

@@ -82,8 +82,10 @@ const ServiceDetail = React.createClass({
 
 const styles = StyleSheet.create({
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
+    marginBottom: 5,
+    padding: 5,
   },
   labelText: {
     fontSize: 20,

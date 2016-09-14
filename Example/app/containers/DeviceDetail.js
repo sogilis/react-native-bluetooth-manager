@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
 import TopBar from '../components/TopBar';
 import ServiceList from '../components/ServiceList';
 import Bluetooth from 'react-native-bluetooth';
@@ -36,9 +36,15 @@ const DeviceDetail = React.createClass({
       connectionInProgress: true,
     });
 
+    const { disconnectSubscription } = getAppState();
+    disconnectSubscription();
+
     Bluetooth.disconnect(this.state.device)
     .then(() => {
-      setAppState({ isConnected: false });
+      setAppState({
+        isConnected: false,
+        disconnectSubscription: () => {}
+      });
 
       this.setState({
         isConnected: false,
@@ -46,6 +52,13 @@ const DeviceDetail = React.createClass({
         services: [],
       });
     });
+  },
+
+  showDisconnectAlert() {
+    Alert.alert(
+      'Disconnection',
+      'Device connection lost'
+    );
   },
 
   connect() {
@@ -63,7 +76,27 @@ const DeviceDetail = React.createClass({
 
     Bluetooth.connect(this.state.device)
     .then(() => {
-      setAppState({ isConnected: true });
+
+      const listenForDisconnect = () => {
+        const { disconnectSubscription } = getAppState();
+        disconnectSubscription && disconnectSubscription();
+
+        setAppState({
+          isConnected: false,
+          disconnectSubscription: () => {},
+        });
+
+        this.showDisconnectAlert();
+        this.props.navigator("DeviceDiscovery");
+      };
+
+      const disconnectSubscription =
+        Bluetooth.deviceDidDisconnect(this.state.device, listenForDisconnect);
+
+      setAppState({
+        isConnected: true,
+        disconnectSubscription: disconnectSubscription,
+      });
 
       this.setState({
         isConnected: true,
@@ -79,7 +112,7 @@ const DeviceDetail = React.createClass({
     .then(unsubscribe => this.unsubscribe = unsubscribe)
     .catch(error => {
       this.setState({
-        error: error,
+        error: error.message,
       });
     });
   },
@@ -94,11 +127,17 @@ const DeviceDetail = React.createClass({
   },
 
   goBack() {
-    Bluetooth.disconnect(this.state.device);
+    const { disconnectSubscription, isConnected } = getAppState();
+
+    if (isConnected) {
+      disconnectSubscription && disconnectSubscription();
+      Bluetooth.disconnect(this.state.device);
+    }
 
     setAppState({
       selectedDevice: null,
       isConnected: false,
+      disconnectSubscription: () => {},
       services: [],
     });
 
@@ -150,8 +189,10 @@ const DeviceDetail = React.createClass({
 
 const styles = StyleSheet.create({
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'red',
+    marginBottom: 5,
+    padding: 5,
   },
   statusText: {
     fontSize: 20,
