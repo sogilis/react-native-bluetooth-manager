@@ -21,8 +21,8 @@ public class BluetoothActions: NSObject {
 
     private var lastState = CBCentralManagerState.Unknown
 
-    private var discoveredPeripherals = [NSUUID: CBPeripheral]()
 
+    private let peripheralStore = PeripheralStore()
 
     public var bluetoothState: String {
         get {
@@ -34,67 +34,9 @@ public class BluetoothActions: NSObject {
         centralManager.delegate = centralEventHandler
     }
 
-    private func getDevice(lookup: [String: AnyObject]) -> CBPeripheral? {
-        guard let deviceIdString = lookup.eitherOr("deviceId", key2: "id") as? String else {
-            print("No device id found.")
-            return nil
-        }
-
-        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
-            print("Invalid device id found.")
-            return nil
-        }
-
-        guard let device = self.discoveredPeripherals[deviceId] else {
-            print("No device found", deviceId, discoveredPeripherals)
-            return nil
-        }
-
-        return device
+    deinit {
+        cleanConnections()
     }
-
-    private func getService(device: CBPeripheral, lookup: [String: AnyObject]) -> CBService? {
-        guard let serviceIdString = lookup.eitherOr("serviceId", key2: "id") as? String else {
-            print("No service id found.")
-            return nil
-        }
-
-        guard let serviceId = NSUUID(UUIDString: serviceIdString) else {
-            print("Invalid service id found.")
-            return nil
-        }
-
-        return device.services?.filter { $0.UUID.UUIDString == serviceId.UUIDString }.first
-    }
-
-    private func getService(lookup: [String: AnyObject]) -> CBService? {
-        guard let device = getDevice(lookup) else {
-            print("Device not found when looking up service")
-            return nil
-        }
-
-        return getService(device, lookup: lookup)
-    }
-
-    private func getCharacteristic(lookup: [String: AnyObject]) -> CBCharacteristic? {
-        guard let service = getService(lookup) else {
-            print("Service not found when looking up characteristic", lookup)
-            return nil
-        }
-
-        guard let charIdString = lookup["id"] as? String else {
-            print("No characteristic id found.", lookup)
-            return nil
-        }
-
-        guard let charId = NSUUID(UUIDString: charIdString) else {
-            print("Invalid characteristic id found.", lookup)
-            return nil
-        }
-
-        return service.characteristics?.filter { $0.UUID.UUIDString == charId.UUIDString }.first
-    }
-
 
     public func startScan(serviceUUIDs: [String], onScanStarted: (BluetoothServiceReturn) -> Void) {
         let mappedIds = serviceUUIDs.map { CBUUID(string: $0) }
@@ -110,13 +52,13 @@ public class BluetoothActions: NSObject {
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.stopScan()
 
-            onStopScanComplete([String:String]())
+            onStopScanComplete([String:AnyObject]())
             print("Bluetooth scan stopped")
         })
     }
 
     public func connect(deviceLookup: [String: AnyObject]) {
-        guard let device = getDevice(deviceLookup) else {
+        guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not connect")
             onDeviceConnectedHandler([
                 "error": "No device found"]
@@ -130,7 +72,7 @@ public class BluetoothActions: NSObject {
     }
 
     public func disconnect(deviceLookup: [String: AnyObject]) {
-        guard let device = getDevice(deviceLookup) else {
+        guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not discover services")
             onDeviceDisconnectedHandler([
                 "error": "No device found"]
@@ -147,7 +89,7 @@ public class BluetoothActions: NSObject {
                                  services: [String]?,
                                  onDiscoverStarted: (BluetoothServiceReturn) -> Void) {
 
-        guard let device = getDevice(deviceLookup) else {
+        guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not discover services")
             onDiscoverStarted([
                 "error": "No device found"
@@ -163,31 +105,14 @@ public class BluetoothActions: NSObject {
         })
     }
 
-    public func discoverCharacteristics(service: [String: AnyObject],
+    public func discoverCharacteristics(lookup: [String: AnyObject],
                                         characteristics: [String]?,
                                         onDiscoverStarted: (BluetoothServiceReturn) -> Void) {
-        print("Discovering characteristics.")
 
-        guard let device = getDevice(service) else {
-            print("No device found. Can not discover characteristics")
-
+        guard let requiredService = peripheralStore.getService(lookup) else {
+            print("No service found. Can not discover characteristics", lookup)
             onDiscoverStarted([
-                "id": service.eitherOr("serviceId", key2: "id") ?? "",
-                "error": "No device found"
-                ])
-            return
-        }
-
-        let getService: Void -> CBService? = {
-            return  device.services?.filter {
-                $0.UUID.UUIDString == (service["id"] as? String) ?? "_"
-            } .first
-        }
-
-        guard let requiredService = getService() else {
-            print("No service found. Can not discover characteristics", service, device)
-            onDiscoverStarted([
-                "id": service.eitherOr("serviceId", key2: "id") ?? "",
+                "id": lookup.eitherOr("serviceId", key2: "id") ?? "unknown",
                 "error": "No service found"
                 ])
             return
@@ -195,16 +120,28 @@ public class BluetoothActions: NSObject {
 
         dispatch_async(backgroundQueue, {
             let characteristicIds = characteristics?.map { CBUUID(string: $0) }
-            device.discoverCharacteristics(characteristicIds, forService: requiredService)
+            requiredService.peripheral.discoverCharacteristics(characteristicIds,
+                forService: requiredService)
         })
     }
 
     public func writeCharacteristicValue(lookup: [String: AnyObject], data: String, withResponse: Bool) {
 
-        guard let characteristic = getCharacteristic(lookup) else {
+        guard let characteristic = peripheralStore.getCharacteristic(lookup) else {
             onCharacteristicWriteHandler([
                 "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
                 "error": "Unable to find characteristic to write to"
+                ])
+            return
+        }
+
+        let properties = withResponse ? CBCharacteristicProperties.Write :
+            CBCharacteristicProperties.WriteWithoutResponse
+
+        guard characteristic.properties.contains(properties) else {
+            onCharacteristicWriteHandler([
+                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
+                "error": "Trying to write to a characteristic that does not support write type."
                 ])
             return
         }
@@ -218,6 +155,7 @@ public class BluetoothActions: NSObject {
         }
 
         let device = characteristic.service.peripheral
+
         let writeType = withResponse ? CBCharacteristicWriteType.WithResponse :
             CBCharacteristicWriteType.WithoutResponse
 
@@ -227,10 +165,12 @@ public class BluetoothActions: NSObject {
     }
 
     public func readCharacteristicValue(lookup: [String: AnyObject]) {
-        guard let characteristic = getCharacteristic(lookup) else {
+        guard let characteristic = peripheralStore.getCharacteristic(lookup) else {
+            print("WTF is my characteristic", lookup, peripheralStore.listIds())
+
             onCharacteristicReadHandler([
                 "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
-                "error": "Unable to find characteristic to write to"
+                "error": "Unable to find characteristic to read from"
                 ])
             return
         }
@@ -247,6 +187,25 @@ public class BluetoothActions: NSObject {
             let device = characteristic.service.peripheral
             device.readValueForCharacteristic(characteristic)
         })
+    }
+
+    private func changeCharacteristicNotification(lookup: [String: AnyObject], newState: Bool) {
+        dispatch_async(backgroundQueue, { [unowned self] in
+            guard let characteristic = self.peripheralStore.getCharacteristic(lookup) else {
+                print("Unable to find characteristic when changing notification")
+                return
+            }
+
+            characteristic.service.peripheral.setNotifyValue(newState, forCharacteristic: characteristic)
+        })
+    }
+
+    public func subscribeToNotification(lookup: [String: AnyObject]) {
+        changeCharacteristicNotification(lookup, newState: true)
+    }
+
+    public func unsubscribeFromNotification(lookup: [String: AnyObject]) {
+        changeCharacteristicNotification(lookup, newState: false)
     }
 
     public func onChangeState(handler: String -> Void) {
@@ -285,12 +244,17 @@ public class BluetoothActions: NSObject {
         }
     }
 
+    private func handleCharacteristicUpdate(params: CharacteristicCallbackParams) {
+        if params.1.isNotifying {
+            onCharacteristicNotifyHandler(OutputBuilder.asCharacteristic(params.1))
+        }
+
+        onCharacteristicReadHandler(OutputBuilder.asCharacteristic(params.1))
+    }
+
     public func onCharacteristicRead(handler: BluetoothServiceReturn -> Void) {
         onCharacteristicReadHandler = handler
-
-        peripheralEventHandler.onCharacteristicValueUpdated { newValue in
-            handler(OutputBuilder.asCharacteristic(newValue.1))
-        }
+        peripheralEventHandler.onCharacteristicValueUpdated(handleCharacteristicUpdate)
     }
 
     public func onCharacteristicWritten(handler: BluetoothServiceReturn -> Void) {
@@ -303,10 +267,7 @@ public class BluetoothActions: NSObject {
 
     public func onCharacteristicNotified(handler: BluetoothServiceReturn -> Void) {
         onCharacteristicNotifyHandler = handler
-
-        peripheralEventHandler.onCharacteristicNotify { characteristicInfo in
-            handler(OutputBuilder.asCharacteristic(characteristicInfo.1))
-        }
+        peripheralEventHandler.onCharacteristicValueUpdated(handleCharacteristicUpdate)
     }
 
     public func onDeviceConnected(handler: BluetoothServiceReturn -> Void) {
@@ -328,20 +289,23 @@ public class BluetoothActions: NSObject {
 
     public func onDeviceDiscovered(handler: BluetoothServiceReturn -> Void) {
         centralEventHandler.onDeviceDiscovered { [unowned self] device in
-
-            dispatch_async(self.backgroundQueue, { [unowned self] in
-                if self.discoveredPeripherals[device.identifier] == nil {
-                    self.discoveredPeripherals[device.identifier] = device
-                }
-
-                handler(OutputBuilder.asDevice(device))
-            })
+            self.peripheralStore.addPeripheral(device)
+            handler(OutputBuilder.asDevice(device))
         }
     }
 
+    public func cleanUp() {
+        onDeviceConnectedHandler = { _ in }
+        onDeviceDisconnectedHandler = { _ in }
+        onCharacteristicReadHandler = { _ in }
+        onCharacteristicWriteHandler = { _ in }
+        onCharacteristicNotifyHandler = { _ in }
+
+        cleanConnections()
+    }
+
     public func cleanConnections() {
-        self.discoveredPeripherals
-            .map { $0.1 }
+        peripheralStore.items
             .forEach { [unowned self] peripheral in
 
             guard peripheral.state == .Connected else {
@@ -362,6 +326,7 @@ public class BluetoothActions: NSObject {
                     }
             }
         }
-        self.discoveredPeripherals.removeAll()
+
+        peripheralStore.removeAll()
     }
 }

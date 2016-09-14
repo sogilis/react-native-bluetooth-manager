@@ -1,13 +1,17 @@
 'use strict';
 
 import { NativeAppEventEmitter, NativeModules, NativeEventEmitter, Platform } from 'react-native';
+import { Buffer } from 'buffer';
+
 const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
 
 const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
   new NativeEventEmitter(ReactNativeBluetooth);
 
 const unsubscription = (listener) => {
-  return () => listener.remove();
+  return () => {
+    listener.remove();
+  };
 };
 
 const didChangeState = (callback) => {
@@ -64,17 +68,19 @@ const stopScan = () => {
   return new Promise((resolve, reject) => {
     let listener;
 
-    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, (error) => {
+    listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, detail => {
       if (listener) {
         listener.remove();
       }
 
-      if (error) {
-        reject(error.error);
+      if ("error" in detail) {
+        reject(detail.error);
       } else {
-        resolve(null);
+        resolve(detail);
       }
     });
+
+    ReactNativeBluetooth.stopScan();
   });
 };
 
@@ -152,11 +158,15 @@ const readCharacteristicValue = characteristic => {
         listener = null;
       }
 
-      console.log("We have a characteristic value", detail);
       if ("error" in detail) {
         reject(detail.error);
       } else {
-        resolve(new Buffer(detail, 'base64'));
+        const mappedDetail = {
+          ...detail,
+          base64Value: detail.value,
+          value: new Buffer(detail.value, 'base64'),
+        };
+        resolve(mappedDetail);
       }
     });
 
@@ -210,8 +220,12 @@ const characteristicDidNotify = (characteristic, callback) => {
     if (!idsAreSame(characteristic, notified))
       return;
 
-    // TODO: specify error? Convert value to buffer.
-    callback(notified);
+    const mappedNotified = {
+      ...notified,
+      value: new Buffer(notified.value, 'base64'),
+    };
+
+    callback(mappedNotified);
   };
 
   const listener = EventEmitter.addListener(
@@ -219,7 +233,12 @@ const characteristicDidNotify = (characteristic, callback) => {
     onNotifyCaught
   );
 
-  return unsubscription(listener);
+  ReactNativeBluetooth.subscribeToNotification(characteristic);
+
+  return () => {
+    listener.remove();
+    ReactNativeBluetooth.unsubscribeFromNotification(characteristic);
+  };
 };
 
 

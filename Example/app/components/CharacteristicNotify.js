@@ -42,8 +42,9 @@ const CharacteristicNotify = React.createClass({
   },
 
   onNotificationReceived(detail) {
+    console.log("Received notification", detail);
     this.setState({
-      characteristicStatus: detail.value || "Unable to read value",
+      characteristicStatus: detail.value ? detail.value.toString('hex') : "No value passed in notification",
     });
   },
 
@@ -74,8 +75,10 @@ const CharacteristicNotify = React.createClass({
     return (
       <View style={styles.container}>
         <Button onPress={this.subscribeToNotifyValue} style={styles.buttonStyle}>Notify</Button>
-        <Text>{this.state.characteristicStatus}</Text>
-        <ActivityIndicator animating={this.state.operationInProgress} />
+        <View style={ styles.resultHolder }>
+          <Text>{this.state.characteristicStatus}</Text>
+          <ActivityIndicator animating={this.state.operationInProgress} />
+        </View>
       </View>
     );
   }
@@ -83,15 +86,23 @@ const CharacteristicNotify = React.createClass({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     marginTop: 20,
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingLeft: 20,
     paddingRight: 20,
   },
+  resultHolder: {
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    flexDirection: 'row',
+    marginTop: 20,
+    justifyContent: 'center',
+  },
   buttonStyle: {
     width: 120,
+    marginRight: 10,
   }
 });
 

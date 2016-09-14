@@ -34,6 +34,10 @@ RCT_EXPORT_MODULE();
     return [super init];
 }
 
+-(void)dealloc {
+    [actions cleanUp];
+}
+
 - (NSDictionary<NSString *, NSString *> *)constantsToExport {
     return @{statusChangeEventName: statusChangeEventName,
              scanStartedEventName: scanStartedEventName,
@@ -69,52 +73,70 @@ RCT_EXPORT_MODULE();
 
 typedef NSDictionary<NSString *, id> * BluetoothServiceReturn;
 
+- (void)sendEventIfApplicable:(NSString * const)name body:(BluetoothServiceReturn)body {
+    if (self.bridge == nil) {
+        NSLog(@"Unable to send event, bridge is nil");
+        return;
+    }
+
+    [self sendEventWithName:name body:body];
+}
+
+- (void)sendStringEventIfApplicable:(NSString * const)name body:(NSString *)body {
+    if (self.bridge == nil) {
+        NSLog(@"Unable to send event, bridge is nil");
+        return;
+    }
+
+    [self sendEventWithName:name body:body];
+}
+
 - (void)registerForNativeEvents {
     __block ReactNativeBluetooth *myself = self;
 
     void  (^onChangeState)(NSString *) =
         ^(NSString * result) {
-        [myself sendEventWithName:statusChangeEventName body:result];
+        [myself sendStringEventIfApplicable:statusChangeEventName body:result];
         };
 
     void  (^onServiceDiscovered)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:serviceDiscoveredEventName body:result];
+        [myself sendEventIfApplicable:serviceDiscoveredEventName body:result];
         };
 
     void  (^onCharacteristicRead)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:characteristicReadEventName body:result];
+        [myself sendEventIfApplicable:characteristicReadEventName body:result];
         };
 
     void  (^onCharacteristicWritten)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:characteristicWrittenEventName body:result];
+        [myself sendEventIfApplicable:characteristicWrittenEventName body:result];
         };
 
     void  (^onCharacteristicNotified)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:characteristicNotifiedEventName body:result];
+        [myself sendEventIfApplicable:characteristicNotifiedEventName body:result];
         };
 
     void  (^onCharacteristicDiscovered)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:characteristicDiscoveredEventName body:result];
+        [myself sendEventIfApplicable:characteristicDiscoveredEventName body:result];
         };
 
     void  (^onDeviceConnected)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:deviceConnectedEventName body:result];
+        [myself sendEventIfApplicable:deviceConnectedEventName body:result];
         };
 
     void  (^onDeviceDisconnected)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:deviceDisconnectedEventName body:result];
+        [myself sendEventIfApplicable:deviceDisconnectedEventName body:result];
         };
 
     void  (^onDeviceDiscovered)(BluetoothServiceReturn) =
         ^(BluetoothServiceReturn result) {
-        [myself sendEventWithName:deviceDiscoveredEventName body:result];
+        [myself sendEventIfApplicable:deviceDiscoveredEventName body:result];
         };
 
 
@@ -196,6 +218,14 @@ RCT_EXPORT_METHOD(disconnect:(NSDictionary<NSString *, id> *)params) {
 
 RCT_EXPORT_METHOD(notifyCurrentState) {
     [self sendEventWithName:statusChangeEventName body:actions.bluetoothState];
+}
+
+RCT_EXPORT_METHOD(subscribeToNotification:(NSDictionary<NSString *, id> *)params) {
+    [actions subscribeToNotification:params];
+}
+
+RCT_EXPORT_METHOD(unsubscribeFromNotification:(NSDictionary<NSString *, id> *)params) {
+    [actions unsubscribeFromNotification:params];
 }
 
 @end

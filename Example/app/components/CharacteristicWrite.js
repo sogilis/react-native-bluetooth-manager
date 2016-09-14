@@ -49,8 +49,10 @@ const CharacteristicWrite = React.createClass({
     return (
       <View style={styles.container}>
         <Button onPress={this.writeCharacteristicValue} style={styles.buttonStyle}>Write</Button>
-        <Text>{this.state.characteristicStatus}</Text>
-        <ActivityIndicator animating={this.state.operationInProgress} />
+        <View style={ styles.resultHolder }>
+          <Text>{this.state.characteristicStatus}</Text>
+          <ActivityIndicator animating={this.state.operationInProgress} />
+        </View>
       </View>
     );
   }
@@ -58,12 +60,19 @@ const CharacteristicWrite = React.createClass({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     marginTop: 20,
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingLeft: 20,
     paddingRight: 20,
+  },
+  resultHolder: {
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    flexDirection: 'row',
+    marginTop: 20,
+    justifyContent: 'center',
   },
   buttonStyle: {
     width: 120,

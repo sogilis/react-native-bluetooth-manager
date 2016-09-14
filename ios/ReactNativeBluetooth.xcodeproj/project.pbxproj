@@ -17,6 +17,7 @@
 		3308EDF21D7FF40F00007DE7 /* OutputBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */; };
 		3308EDF31D7FF40F00007DE7 /* PeripheralEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */; };
 		3308EEA91D86B6B900007DE7 /* DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308EEA81D86B6B900007DE7 /* DictionaryExtensions.swift */; };
+		33793CB31D892EF3007A47DB /* PeripheralStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33793CB21D892EF3007A47DB /* PeripheralStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputBuilder.swift; sourceTree = "<group>"; };
 		3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeripheralEventHandler.swift; sourceTree = "<group>"; };
 		3308EEA81D86B6B900007DE7 /* DictionaryExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryExtensions.swift; sourceTree = "<group>"; };
+		33793CB21D892EF3007A47DB /* PeripheralStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeripheralStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				3308EBBB1D79B97000007DE7 /* Info.plist */,
 				3308EDED1D7FF40F00007DE7 /* OutputBuilder.swift */,
 				3308EDEE1D7FF40F00007DE7 /* PeripheralEventHandler.swift */,
+				33793CB21D892EF3007A47DB /* PeripheralStore.swift */,
 			);
 			path = CoreBluetoothSwift;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				3308EDEF1D7FF40F00007DE7 /* Aliases.swift in Sources */,
 				3308EDF11D7FF40F00007DE7 /* CentralEventHandler.swift in Sources */,
 				3308EDF31D7FF40F00007DE7 /* PeripheralEventHandler.swift in Sources */,
+				33793CB31D892EF3007A47DB /* PeripheralStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

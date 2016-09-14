@@ -30,12 +30,17 @@ const CharacteristicRead = React.createClass({
     });
 
     Bluetooth.readCharacteristicValue(this.props.characteristic)
-    .then(c => this.setState({characteristicValue: c.value.toString() || ""}))
+    .then(c => {
+      const toDisplay = c.value.toString('hex');
+      this.setState({characteristicValue: toDisplay});
+    })
     .catch(e => {
       this.setState({
         characteristicValue: "No Value",
       });
-      this.showReadAlert(e);
+
+      const message = "message" in e ? e.message : e;
+      this.showReadAlert(message);
     })
     .finally(() => this.setState({operationInProgress: false}));
   },
@@ -46,8 +51,10 @@ const CharacteristicRead = React.createClass({
     return (
       <View style={styles.container}>
         <Button onPress={this.readCharacteristicValue} style={styles.buttonStyle}>Read</Button>
-        <Text>{this.state.characteristicValue}</Text>
-        <ActivityIndicator animating={this.state.operationInProgress} />
+        <View style={ styles.resultHolder }>
+          <Text>{this.state.characteristicValue}</Text>
+          <ActivityIndicator animating={this.state.operationInProgress} />
+        </View>
       </View>
     );
   }
@@ -55,12 +62,19 @@ const CharacteristicRead = React.createClass({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     marginTop: 20,
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingLeft: 20,
     paddingRight: 20,
+  },
+  resultHolder: {
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderRadius: 5,
+    padding: 10,
+    flexDirection: 'row',
+    marginTop: 20,
+    justifyContent: 'center',
   },
   buttonStyle: {
     width: 120,
