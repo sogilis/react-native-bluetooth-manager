@@ -39,9 +39,15 @@ import java.util.Map;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
+    @Override public String getName() { return MODULE_NAME; }
+
     private DeviceCollection discoveredDevices = new DeviceCollection();
     private GattCollection gattCollection = new GattCollection();
     private EventEmitter eventEmitter;
+
+    // States
+    private static final String STATE_ENABLED = "enabled";
+    private static final String STATE_DISABLED = "disabled";
 
     public ReactNativeBluetoothModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -51,41 +57,18 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
-    @Override public Map<String, Object> getConstants() {
-        final Map<String, Object> constants = new HashMap<>();
-
-        constants.put("StateChanged", STATE_CHANGED);
-        constants.put("ScanStarted", SCAN_STARTED);
-        constants.put("ScanStopped", SCAN_STOPPED);
-        constants.put("DeviceDiscovered", DEVICE_DISCOVERED);
-        constants.put("DeviceConnected", DEVICE_CONNECTED);
-        constants.put("DeviceDisconnected", DEVICE_DISCONNECTED);
-        constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
-        constants.put("ServiceDiscovered", SERVICE_DISCOVERED);
-        constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);
-        constants.put("CharacteristicDiscovered", CHARACTERISTIC_DISCOVERED);
-        constants.put("CharacteristicRead", CHARACTERISTIC_READ);
-        constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
-        constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
-
-        return constants;
+    private void emit(BluetoothEvent event) {
+        eventEmitter.emit(event);
     }
 
-    // States
-    private static final String STATE_ENABLED = "enabled";
-    private static final String STATE_DISABLED = "disabled";
+    private void didEnableBluetooth() {
+        emit(stateChanged(STATE_ENABLED));
+    }
 
-    @Override public String getName() { return MODULE_NAME; }
-
-    @ReactMethod
-    public void notifyCurrentState() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-            emit(stateChanged(STATE_ENABLED));
-        } else {
-            emit(stateChanged(STATE_DISABLED));
-        }
+    private void didDisableBluetooth() {
+        gattCollection.clear();
+        discoveredDevices.clear();
+        emit(stateChanged(STATE_DISABLED));
     }
 
     private BroadcastReceiver stateChangeReceiver = new BroadcastReceiver() {
@@ -103,25 +86,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         }
     };
 
-    private void didEnableBluetooth() {
-        emit(stateChanged(STATE_ENABLED));
-    }
-
-    private void didDisableBluetooth() {
-        gattCollection.clear();
-        discoveredDevices.clear();
-        emit(stateChanged(STATE_DISABLED));
-    }
-
     @ReactMethod
-    public void startScan(final ReadableArray uuidStrings) {
-        new BluetoothAction(SCAN_STARTED, eventEmitter) {
-            @Override
-            public void run() {
-                bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
-                emit(scanStarted());
-            }
-        };
+    public void notifyCurrentState() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
+            emit(stateChanged(STATE_ENABLED));
+        } else {
+            emit(stateChanged(STATE_DISABLED));
+        }
     }
 
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
@@ -135,26 +108,23 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     };
 
     @ReactMethod
+    public void startScan(final ReadableArray uuidStrings) {
+        new BluetoothAction(SCAN_STARTED, eventEmitter) {
+            @Override
+            public void run() {
+                bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
+                emit(scanStarted());
+            }
+        };
+    }
+
+    @ReactMethod
     public void stopScan() {
         new BluetoothAction(SCAN_STOPPED, eventEmitter) {
             @Override
             public void run() {
                 bluetoothAdapter.stopLeScan(scanCallback);
                 emit(scanStopped());
-            }
-        };
-    }
-
-    @ReactMethod
-    public void connect(final ReadableMap deviceMap) {
-        final String deviceId = deviceMap.getString("id");
-
-        new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
-            @Override
-            public void run() throws BluetoothException {
-                BluetoothDevice device = discoveredDevices.findById(deviceId);
-
-                device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
         };
     }
@@ -200,6 +170,20 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             emit(characteristicNotified(gatt.getDevice(), characteristic));
         }
     };
+
+    @ReactMethod
+    public void connect(final ReadableMap deviceMap) {
+        final String deviceId = deviceMap.getString("id");
+
+        new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
+            @Override
+            public void run() throws BluetoothException {
+                BluetoothDevice device = discoveredDevices.findById(deviceId);
+
+                device.connectGatt(getReactApplicationContext(), false, gattCallback);
+            }
+        };
+    }
 
     @ReactMethod
     public void disconnect(final ReadableMap deviceMap) {
@@ -343,7 +327,23 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         };
     }
 
-    private void emit(BluetoothEvent event) {
-        eventEmitter.emit(event);
+    @Override public Map<String, Object> getConstants() {
+        final Map<String, Object> constants = new HashMap<>();
+
+        constants.put("StateChanged", STATE_CHANGED);
+        constants.put("ScanStarted", SCAN_STARTED);
+        constants.put("ScanStopped", SCAN_STOPPED);
+        constants.put("DeviceDiscovered", DEVICE_DISCOVERED);
+        constants.put("DeviceConnected", DEVICE_CONNECTED);
+        constants.put("DeviceDisconnected", DEVICE_DISCONNECTED);
+        constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
+        constants.put("ServiceDiscovered", SERVICE_DISCOVERED);
+        constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);
+        constants.put("CharacteristicDiscovered", CHARACTERISTIC_DISCOVERED);
+        constants.put("CharacteristicRead", CHARACTERISTIC_READ);
+        constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
+        constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
+
+        return constants;
     }
 }
