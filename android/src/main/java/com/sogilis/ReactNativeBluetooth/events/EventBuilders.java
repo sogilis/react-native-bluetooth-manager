@@ -12,6 +12,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.deviceId;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.hasProperty;
 
 public class EventBuilders {
@@ -82,7 +83,7 @@ public class EventBuilders {
     public static ReadableMap deviceMap(BluetoothDevice device) {
         WritableMap map = new WritableNativeMap();
 
-        map.putString("id", device.getAddress());
+        map.putString("id", deviceId(device));
         map.putString("address", device.getAddress());
         map.putString("name", device.getName());
 
@@ -93,7 +94,7 @@ public class EventBuilders {
         WritableMap map = new WritableNativeMap();
 
         map.putString("id", service.getUuid().toString());
-        map.putString("deviceId", device.getAddress());
+        map.putString("deviceId", deviceId(device));
 
         return map;
     }
@@ -106,7 +107,7 @@ public class EventBuilders {
         map.putString("value", encodedValue);
         map.putString("id", characteristic.getUuid().toString());
         map.putString("serviceId", characteristic.getService().getUuid().toString());
-        map.putString("deviceId", device.getAddress());
+        map.putString("deviceId", deviceId(device));
         map.putMap("properties", propertiesMap(characteristic));
 
         return map;
