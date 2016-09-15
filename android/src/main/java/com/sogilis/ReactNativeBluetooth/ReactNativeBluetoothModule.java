@@ -139,7 +139,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 gattCollection.add(gatt);
                 emit(deviceConnected(device));
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                gattCollection.removeByDeviceId(deviceId);
+                gattCollection.close(deviceId);
                 emit(deviceDisconnected(device));
             }
         }
@@ -192,8 +192,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(DEVICE_DISCONNECTED, eventEmitter) {
             @Override
             public void run() {
-                BluetoothGatt gatt = gattCollection.removeByDeviceId(deviceId);
-                gatt.disconnect();
+                gattCollection.close(deviceId);
             }
         };
     }

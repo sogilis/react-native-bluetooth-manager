@@ -14,8 +14,9 @@ public class GattCollection {
         gatts.put(deviceId(gatt.getDevice()), gatt);
     }
 
-    public BluetoothGatt removeByDeviceId(String deviceId) {
-        return gatts.remove(deviceId);
+    public void close(String deviceId) {
+        BluetoothGatt gatt = gatts.remove(deviceId);
+        gatt.close();
     }
 
     public BluetoothGatt findByDeviceId(String deviceId) throws BluetoothException {
@@ -31,6 +32,9 @@ public class GattCollection {
     }
 
     public void clear() {
+        for (BluetoothGatt gatt: gatts.values()) {
+            gatt.close();
+        }
         gatts.clear();
     }
 }
