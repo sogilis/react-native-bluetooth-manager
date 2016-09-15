@@ -43,22 +43,29 @@ const DeviceDetail = React.createClass({
       setConnectionInProgress,
       resetServices,
       applicationError,
+      isConnected,
       device,
     } = this.props;
 
     this.unsubscribe && this.unsubscribe();
 
-    setConnectionInProgress(true);
-    this.endListeningForDisconnection();
 
-    Bluetooth.disconnect(device)
-    .then(() => {
-      setConnectionStatus(false);
-      setConnectionInProgress(false);
+    if (isConnected) {
+      setConnectionInProgress(true);
+      this.endListeningForDisconnection();
+
+      Bluetooth.disconnect(device)
+      .then(() => {
+        setConnectionStatus(false);
+        setConnectionInProgress(false);
+        resetServices();
+      }).catch(e => {
+        applicationError(e.message);
+      });
+    } else {
       resetServices();
-    }).catch(e => {
-      applicationError(e.message);
-    });
+    }
+
   },
 
   listenForDisconnect() {
@@ -127,26 +134,14 @@ const DeviceDetail = React.createClass({
 
   goBack() {
     const {
-      resetServices,
       setDevice,
-      setConnectionStatus,
-      isConnected,
-      device
+      navigator,
     } = this.props;
 
-    this.endListeningForDisconnection();
+    this.disconnect();
 
-    if (isConnected) {
-      Bluetooth.disconnect(device)
-      .then(() => {
-        setConnectionStatus(false);
-      });
-    }
-
-    resetServices();
     setDevice(null);
-
-    this.props.navigator('DeviceDiscovery');
+    navigator('DeviceDiscovery');
   },
 
   renderStatus() {

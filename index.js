@@ -29,6 +29,8 @@ const DefaultScanOptions = {
   uuids: [],
 };
 
+let scanInProgress = false;
+
 const Scan = {
   stopAfter: (timeout) => {
     return new Promise(resolve => {
@@ -42,6 +44,7 @@ const Scan = {
   },
 };
 
+
 const startScan = (customOptions = {}) => {
   return new Promise((resolve, reject) => {
     let options = Object.assign({}, DefaultScanOptions, customOptions);
@@ -52,6 +55,8 @@ const startScan = (customOptions = {}) => {
       if (listener) {
         listener.remove();
       }
+
+      scanInProgress = true;
 
       if ("error" in detail) {
         reject(new Error(detail.error));
@@ -66,12 +71,18 @@ const startScan = (customOptions = {}) => {
 
 const stopScan = () => {
   return new Promise((resolve, reject) => {
+    if (!scanInProgress) {
+      resolve();
+      return;
+    }
+
     let listener;
 
     listener = EventEmitter.addListener(ReactNativeBluetooth.ScanStopped, detail => {
       if (listener) {
         listener.remove();
       }
+      scanInProgress = false;
 
       if ("error" in detail) {
         reject(new Error(detail.error));

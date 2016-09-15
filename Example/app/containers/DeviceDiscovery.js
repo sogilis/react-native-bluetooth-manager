@@ -35,10 +35,10 @@ const DeviceDiscovery = React.createClass({
     const { deviceDiscovered, discoveryStatusChange, applicationError, resetDevices } = this.props;
 
     resetDevices();
+    discoveryStatusChange("Connecting");
 
     this.unsubscribe = Bluetooth.didDiscoverDevice((device) => {
       deviceDiscovered(device);
-      discoveryStatusChange("Connecting");
     });
 
     this.scanStoppedUnsubscribe = Bluetooth.scanDidStop(() => {
@@ -46,7 +46,7 @@ const DeviceDiscovery = React.createClass({
     });
 
     Bluetooth.startScan(ScanOptions)
-      .then(scan => scan.stopAfter(5000))
+      .then(scan => scan.stopAfter(15000))
       .catch(error => applicationError(error.message));
   },
 
