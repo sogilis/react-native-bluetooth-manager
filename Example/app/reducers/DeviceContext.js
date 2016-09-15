@@ -16,7 +16,7 @@ export default function deviceContext(state = initialState, action) {
     case types.SETSERVICE:
       return {
         ...state,
-        device: action.service,
+        service: action.service,
       };
     case types.SETCHARACTERISTIC:
       return {

@@ -122,6 +122,7 @@ public class BluetoothActions: NSObject {
             let characteristicIds = characteristics?.map { CBUUID(string: $0) }
             requiredService.peripheral.discoverCharacteristics(characteristicIds,
                 forService: requiredService)
+            onDiscoverStarted(BluetoothServiceReturn())
         })
     }
 

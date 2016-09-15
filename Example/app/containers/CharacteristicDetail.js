@@ -1,7 +1,11 @@
 import React, { PropTypes } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
+
 import TopBar from '../components/TopBar';
-import { getAppState, setAppState } from '../lib/GlobalState';
+
+import { applicationError } from '../actions/GlobalActions';
+import { setCharacteristic } from '../actions/DeviceContextActions';
 
 import CharacteristicRead from '../components/CharacteristicRead';
 import CharacteristicWrite from '../components/CharacteristicWrite';
@@ -10,41 +14,20 @@ import CharacteristicNotify from '../components/CharacteristicNotify';
 const CharacteristicDetail = React.createClass({
   propTypes: {
     navigator: PropTypes.func.isRequired,
-  },
-
-  getInitialState() {
-    const { selectedCharacteristic } = getAppState();
-    this.unsubscribe = () => {};
-
-    return {
-      characteristic: selectedCharacteristic,
-      error: null,
-    };
-  },
-
-  componentWillMount() {
-  },
-
-  componentWillUnmount() {
-    this.unsubscribe();
+    setCharacteristic: PropTypes.func.isRequired,
+    applicationError: PropTypes.func.isRequired,
+    characteristic: PropTypes.object.isRequired,
   },
 
   goBack() {
-    setAppState({
-      selectedCharacteristic: null,
-    });
+    const { setCharacteristic, navigator } = this.props;
 
-    this.props.navigator('ServiceDetail');
-  },
-
-  renderError() {
-    if (this.state.error == null) return null;
-
-    return (<Text style={styles.errorText}>{this.state.error}</Text>);
+    setCharacteristic(null);
+    navigator('ServiceDetail');
   },
 
   formatProperties() {
-    const characteristic = this.state.characteristic;
+    const { characteristic } = this.props;
 
     if (!characteristic.properties)
       return "";
@@ -56,18 +39,19 @@ const CharacteristicDetail = React.createClass({
   },
 
   render() {
+    const { characteristic } = this.props;
+
     return (
       <View style={styles.container}>
         <TopBar
           headerText={"Characteristic Detail"}
           backAction={this.goBack} />
-        {this.renderError()}
         <View style={styles.detailContainer}>
-          <Text style={styles.detailText}>UUID: {this.state.characteristic.id}</Text>
+          <Text style={styles.detailText}>UUID: {characteristic.id}</Text>
           <Text style={styles.detailText}>Properties: {this.formatProperties()}</Text>
-          <CharacteristicWrite characteristic={this.state.characteristic} />
-          <CharacteristicRead characteristic={this.state.characteristic} />
-          <CharacteristicNotify characteristic={this.state.characteristic} />
+          <CharacteristicWrite characteristic={characteristic} />
+          <CharacteristicRead characteristic={characteristic} />
+          <CharacteristicNotify characteristic={characteristic} />
         </View>
       </View>
     );
@@ -75,12 +59,6 @@ const CharacteristicDetail = React.createClass({
 });
 
 const styles = StyleSheet.create({
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 5,
-    padding: 5,
-  },
   detailText: {
     fontSize: 16,
     color: 'grey',
@@ -95,4 +73,23 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CharacteristicDetail;
+const mapStateToProps = state => {
+  const { characteristic } = state.deviceContext;
+
+  return {
+    characteristic: characteristic,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    applicationError: message => {
+      dispatch(applicationError(message));
+    },
+    setCharacteristic: characteristic => {
+      dispatch(setCharacteristic(characteristic));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(CharacteristicDetail);

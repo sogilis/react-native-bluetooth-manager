@@ -48,7 +48,7 @@ const DeviceDetail = React.createClass({
     } = this.props;
 
     this.unsubscribe && this.unsubscribe();
-
+    this.unsubscribe = null;
 
     if (isConnected) {
       setConnectionInProgress(true);
@@ -120,10 +120,10 @@ const DeviceDetail = React.createClass({
   },
 
   serviceSelected(service) {
-    const { setService } = this.props;
+    const { setService, navigator } = this.props;
     setService(service);
 
-    this.props.navigator('ServiceDetail');
+    navigator('ServiceDetail');
   },
 
   endListeningForDisconnection() {

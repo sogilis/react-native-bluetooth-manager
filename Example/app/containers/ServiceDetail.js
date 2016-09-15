@@ -1,78 +1,76 @@
 import React, { PropTypes } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
+
 import TopBar from '../components/TopBar';
 import CharacteristicList from '../components/CharacteristicList';
 import Bluetooth from 'react-native-bluetooth';
-import { getAppState, setAppState } from '../lib/GlobalState';
+
+import { applicationError } from '../actions/GlobalActions';
+import { setCharacteristic, setService } from '../actions/DeviceContextActions';
+import { characteristicDiscovered, resetCharacteristics } from '../actions/ServiceActions';
 
 const ServiceDetail = React.createClass({
   propTypes: {
     navigator: PropTypes.func.isRequired,
-  },
-
-  getInitialState() {
-    const { selectedService } = getAppState();
-    this.unsubscribe = () => {};
-
-    return {
-      service: selectedService,
-      error: null,
-      characteristics: [],
-    };
+    applicationError: PropTypes.func.isRequired,
+    setService: PropTypes.func.isRequired,
+    setCharacteristic: PropTypes.func.isRequired,
+    resetCharacteristics: PropTypes.func.isRequired,
+    characteristicDiscovered: PropTypes.func.isRequired,
+    service: PropTypes.object.isRequired,
+    characteristics: PropTypes.array.isRequired,
   },
 
   componentWillMount() {
-    Bluetooth.discoverCharacteristics(this.state.service, null, characteristic => {
-      this.setState({
-        characteristics: [...this.state.characteristics, characteristic]
-      });
+    const { service, characteristicDiscovered, applicationError } = this.props;
+    this.unsubscribe = [];
+
+    Bluetooth.discoverCharacteristics(service, null, characteristic => {
+      characteristicDiscovered(characteristic);
     })
-    .then(unsubscribe => this.unsubscribe = unsubscribe)
+    .then(unsubscribe => {
+      this.unsubscribe = [...this.unsubscribe, unsubscribe];
+    })
     .catch(error => {
-      this.setState({
-        error: error,
-      });
+      applicationError(error.message);
     });
   },
 
   componentWillUnmount() {
-    this.unsubscribe();
+      this.unsubscribe.forEach(u => u());
   },
 
   characteristicSelected(characteristic) {
-    setAppState({
-      selectedCharacteristic: characteristic,
-    });
+    const { setCharacteristic, navigator, resetCharacteristics } = this.props;
 
-    this.props.navigator('CharacteristicDetail');
+    resetCharacteristics();
+    setCharacteristic(characteristic);
+
+    navigator('CharacteristicDetail');
   },
 
   goBack() {
-    setAppState({
-      selectedService: null,
-      characteristics: [],
-    });
+    const { setService, resetCharacteristics, navigator } = this.props;
 
-    this.props.navigator('DeviceDetail');
-  },
+    setService(null);
+    resetCharacteristics();
 
-  renderError() {
-    if (this.state.error == null) return null;
-
-    return (<Text style={styles.errorText}>{this.state.error}</Text>);
+    navigator('DeviceDetail');
   },
 
   render() {
+    const { characteristics } = this.props;
+
     return (
       <View style={styles.container}>
         <TopBar
           headerText={"Service Detail"}
           backAction={this.goBack} />
-        {this.renderError()}
         <Text style={styles.labelText}>Characteristics</Text>
         <View style={styles.listContainer}>
           <CharacteristicList
-            characteristics={this.state.characteristics}
+            characteristics={characteristics}
             selectCharacteristic={this.characteristicSelected} />
         </View>
       </View>
@@ -81,12 +79,6 @@ const ServiceDetail = React.createClass({
 });
 
 const styles = StyleSheet.create({
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 5,
-    padding: 5,
-  },
   labelText: {
     fontSize: 20,
     color: 'grey',
@@ -100,4 +92,33 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ServiceDetail;
+const mapStateToProps = state => {
+  const { service } = state.deviceContext;
+
+  return {
+    ...state.service,
+    service: service,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    applicationError: message => {
+      dispatch(applicationError(message));
+    },
+    setService: service => {
+      dispatch(setService(service));
+    },
+    setCharacteristic: characteristic => {
+      dispatch(setCharacteristic(characteristic));
+    },
+    characteristicDiscovered: characteristic => {
+      dispatch(characteristicDiscovered(characteristic));
+    },
+    resetCharacteristics: () => {
+      dispatch(resetCharacteristics());
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(ServiceDetail);
