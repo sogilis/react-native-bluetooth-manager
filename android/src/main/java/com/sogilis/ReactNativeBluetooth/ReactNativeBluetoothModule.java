@@ -109,6 +109,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private void didDisableBluetooth() {
         gattCollection.clear();
+        discoveredDevices.clear();
         emit(stateChanged(STATE_DISABLED));
     }
 
