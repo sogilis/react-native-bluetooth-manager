@@ -3,6 +3,7 @@ package com.sogilis.ReactNativeBluetooth.domain;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 
 import java.util.UUID;
@@ -41,5 +42,16 @@ public class BluetoothHelpers {
 
     public static boolean hasProperty(BluetoothGattCharacteristic characteristic, int property) {
         return (characteristic.getProperties() & property) != 0;
+    }
+
+    public static final UUID CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    public static BluetoothGattDescriptor configDescriptor(BluetoothGattCharacteristic characteristic) {
+        return characteristic.getDescriptor(CONFIG_DESCRIPTOR_UUID);
+    }
+
+    public static void enableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        gatt.setCharacteristicNotification(characteristic, true);
+        configDescriptor(characteristic).setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
     }
 }
