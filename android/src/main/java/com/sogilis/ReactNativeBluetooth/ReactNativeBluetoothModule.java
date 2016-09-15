@@ -24,6 +24,7 @@ import com.sogilis.ReactNativeBluetooth.domain.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.BluetoothEvent;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.disableNotification;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.enableNotification;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
@@ -322,6 +323,24 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
 
                 enableNotification(gatt, characteristic);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void unsubscribeFromNotification(final ReadableMap characteristicMap) {
+        final String deviceId = characteristicMap.getString("deviceId");
+        final String serviceId = characteristicMap.getString("serviceId");
+        final String characteristicId = characteristicMap.getString("id");
+
+        new BluetoothAction(CHARACTERISTIC_NOTIFIED, eventEmitter) {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
+                BluetoothGatt gatt = gattCollection.findById(deviceId);
+                BluetoothGattService service = findServiceById(gatt, serviceId);
+                BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
+
+                disableNotification(gatt, characteristic);
             }
         };
     }
