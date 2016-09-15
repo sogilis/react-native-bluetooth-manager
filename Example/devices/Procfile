@@ -1,1 +1,1 @@
-echo: node node_modules/bleno/examples/echo/main.js
+clock: node clock.js
