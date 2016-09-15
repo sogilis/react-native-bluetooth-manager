@@ -30,15 +30,22 @@ const DeviceDiscovery = React.createClass({
       });
     });
 
+    this.scanStoppedUnsubscribe = Bluetooth.scanDidStop(() => {
+      this.setState({
+        status: "Done",
+      });
+    });
+
     Bluetooth.startScan(ScanOptions)
-      .then(scan => scan.stopAfter(15000))
-      .then(() => this.setState({status: "Done"}))
+      .then(scan => scan.stopAfter(5000))
       .catch(error => this.setState({"error": error.message}));
   },
 
   componentWillUnmount() {
-    Bluetooth.stopScan();
+    this.scanStoppedUnsubscribe();
     this.unsubscribe();
+
+    Bluetooth.stopScan();
   },
 
   scanInProgress() {

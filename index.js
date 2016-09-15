@@ -84,6 +84,19 @@ const stopScan = () => {
   });
 };
 
+const scanDidStop = (callback) => {
+  const scanStoppedCaught = detail => {
+    callback(detail);
+  };
+
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.ScanStopped,
+    scanStoppedCaught
+  );
+
+  return unsubscription(listener);
+};
+
 const discoverServices = (device, serviceIds, callback) => {
   return new Promise((resolve, reject) => {
     const listener = EventEmitter.addListener(
@@ -257,6 +270,22 @@ const deviceDidDisconnect = (device, callback) => {
   return unsubscription(listener);
 };
 
+const deviceDidConnect = (device, callback) => {
+  const connectionCaught = detail => {
+    if (!idsAreSame(device, detail))
+      return;
+
+    callback(detail);
+  };
+
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.DeviceConnected,
+    connectionCaught
+  );
+
+  return unsubscription(listener);
+};
+
 
 const connect = (device) => {
   return new Promise((resolve, reject) => {
@@ -325,4 +354,6 @@ export default {
   connect,
   disconnect,
   deviceDidDisconnect,
+  deviceDidConnect,
+  scanDidStop,
 };
