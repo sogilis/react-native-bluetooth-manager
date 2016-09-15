@@ -100,7 +100,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (! discoveredDevices.includes(device)) {
+            if (! discoveredDevices.contains(device)) {
                 discoveredDevices.add(device);
                 emit(deviceDiscovered(device));
             }
@@ -178,7 +178,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(DEVICE_CONNECTED, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothDevice device = discoveredDevices.findById(deviceId);
+                BluetoothDevice device = discoveredDevices.get(deviceId);
 
                 device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
@@ -204,7 +204,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(SERVICE_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothGatt gatt = gattCollection.findByDeviceId(deviceId);
+                BluetoothGatt gatt = gattCollection.get(deviceId);
 
                 gatt.discoverServices();
                 emit(serviceDiscoveryStarted(gatt.getDevice()));
@@ -220,8 +220,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(CHARACTERISTIC_DISCOVERY_STARTED, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothDevice device = discoveredDevices.findById(deviceId);
-                BluetoothGatt gatt = gattCollection.findByDevice(device);
+                BluetoothDevice device = discoveredDevices.get(deviceId);
+                BluetoothGatt gatt = gattCollection.get(device);
                 BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 emit(characteristicDiscoveryStarted(device, service));
@@ -259,7 +259,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(CHARACTERISTIC_READ, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothGatt gatt = gattCollection.findByDeviceId(deviceId);
+                BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt, serviceId, characteristicId);
 
                 if (!gatt.readCharacteristic(characteristic)) {
@@ -279,7 +279,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(CHARACTERISTIC_WRITTEN, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothGatt gatt = gattCollection.findByDeviceId(deviceId);
+                BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt, serviceId, characteristicId);
 
                 characteristic.setValue(Base64.decode(base64Value, Base64.DEFAULT));
@@ -301,7 +301,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(CHARACTERISTIC_NOTIFIED, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothGatt gatt = gattCollection.findByDeviceId(deviceId);
+                BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt, serviceId, characteristicId);
 
                 enableNotification(gatt, characteristic);
@@ -318,7 +318,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(CHARACTERISTIC_NOTIFIED, eventEmitter) {
             @Override
             public void run() throws BluetoothException {
-                BluetoothGatt gatt = gattCollection.findByDeviceId(deviceId);
+                BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt, serviceId, characteristicId);
 
                 disableNotification(gatt, characteristic);

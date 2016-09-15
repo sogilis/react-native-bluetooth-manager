@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DeviceCollection {
     private ConcurrentHashMap<String, BluetoothDevice> devices = new ConcurrentHashMap<>();
 
-    public boolean includes(BluetoothDevice device) {
+    public boolean contains(BluetoothDevice device) {
         return devices.containsKey(deviceId(device));
     }
 
@@ -21,7 +21,7 @@ public class DeviceCollection {
         devices.clear();
     }
 
-    public BluetoothDevice findById(String id) throws BluetoothException {
+    public BluetoothDevice get(String id) throws BluetoothException {
         if (devices.containsKey(id)) {
             return devices.get(id);
         } else {

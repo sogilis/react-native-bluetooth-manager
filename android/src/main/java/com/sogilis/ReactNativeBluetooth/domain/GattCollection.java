@@ -19,7 +19,7 @@ public class GattCollection {
         gatt.close();
     }
 
-    public BluetoothGatt findByDeviceId(String deviceId) throws BluetoothException {
+    public BluetoothGatt get(String deviceId) throws BluetoothException {
         if (gatts.containsKey(deviceId)) {
             return gatts.get(deviceId);
         } else {
@@ -27,8 +27,8 @@ public class GattCollection {
         }
     }
 
-    public BluetoothGatt findByDevice(BluetoothDevice device) throws BluetoothException {
-        return findByDeviceId(deviceId(device));
+    public BluetoothGatt get(BluetoothDevice device) throws BluetoothException {
+        return get(deviceId(device));
     }
 
     public void clear() {
