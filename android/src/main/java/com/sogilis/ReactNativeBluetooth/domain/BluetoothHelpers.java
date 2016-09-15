@@ -52,6 +52,8 @@ public class BluetoothHelpers {
 
     public static void enableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         gatt.setCharacteristicNotification(characteristic, true);
-        configDescriptor(characteristic).setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        gatt.writeDescriptor(descriptor);
     }
 }
