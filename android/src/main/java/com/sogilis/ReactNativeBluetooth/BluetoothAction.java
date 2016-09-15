@@ -9,7 +9,7 @@ public abstract class BluetoothAction {
     private String eventName;
     private EventEmitter eventEmitter;
 
-    public abstract void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException;
+    public abstract void run(BluetoothAdapter bluetoothAdapter) throws BluetoothException;
 
     public BluetoothAction(String eventName, EventEmitter eventEmitter) {
         this.eventName = eventName;
@@ -26,7 +26,7 @@ public abstract class BluetoothAction {
         }
 
         try {
-            this.withBluetooth(bluetoothAdapter);
+            this.run(bluetoothAdapter);
         }
         catch(BluetoothException e) {
             emitError(e.getMessage());
