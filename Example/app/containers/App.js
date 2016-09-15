@@ -1,36 +1,31 @@
 import React from 'react';
-import { Text } from 'react-native';
 import Routes from '../lib/Routes';
-import Bluetooth from 'react-native-bluetooth';
+import { createStore, applyMiddleware, combineReducers, compose, } from 'redux';
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
+import * as reducers from '../reducers';
 
-const App = React.createClass({
-  getInitialState() {
-    return {
-      bluetoothState: "unknown",
-    };
-  },
+const reducer = combineReducers(reducers);
 
-  componentWillMount() {
-    this.unsubscribe = Bluetooth.didChangeState(newState => {
-      this.setState({bluetoothState: newState});
-    });
-  },
+const store = createStore(
+  reducer, {},
+  compose(
+    applyMiddleware(thunk)
+  )
+);
 
-  componentWillUnmount() {
-    this.unsubscribe();
-  },
+if (module.hot) {
+  module.hot.accept('../reducers', () => {
+    const nextRootReducer = require('../reducers/index');
+    const reducer = combineReducers(nextRootReducer);
+    store.replaceReducer(reducer);
+  });
+}
 
-  render() {
-    if (this.state.bluetoothState == "enabled") {
-      return (
-        <Routes />
-      );
-    } else {
-      return (
-        <Text>Bluetooth state: {this.state.bluetoothState}</Text>
-      );
-    }
-  },
-});
+const App = () => (
+  <Provider store={store}>
+    <Routes />
+  </Provider>
+);
 
 export default App;

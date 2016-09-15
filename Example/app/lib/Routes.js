@@ -1,32 +1,99 @@
-import React from 'react';
-import { Navigator } from 'react-native';
+import React, { PropTypes } from 'react';
+import { Navigator, Alert } from 'react-native';
+import Bluetooth from 'react-native-bluetooth';
+import { connect } from 'react-redux';
+
 import DeviceDiscovery from '../containers/DeviceDiscovery';
 import DeviceDetail from '../containers/DeviceDetail';
 import ServiceDetail from '../containers/ServiceDetail';
 import CharacteristicDetail from '../containers/CharacteristicDetail';
+import NoBluetooth from '../components/NoBluetooth';
 
-const renderScene = (route, navigator) => {
-  const navigate = routeName => navigator.replace( { name: routeName } );
+import { resetApplicationError } from '../actions/GlobalActions';
 
-  if (route.name == 'DeviceDiscovery') {
-    return <DeviceDiscovery navigator={navigate} />;
+const Routes = React.createClass({
+  propTypes: {
+    error: PropTypes.string,
+    resetError: PropTypes.func.isRequired,
+  },
+
+  getInitialState() {
+    return {
+      bluetoothState: "enabled",
+    };
+  },
+
+  renderScene(route, navigator) {
+    const navigate = routeName => navigator.replace( { name: routeName } );
+
+    if (this.state.bluetoothState != 'enabled') {
+      return <NoBluetooth />;
+    }
+    if (route.name == 'DeviceDiscovery') {
+      return <DeviceDiscovery navigator={navigate} />;
+    }
+    if (route.name == 'DeviceDetail') {
+      return <DeviceDetail navigator={navigate} />;
+    }
+    if (route.name == 'ServiceDetail') {
+      return <ServiceDetail navigator={navigate} />;
+    }
+    if (route.name == 'CharacteristicDetail') {
+      return <CharacteristicDetail navigator={navigate} />;
+    }
+
+    console.assert(false, "Invalid route name requested.");
+  },
+
+  componentWillReceiveProps(nextProps) {
+    const { error } = nextProps;
+    const { resetError } = this.props;
+
+    if (error != null) {
+      Alert.alert(
+        'Application error',
+        error
+      );
+
+      resetError();
+    }
+  },
+
+  componentWillMount() {
+    this.unsubscribe = Bluetooth.didChangeState(newState => {
+      this.setState({bluetoothState: newState});
+    });
+  },
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  },
+
+  render() {
+    return (
+      <Navigator
+        initialRoute={{ name: 'DeviceDiscovery' }}
+        renderScene={ this.renderScene } />
+    );
   }
-  if (route.name == 'DeviceDetail') {
-    return <DeviceDetail navigator={navigate} />;
-  }
-  if (route.name == 'ServiceDetail') {
-    return <ServiceDetail navigator={navigate} />;
-  }
-  if (route.name == 'CharacteristicDetail') {
-    return <CharacteristicDetail navigator={navigate} />;
-  }
+});
+
+
+const mapStateToProps = state => {
+  const { error } = state.global;
+
+  return {
+    error: error,
+  };
 };
 
-const Routes = () => (
-  <Navigator
-    initialRoute={{ name: 'DeviceDiscovery' }}
-    renderScene={ renderScene } />
-);
+const mapDispatchToProps = dispatch => {
+  return {
+    resetError: () => {
+      dispatch(resetApplicationError());
+    }
+  };
+};
 
-export default Routes;
+export default connect(mapStateToProps, mapDispatchToProps, null)(Routes);
 

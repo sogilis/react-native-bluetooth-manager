@@ -1,21 +1,27 @@
 import React, { PropTypes } from 'react';
 import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
+import { connect } from 'react-redux';
 import TopBar from '../components/TopBar';
 import ServiceList from '../components/ServiceList';
 import Bluetooth from 'react-native-bluetooth';
 import { getAppState, setAppState } from '../lib/GlobalState';
+import { applicationError } from '../actions/GlobalActions';
 
 const DeviceDetail = React.createClass({
   propTypes: {
     navigator: PropTypes.func.isRequired,
+    applicationError: PropTypes.func.isRequired,
+    device: PropTypes.object.isRequired,
   },
 
   getInitialState() {
-    const { selectedDevice, isConnected, services } = getAppState();
+    const { isConnected, services } = getAppState();
+    const { device } = this.props;
+
     this.unsubscribe = () => {};
 
     return {
-      device: selectedDevice,
+      device: device,
       error: null,
       services: services || [],
       isConnected: isConnected || false,
@@ -67,6 +73,8 @@ const DeviceDetail = React.createClass({
       return;
     }
 
+    const { applicationError } = this.props;
+
     setAppState({ isConnected: false });
 
     this.setState({
@@ -110,11 +118,7 @@ const DeviceDetail = React.createClass({
       });
     })
     .then(unsubscribe => this.unsubscribe = unsubscribe)
-    .catch(error => {
-      this.setState({
-        error: error.message,
-      });
-    });
+    .catch(error => applicationError(error.message));
   },
 
   serviceSelected(service) {
@@ -144,12 +148,6 @@ const DeviceDetail = React.createClass({
     this.props.navigator('DeviceDiscovery');
   },
 
-  renderError() {
-    if (this.state.error == null) return null;
-
-    return (<Text style={styles.errorText}>{this.state.error}</Text>);
-  },
-
   renderStatus() {
     if (this.state.connectionInProgress) {
       return <ActivityIndicator animating={true} />;
@@ -176,7 +174,6 @@ const DeviceDetail = React.createClass({
         <TopBar
           headerText={"Device - " + this.state.device.name}
           backAction={ this.goBack } />
-        {this.renderError()}
         {this.renderStatus()}
         {this.renderServiceLabel()}
         <View style={styles.listContainer}>
@@ -188,12 +185,6 @@ const DeviceDetail = React.createClass({
 });
 
 const styles = StyleSheet.create({
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 5,
-    padding: 5,
-  },
   statusText: {
     fontSize: 20,
     color: '#00AFEE',
@@ -217,4 +208,19 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DeviceDetail;
+const mapStateToProps = state => {
+  const { device } = state.deviceContext;
+  return {
+    device: device,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    applicationError: (message) => {
+      dispatch(applicationError(message));
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(DeviceDetail);

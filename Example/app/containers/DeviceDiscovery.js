@@ -1,9 +1,19 @@
 import React, { PropTypes } from 'react';
-import { Text, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { connect } from 'react-redux';
+
 import DeviceList from '../components/DeviceList';
 import TopBar from '../components/TopBar';
 import Bluetooth from 'react-native-bluetooth';
-import { setAppState } from '../lib/GlobalState';
+
+import {
+  deviceDiscovered,
+  discoveryStatusChange,
+  resetDevices,
+} from '../actions/DiscoveryActions';
+
+import { applicationError } from '../actions/GlobalActions';
+import { setDevice } from '../actions/DeviceContextActions';
 
 const ScanOptions = {
   uuids: null,
@@ -12,33 +22,32 @@ const ScanOptions = {
 const DeviceDiscovery = React.createClass({
   propTypes: {
     navigator: PropTypes.func.isRequired,
-  },
-
-  getInitialState() {
-    return {
-      devices: [],
-      error: null,
-      status: "",
-    };
+    deviceDiscovered: PropTypes.func.isRequired,
+    discoveryStatusChange: PropTypes.func.isRequired,
+    resetDevices: PropTypes.func.isRequired,
+    applicationError: PropTypes.func.isRequired,
+    discoveryStatus: PropTypes.string.isRequired,
+    devicesDiscovered: PropTypes.array.isRequired,
+    setDevice: PropTypes.func.isRequired,
   },
 
   componentWillMount() {
+    const { deviceDiscovered, discoveryStatusChange, applicationError, resetDevices } = this.props;
+
+    resetDevices();
+
     this.unsubscribe = Bluetooth.didDiscoverDevice((device) => {
-      this.setState({
-        devices: [...this.state.devices, device],
-        status: "Connecting",
-      });
+      deviceDiscovered(device);
+      discoveryStatusChange("Connecting");
     });
 
     this.scanStoppedUnsubscribe = Bluetooth.scanDidStop(() => {
-      this.setState({
-        status: "Done",
-      });
+      discoveryStatusChange("Done");
     });
 
     Bluetooth.startScan(ScanOptions)
       .then(scan => scan.stopAfter(5000))
-      .catch(error => this.setState({"error": error.message}));
+      .catch(error => applicationError(error.message));
   },
 
   componentWillUnmount() {
@@ -49,31 +58,26 @@ const DeviceDiscovery = React.createClass({
   },
 
   scanInProgress() {
-    return (this.state.error == null || this.state.error == "" ) && this.state.status != "Done";
+    return this.props.discoveryStatus != "Done";
   },
 
   deviceSelected(device) {
-    setAppState({
-      selectedDevice: device,
-    });
+    const { setDevice, navigator } = this.props;
 
-    this.props.navigator('DeviceDetail');
-  },
+    setDevice(device);
 
-  renderError() {
-    if (this.state.error == null) return null;
-
-    return (<Text style={styles.errorText}>{this.state.error}</Text>);
+    navigator('DeviceDetail');
   },
 
   render() {
+    const { devicesDiscovered } = this.props;
+
     return (
       <View style={styles.container}>
         <TopBar headerText="Device List" />
-        {this.renderError()}
         <View style={styles.deviceListContainer}>
           <ActivityIndicator animating={this.scanInProgress()} />
-          <DeviceList devices={this.state.devices} selectDevice={this.deviceSelected} />
+          <DeviceList devices={devicesDiscovered} selectDevice={this.deviceSelected} />
         </View>
       </View>
     );
@@ -81,12 +85,6 @@ const DeviceDiscovery = React.createClass({
 });
 
 var styles = StyleSheet.create({
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 5,
-    padding: 5,
-  },
   container: {
     flex: 1,
   },
@@ -95,4 +93,28 @@ var styles = StyleSheet.create({
   },
 });
 
-export default DeviceDiscovery;
+const mapStateToProps = state => {
+  return state.discovery;
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    deviceDiscovered: device => {
+      dispatch(deviceDiscovered(device));
+    },
+    discoveryStatusChange: status => {
+      dispatch(discoveryStatusChange(status));
+    },
+    resetDevices: () => {
+      dispatch(resetDevices());
+    },
+    setDevice: device => {
+      dispatch(setDevice(device));
+    },
+    applicationError: (message) => {
+      dispatch(applicationError(message));
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps, null)(DeviceDiscovery);
