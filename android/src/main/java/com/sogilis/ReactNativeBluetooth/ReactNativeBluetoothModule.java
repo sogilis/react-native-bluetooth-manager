@@ -308,6 +308,24 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         };
     }
 
+    @ReactMethod
+    public void subscribeToNotification(final ReadableMap characteristicMap) {
+        final String deviceId = characteristicMap.getString("deviceId");
+        final String serviceId = characteristicMap.getString("serviceId");
+        final String characteristicId = characteristicMap.getString("id");
+
+        new BluetoothAction(CHARACTERISTIC_NOTIFIED, eventEmitter) {
+            @Override
+            public void withBluetooth(BluetoothAdapter bluetoothAdapter) throws BluetoothException {
+                BluetoothGatt gatt = gattCollection.findById(deviceId);
+                BluetoothGattService service = findServiceById(gatt, serviceId);
+                BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt.getDevice(), service, characteristicId);
+
+                enableNotification(gatt, characteristic);
+            }
+        };
+    }
+
     private void emit(BluetoothEvent event) {
         eventEmitter.emit(event);
     }
