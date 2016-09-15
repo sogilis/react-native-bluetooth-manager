@@ -6,3 +6,17 @@ export function setDevice(device) {
     device: device,
   };
 }
+
+export function setService(service) {
+  return {
+    type: types.SETSERVICE,
+    service: service,
+  };
+}
+
+export function setCharacteristic(characteristic) {
+  return {
+    type: types.SETCHARACTERISTIC,
+    characteristic: characteristic,
+  };
+}

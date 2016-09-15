@@ -2,6 +2,8 @@ import * as types from '../actions/DeviceContextActionTypes';
 
 const initialState = {
   device: null,
+  service: null,
+  characteristic: null,
 };
 
 export default function deviceContext(state = initialState, action) {
@@ -10,6 +12,16 @@ export default function deviceContext(state = initialState, action) {
       return {
         ...state,
         device: action.device,
+      };
+    case types.SETSERVICE:
+      return {
+        ...state,
+        device: action.service,
+      };
+    case types.SETCHARACTERISTIC:
+      return {
+        ...state,
+        characteristic: action.characteristic,
       };
     default:
       return state;

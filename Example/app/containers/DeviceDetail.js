@@ -1,120 +1,105 @@
 import React, { PropTypes } from 'react';
-import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
+import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import TopBar from '../components/TopBar';
 import ServiceList from '../components/ServiceList';
 import Bluetooth from 'react-native-bluetooth';
-import { getAppState, setAppState } from '../lib/GlobalState';
+
 import { applicationError } from '../actions/GlobalActions';
+import { setService, setDevice } from '../actions/DeviceContextActions';
+import {
+  serviceDiscovered,
+  storeDisconnectionHandler,
+  setConnectionStatus,
+  setConnectionInProgress,
+  resetServices
+} from '../actions/DeviceActions';
 
 const DeviceDetail = React.createClass({
   propTypes: {
     navigator: PropTypes.func.isRequired,
     applicationError: PropTypes.func.isRequired,
+    setConnectionStatus: PropTypes.func.isRequired,
+    setConnectionInProgress: PropTypes.func.isRequired,
+    storeDisconnectionHandler: PropTypes.func.isRequired,
+    setService: PropTypes.func.isRequired,
+    setDevice: PropTypes.func.isRequired,
+    resetServices: PropTypes.func.isRequired,
+    disconnectionHandler: PropTypes.func.isRequired,
+    isConnected: PropTypes.bool.isRequired,
+    connectionInProgress: PropTypes.bool.isRequired,
     device: PropTypes.object.isRequired,
-  },
-
-  getInitialState() {
-    const { isConnected, services } = getAppState();
-    const { device } = this.props;
-
-    this.unsubscribe = () => {};
-
-    return {
-      device: device,
-      error: null,
-      services: services || [],
-      isConnected: isConnected || false,
-      connectionInProgress: false,
-    };
-  },
-
-  componentWillMount() {
+    services: PropTypes.array.isRequired,
   },
 
   componentWillUnmount() {
-    this.unsubscribe();
+    this.unsubscribe && this.unsubscribe();
   },
 
   disconnect() {
-    this.setState({
-      isConnected: false,
-      connectionInProgress: true,
-    });
+    const {
+      setConnectionStatus,
+      setConnectionInProgress,
+      storeDisconnectionHandler,
+      resetServices,
+      device,
+    } = this.props;
 
-    const { disconnectSubscription } = getAppState();
-    disconnectSubscription();
+    setConnectionInProgress(true);
+    storeDisconnectionHandler(() => {});
 
-    Bluetooth.disconnect(this.state.device)
+    Bluetooth.disconnect(device)
     .then(() => {
-      setAppState({
-        isConnected: false,
-        disconnectSubscription: () => {}
-      });
-
-      this.setState({
-        isConnected: false,
-        connectionInProgress: false,
-        services: [],
-      });
+      setConnectionStatus(false);
+      setConnectionInProgress(false);
+      resetServices();
     });
   },
 
-  showDisconnectAlert() {
-    Alert.alert(
-      'Disconnection',
-      'Device connection lost'
-    );
+  listenForDisconnect() {
+    const {
+      setConnectionStatus,
+      resetServices,
+    } = this.props;
+
+    this.endListeningForDisconnection();
+
+    setConnectionStatus(false);
+    resetServices();
+
+    applicationError('Device connection lost');
+    this.props.navigator("DeviceDiscovery");
   },
 
   connect() {
-    if (this.state.isConnected) {
+    const {
+      applicationError,
+      setConnectionStatus,
+      isConnected,
+      setConnectionInProgress,
+      storeDisconnectionHandler,
+      device
+    } = this.props;
+
+    if (isConnected) {
       this.disconnect();
       return;
     }
 
-    const { applicationError } = this.props;
+    setConnectionInProgress(true);
 
-    setAppState({ isConnected: false });
+    const disconnectSubscription =
+      Bluetooth.deviceDidDisconnect(device, this.listenForDisconnect);
 
-    this.setState({
-      isConnected: false,
-      connectionInProgress: true,
-    });
+    storeDisconnectionHandler(disconnectSubscription);
 
-    Bluetooth.connect(this.state.device)
+    Bluetooth.connect(device)
     .then(() => {
+      setConnectionStatus(true);
+      setConnectionInProgress(false);
 
-      const listenForDisconnect = () => {
-        const { disconnectSubscription } = getAppState();
-        disconnectSubscription && disconnectSubscription();
-
-        setAppState({
-          isConnected: false,
-          disconnectSubscription: () => {},
-        });
-
-        this.showDisconnectAlert();
-        this.props.navigator("DeviceDiscovery");
-      };
-
-      const disconnectSubscription =
-        Bluetooth.deviceDidDisconnect(this.state.device, listenForDisconnect);
-
-      setAppState({
-        isConnected: true,
-        disconnectSubscription: disconnectSubscription,
-      });
-
-      this.setState({
-        isConnected: true,
-        connectionInProgress: false,
-      });
-
-      return Bluetooth.discoverServices(this.state.device, null, service => {
-        this.setState({
-          services: [...this.state.services, service]
-        });
+      return Bluetooth.discoverServices(device, null, service => {
+        serviceDiscovered(service);
       });
     })
     .then(unsubscribe => this.unsubscribe = unsubscribe)
@@ -122,62 +107,78 @@ const DeviceDetail = React.createClass({
   },
 
   serviceSelected(service) {
-    setAppState({
-      selectedService: service,
-      services: this.state.services,
-    });
+    const { setService } = this.props;
+    setService(service);
 
     this.props.navigator('ServiceDetail');
   },
 
+  endListeningForDisconnection() {
+    const { disconnectionHandler, storeDisconnectionHandler } = this.props;
+    disconnectionHandler();
+    storeDisconnectionHandler(() => {});
+  },
+
   goBack() {
-    const { disconnectSubscription, isConnected } = getAppState();
+    const {
+      resetServices,
+      setDevice,
+      setConnectionStatus,
+      isConnected,
+      device
+    } = this.props;
+
+    this.endListeningForDisconnection();
 
     if (isConnected) {
-      disconnectSubscription && disconnectSubscription();
-      Bluetooth.disconnect(this.state.device);
+      Bluetooth.disconnect(device)
+      .then(() => {
+        setConnectionStatus(false);
+      });
     }
 
-    setAppState({
-      selectedDevice: null,
-      isConnected: false,
-      disconnectSubscription: () => {},
-      services: [],
-    });
+    resetServices();
+    setDevice(null);
 
     this.props.navigator('DeviceDiscovery');
   },
 
   renderStatus() {
-    if (this.state.connectionInProgress) {
+    const { connectionInProgress, isConnected } = this.props;
+
+    if (connectionInProgress) {
       return <ActivityIndicator animating={true} />;
     }
 
     return (
       <View style={styles.statusContainer}>
         <TouchableOpacity onPress={this.connect}>
-          <Text style={styles.statusText}>{this.state.isConnected ? 'Disconnect' : 'Connect'}</Text>
+          <Text style={styles.statusText}>{isConnected ? 'Disconnect' : 'Connect'}</Text>
         </TouchableOpacity>
       </View>
     );
   },
 
   renderServiceLabel() {
-    if (!this.state.isConnected) return null;
+    const { isConnected } = this.props;
+
+    if (!isConnected) return null;
 
     return <Text style={styles.labelText}>Services</Text>;
   },
 
   render() {
+    const { device, services } = this.props;
+
     return (
       <View style={styles.container}>
         <TopBar
-          headerText={"Device - " + this.state.device.name}
+          headerText={"Device - " + device.name}
           backAction={ this.goBack } />
         {this.renderStatus()}
         {this.renderServiceLabel()}
         <View style={styles.listContainer}>
-          <ServiceList services={this.state.services} selectService={this.serviceSelected} />
+          <ServiceList services={services} selectService={this.serviceSelected} />
         </View>
       </View>
     );
@@ -210,16 +211,39 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   const { device } = state.deviceContext;
+
   return {
+    ...state.device,
     device: device,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    applicationError: (message) => {
+    applicationError: message => {
       dispatch(applicationError(message));
-    }
+    },
+    serviceDiscovered: service => {
+      dispatch(serviceDiscovered(service));
+    },
+    storeDisconnectionHandler: handler => {
+      dispatch(storeDisconnectionHandler(handler));
+    },
+    setConnectionStatus: status => {
+      dispatch(setConnectionStatus(status));
+    },
+    setConnectionInProgress: inProgress => {
+      dispatch(setConnectionInProgress(inProgress));
+    },
+    resetServices: () => {
+      dispatch(resetServices());
+    },
+    setService: service => {
+      dispatch(setService(service));
+    },
+    setDevice: device => {
+      dispatch(setDevice(device));
+    },
   };
 };
 

@@ -14,13 +14,13 @@ const store = createStore(
   )
 );
 
-if (module.hot) {
-  module.hot.accept('../reducers', () => {
-    const nextRootReducer = require('../reducers/index');
-    const reducer = combineReducers(nextRootReducer);
-    store.replaceReducer(reducer);
-  });
-}
+// if (module.hot) {
+//   module.hot.accept('../reducers', () => {
+//     const nextRootReducer = require('../reducers/index');
+//     const reducer = combineReducers(nextRootReducer);
+//     store.replaceReducer(reducer);
+//   });
+// }
 
 const App = () => (
   <Provider store={store}>
