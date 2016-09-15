@@ -23,6 +23,8 @@ import com.sogilis.ReactNativeBluetooth.domain.DeviceCollection;
 import com.sogilis.ReactNativeBluetooth.domain.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.BluetoothEvent;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
+
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.enableNotification;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.findServiceById;
@@ -268,7 +270,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private void enableCharacteristicNotifications(BluetoothGatt gatt, BluetoothGattService service) {
         for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
-            gatt.setCharacteristicNotification(characteristic, true);
+            enableNotification(gatt, characteristic);
         }
     }
 
