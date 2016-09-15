@@ -20,11 +20,11 @@ public class EventBuilders {
     }
 
     public static BluetoothEvent scanStarted() {
-        return new BluetoothEvent(SCAN_STARTED, null);
+        return new BluetoothEvent(SCAN_STARTED, new WritableNativeMap());
     }
 
     public static BluetoothEvent scanStopped() {
-        return new BluetoothEvent(SCAN_STOPPED, null);
+        return new BluetoothEvent(SCAN_STOPPED, new WritableNativeMap());
     }
 
     public static BluetoothEvent deviceDiscovered(BluetoothDevice device) {
