@@ -25,6 +25,7 @@ const DeviceDetail = React.createClass({
     setService: PropTypes.func.isRequired,
     setDevice: PropTypes.func.isRequired,
     resetServices: PropTypes.func.isRequired,
+    serviceDiscovered: PropTypes.func.isRequired,
     disconnectionHandler: PropTypes.func.isRequired,
     isConnected: PropTypes.bool.isRequired,
     connectionInProgress: PropTypes.bool.isRequired,
@@ -40,19 +41,23 @@ const DeviceDetail = React.createClass({
     const {
       setConnectionStatus,
       setConnectionInProgress,
-      storeDisconnectionHandler,
       resetServices,
+      applicationError,
       device,
     } = this.props;
 
+    this.unsubscribe && this.unsubscribe();
+
     setConnectionInProgress(true);
-    storeDisconnectionHandler(() => {});
+    this.endListeningForDisconnection();
 
     Bluetooth.disconnect(device)
     .then(() => {
       setConnectionStatus(false);
       setConnectionInProgress(false);
       resetServices();
+    }).catch(e => {
+      applicationError(e.message);
     });
   },
 
@@ -78,6 +83,7 @@ const DeviceDetail = React.createClass({
       isConnected,
       setConnectionInProgress,
       storeDisconnectionHandler,
+      serviceDiscovered,
       device
     } = this.props;
 
