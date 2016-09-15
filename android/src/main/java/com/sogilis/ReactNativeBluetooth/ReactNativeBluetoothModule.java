@@ -137,7 +137,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void withBluetooth(BluetoothAdapter bluetoothAdapter) {
                 bluetoothAdapter.stopLeScan(scanCallback);
-                discoveredDevices.clear();
                 emit(scanStopped());
             }
         };
