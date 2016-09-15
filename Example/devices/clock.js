@@ -5,6 +5,7 @@ var currentTimeString = function() {
   return new Date().toLocaleTimeString();
 };
 
+
 var ClockCharacteristic = function() {
   ClockCharacteristic.super_.call(this, {
     uuid: 'baedcf60-7b28-11e6-92be-67ce27ce051d',
@@ -13,16 +14,21 @@ var ClockCharacteristic = function() {
 
   this._updateValueCallback = null;
 
-  setTimeout(function() {
-    if (this._updateValueCallback) {
-      var value = currentTimeString();
-      this._updateValueCallback(Buffer.from(value));
-      if (this.active) {
-        this.sendValue();
+  var makeCallback = () => {
+    setTimeout(function() {
+      if (this._updateValueCallback) {
+        var value = currentTimeString();
+        this._updateValueCallback(Buffer.from(value));
+        if (this.active) {
+          this.sendValue();
+        }
+        console.log('notified => ' + value);
       }
-      console.log('notified => ' + value);
-    }
-  }.bind(this), 1000);
+      makeCallback();
+    }.bind(this), 1000);
+  };
+
+  makeCallback();
 };
 
 util.inherits(ClockCharacteristic, bleno.Characteristic);
