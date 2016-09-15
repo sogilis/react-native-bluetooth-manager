@@ -16,6 +16,10 @@ public class GattCollection {
         return gatts.remove(address);
     }
 
+    public BluetoothGatt findById(String id) throws BluetoothException {
+        return findByAddress(id);
+    }
+
     public BluetoothGatt findByAddress(String address) throws BluetoothException {
         if (gatts.containsKey(address)) {
             return gatts.get(address);
