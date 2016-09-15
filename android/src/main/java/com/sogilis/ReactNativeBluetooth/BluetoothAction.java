@@ -9,13 +9,14 @@ public abstract class BluetoothAction {
     private String eventName;
     private EventEmitter eventEmitter;
 
-    public abstract void run(BluetoothAdapter bluetoothAdapter) throws BluetoothException;
+    protected BluetoothAdapter bluetoothAdapter;
+
+    public abstract void run() throws BluetoothException;
 
     public BluetoothAction(String eventName, EventEmitter eventEmitter) {
         this.eventName = eventName;
         this.eventEmitter = eventEmitter;
-
-        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
             emitError("Bluetooth not supported");
@@ -26,7 +27,7 @@ public abstract class BluetoothAction {
         }
 
         try {
-            this.run(bluetoothAdapter);
+            this.run();
         }
         catch(BluetoothException e) {
             emitError(e.getMessage());
