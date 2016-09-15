@@ -1,0 +1,11 @@
+{
+  "name": "react-native-bluetooth-example-devices",
+  "private": true,
+  "scripts": {
+    "start": "./node_modules/.bin/nf start"
+  },
+  "devDependencies": {
+    "bleno": "^0.4.0",
+    "foreman": "^2.0.0"
+  }
+}
