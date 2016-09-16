@@ -438,7 +438,7 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
   };
 
   // TODO: need to discover characteristics
-  return discoverServicesOnce(device, serviceId)
+  return discoverServicesOnce(device, [serviceId])
     .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
     .then(characteristic => {
       if ("error" in characteristic) {
@@ -459,7 +459,7 @@ const findAndWriteToCharacteristic = (device, serviceId, characteristicId,  buff
     deviceId: device.id,
   };
 
-  return discoverServicesOnce(device, serviceId)
+  return discoverServicesOnce(device, [serviceId])
     .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
     .then(characteristic => {
       if ("error" in characteristic) {
