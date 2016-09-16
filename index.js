@@ -33,12 +33,29 @@ let scanInProgress = false;
 
 const Scan = {
   stopAfter: (timeout) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
+    return new Promise((resolve, reject)=> {
+      let timeoutReached = false;
+      let timer = null;
+      let stopSubscription = null;
+
+      stopSubscription = scanDidStop(() => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+
+        if (stopSubscription) {
+          stopSubscription();
+        }
+
+        resolve(timeoutReached);
+      });
+
+      timer = setTimeout(() => {
         // TODO: Check for connection first
+        timeoutReached = true;
+
         stopScan()
-          .then(resolve)
-          .catch(console.log.bind(console));
+        .catch(error => reject(error));
       }, timeout);
     });
   },
@@ -67,6 +84,21 @@ const startScan = (customOptions = {}) => {
 
     ReactNativeBluetooth.startScan(options.uuids);
   });
+};
+
+const startScanWithDiscovery = (customOptions, onDeviceFound) => {
+  let unsubscribeFromDiscovery = didDiscoverDevice(onDeviceFound);
+  let scanDidStopUnsubscribe = null;
+
+  scanDidStopUnsubscribe = scanDidStop(() => {
+    if (scanDidStopUnsubscribe) {
+      scanDidStopUnsubscribe();
+    }
+
+    unsubscribeFromDiscovery();
+  });
+
+  return startScan(customOptions);
 };
 
 const stopScan = () => {
@@ -148,8 +180,13 @@ const discoverCharacteristics = (service, characteristicIds, callback) => {
     );
 
     let startupListener;
+    let timer;
 
     const onStartedCaught = detail => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+
       if ("error" in detail) {
         reject(new Error(detail["error"]));
         return;
@@ -166,6 +203,12 @@ const discoverCharacteristics = (service, characteristicIds, callback) => {
       ReactNativeBluetooth.CharacteristicDiscoveryStarted,
       onStartedCaught
     );
+
+    timer = setTimeout(() => {
+      if (startupListener) {
+        listener.remove();
+        reject(new Error("Timeout discovering characteristics"));
+      }}, 15000);
 
     ReactNativeBluetooth.discoverCharacteristics(service, characteristicIds);
   });
@@ -352,13 +395,90 @@ const didDiscoverDevice = (callback) => {
   ));
 };
 
+const discoverCharacteristicsOnce  = (service, characteristicIds) => {
+  return new Promise((resolve, reject) => {
+    let unsubscribe;
+
+    const onDiscovery = characteristic => {
+      if (unsubscribe)
+        unsubscribe();
+      resolve(characteristic);
+    };
+
+    discoverCharacteristics(service, characteristicIds, onDiscovery)
+    .then( release => unsubscribe = release )
+    .catch(reject);
+  });
+};
+
+const discoverServicesOnce = (device, serviceIds) => {
+  return new Promise((resolve, reject) => {
+    let unsubscribe;
+
+    const onDiscovery = service => {
+      if (unsubscribe)
+        unsubscribe();
+      resolve(service);
+    };
+
+    discoverServices(device, serviceIds, onDiscovery)
+    .then( release => unsubscribe = release )
+    .catch(reject);
+  });
+};
+
+const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
+  console.assert("id" in device, "Valid device must be specified");
+  console.assert(serviceId, "Device id must be specified");
+  console.assert(characteristicId, "Valid characteristic must be specified");
+
+  const service = {
+    id: serviceId,
+    deviceId: device.id,
+  };
+
+  // TODO: need to discover characteristics
+  return discoverServicesOnce(device, serviceId)
+    .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
+    .then(characteristic => {
+      if ("error" in characteristic) {
+        Promise.reject(characteristic.error);
+        return;
+      }
+      return readCharacteristicValue(characteristic);
+    });
+};
+
+const findAndWriteToCharacteristic = (device, serviceId, characteristicId,  buffer, withResponse = false) => {
+  console.assert("id" in device, "Valid device must be specified");
+  console.assert(serviceId, "Device id must be specified");
+  console.assert(characteristicId, "Valid characteristic must be specified");
+
+  const service = {
+    id: serviceId,
+    deviceId: device.id,
+  };
+
+  return discoverServicesOnce(device, serviceId)
+    .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
+    .then(characteristic => {
+      if ("error" in characteristic) {
+        Promise.reject(characteristic.error);
+        return;
+      }
+      return writeCharacteristicValue(characteristic, buffer, withResponse);
+    });
+};
+
 export default {
   didChangeState,
   startScan,
+  startScanWithDiscovery,
   stopScan,
   didDiscoverDevice,
   discoverServices,
   discoverCharacteristics,
+  discoverCharacteristicsOnce,
   readCharacteristicValue,
   writeCharacteristicValue,
   characteristicDidNotify,
@@ -367,4 +487,6 @@ export default {
   deviceDidDisconnect,
   deviceDidConnect,
   scanDidStop,
+  findAndReadFromCharacteristic,
+  findAndWriteToCharacteristic,
 };
