@@ -287,12 +287,18 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
       return;
     }
 
+    let timer = null;
+
     let listener = EventEmitter.addListener(ReactNativeBluetooth.CharacteristicWritten, detail => {
       if (!idsAreSame(characteristic, detail))
         return;
 
       if (listener) {
         listener.remove();
+      }
+
+      if (timer) {
+        clearTimeout(timer);
       }
 
       if ("error" in detail) {
@@ -302,7 +308,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
       }
     });
 
-    setTimeout(() => {
+    timer = setTimeout(() => {
       if (listener) {
         listener.remove();
         reject(new Error("Timeout writing characteristic"));
