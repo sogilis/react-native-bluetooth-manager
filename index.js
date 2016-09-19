@@ -142,9 +142,20 @@ const scanDidStop = (callback) => {
 
 const discoverServices = (device, serviceIds, callback) => {
   return new Promise((resolve, reject) => {
+    const onServicesDiscovered = serviceMap => {
+      console.assert("deviceId" in serviceMap,
+        "Missing deviceId in service found event");
+      console.assert("services" in serviceMap || "service" in serviceMap,
+        "Missing services in service found event");
+
+      if (serviceMap.deviceId != device.id) return;
+
+      callback(serviceMap.services || [serviceMap.service]);
+    };
+
     const listener = EventEmitter.addListener(
       ReactNativeBluetooth.ServiceDiscovered,
-      callback
+      onServicesDiscovered
     );
 
     let startupListener;
@@ -173,10 +184,23 @@ const discoverServices = (device, serviceIds, callback) => {
 
 const discoverCharacteristics = (service, characteristicIds, callback) => {
   return new Promise((resolve, reject) => {
-    // TODO: filter this callback by device
+    const onCharacteristicsDiscovered = characteristicMap => {
+      console.assert("deviceId" in characteristicMap,
+        "Missing deviceId in characteristic found event");
+      console.assert("serviceId" in characteristicMap,
+        "Missing deviceId in characteristic found event");
+      console.assert("characteristics" in characteristicMap || "characteristic" in characteristicMap,
+        "Missing characteristics in characteristic found event");
+
+      if (characteristicMap.deviceId != service.deviceId) return;
+      if (characteristicMap.serviceId != service.id) return;
+
+      callback(characteristicMap.characteristics || [characteristicMap.characteristic]);
+    };
+
     const listener = EventEmitter.addListener(
       ReactNativeBluetooth.CharacteristicDiscovered,
-      callback
+      onCharacteristicsDiscovered
     );
 
     let startupListener;
@@ -415,10 +439,10 @@ const discoverServicesOnce = (device, serviceIds) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
 
-    const onDiscovery = service => {
+    const onDiscovery = services => {
       if (unsubscribe)
         unsubscribe();
-      resolve(service);
+      resolve(services);
     };
 
     discoverServices(device, serviceIds, onDiscovery)
@@ -437,16 +461,19 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
     deviceId: device.id,
   };
 
-  // TODO: need to discover characteristics
   return connect(device)
     .then(() => discoverServicesOnce(device, [serviceId]))
-    .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
-    .then(characteristic => {
-      if ("error" in characteristic) {
-        Promise.reject(characteristic.error);
+    .then(() => discoverCharacteristicsOnce(service, [characteristicId]))
+    .then(characteristics => {
+      if ("error" in characteristics) {
+        Promise.reject(characteristics.error);
         return;
       }
-      return readCharacteristicValue(characteristic);
+      if (characteristics.length != 1) {
+        Promise.reject("Error in characteristic discovery. Wrong number of characteristics.");
+        return;
+      }
+      return readCharacteristicValue(characteristics[0]);
     });
 };
 
