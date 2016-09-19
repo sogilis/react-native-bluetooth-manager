@@ -184,7 +184,7 @@ const discoverServicesInternal = (device, serviceIds, callback) => {
       onStartedCaught
     );
 
-    ReactNativeBluetooth.discoverServices(device, null);
+    ReactNativeBluetooth.discoverServices(device, serviceIds);
   });
 };
 
