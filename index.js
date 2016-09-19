@@ -167,7 +167,7 @@ const discoverServices = (device, serviceIds, callback) => {
       onStartedCaught
     );
 
-    ReactNativeBluetooth.discoverServices(device, serviceIds);
+    ReactNativeBluetooth.discoverServices(device, null);
   });
 };
 
@@ -438,7 +438,8 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
   };
 
   // TODO: need to discover characteristics
-  return discoverServicesOnce(device, [serviceId])
+  return connect(device)
+    .then(() => discoverServicesOnce(device, [serviceId]))
     .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
     .then(characteristic => {
       if ("error" in characteristic) {
@@ -459,8 +460,9 @@ const findAndWriteToCharacteristic = (device, serviceId, characteristicId,  buff
     deviceId: device.id,
   };
 
-  return discoverServicesOnce(device, [serviceId])
-    .then(() =>discoverCharacteristicsOnce(service, [characteristicId]))
+  return connect(device)
+    .then(() => discoverServicesOnce(device, [serviceId]))
+    .then(() => discoverCharacteristicsOnce(service, [characteristicId]))
     .then(characteristic => {
       if ("error" in characteristic) {
         Promise.reject(characteristic.error);
