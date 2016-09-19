@@ -38,6 +38,7 @@
     "tape": "^4.6.0"
   },
   "dependencies": {
-    "buffer": "^4.9.1"
+    "buffer": "^4.9.1",
+    "lodash": "^4.15.0"
   }
 }
