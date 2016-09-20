@@ -8,9 +8,14 @@ import android.util.Base64;
 import static android.bluetooth.BluetoothGattCharacteristic.*;
 
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 
+import java.util.List;
+
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.serviceId;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.deviceId;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.hasProperty;
@@ -52,10 +57,11 @@ public class EventBuilders {
         return new BluetoothEvent(CHARACTERISTIC_DISCOVERY_STARTED, serviceMap(device, service));
     }
 
-    public static BluetoothEvent characteristicDiscovered(BluetoothDevice device,
-                                                          BluetoothGattCharacteristic characteristic) {
-        return new BluetoothEvent(CHARACTERISTIC_DISCOVERED,
-                characteristicMap(device, characteristic));
+    public static BluetoothEvent characteristicsDiscovered(BluetoothDevice device,
+                                                           BluetoothGattService service,
+                                                           List<BluetoothGattCharacteristic> characteristics) {
+        return new BluetoothEvent(CHARACTERISTICS_DISCOVERED,
+                characteristicListMap(device, service, characteristics));
     }
 
     public static BluetoothEvent characteristicRead(BluetoothDevice device,
@@ -99,7 +105,7 @@ public class EventBuilders {
         return map;
     }
 
-    public static ReadableMap characteristicMap(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
+    public static WritableMap characteristicMap(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
         byte[] value = characteristic.getValue();
         String encodedValue = (value != null ? Base64.encodeToString(value, Base64.DEFAULT) : null);
         WritableMap map = new WritableNativeMap();
@@ -111,6 +117,26 @@ public class EventBuilders {
         map.putMap("properties", propertiesMap(characteristic));
 
         return map;
+    }
+
+    private static ReadableMap characteristicListMap(BluetoothDevice device, BluetoothGattService service, List<BluetoothGattCharacteristic> characteristics) {
+        WritableMap map = new WritableNativeMap();
+
+        map.putString("deviceId", deviceId(device));
+        map.putString("serviceId", serviceId(service));
+        map.putArray("characteristics", characteristicArray(device, characteristics));
+
+        return map;
+    }
+
+    private static WritableArray characteristicArray(BluetoothDevice device, List<BluetoothGattCharacteristic> characteristics) {
+        WritableArray array = new WritableNativeArray();
+
+        for (BluetoothGattCharacteristic characteristic: characteristics) {
+            array.pushMap(characteristicMap(device, characteristic));
+        }
+
+        return array;
     }
 
     public static WritableMap propertiesMap(BluetoothGattCharacteristic characteristic) {

@@ -34,7 +34,9 @@ import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.findChara
 import static com.sogilis.ReactNativeBluetooth.util.UUIDHelpers.uuidsFromStrings;
 import static com.sogilis.ReactNativeBluetooth.events.EventBuilders.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
@@ -225,28 +227,24 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattService service = findServiceById(gatt, serviceId);
 
                 emit(characteristicDiscoveryStarted(device, service));
-
-                if (characteristicIds == null || characteristicIds.size() == 0) {
-                    discoverAllCharacteristics(device, service);
-                } else {
-                    discoverRequestedCharacteristics(device, service, characteristicIds);
-                }
+                emit(characteristicsDiscovered(device, service,
+                        filterCharacteristics(device, service, characteristicIds)));
             }
         };
     }
 
-    private void discoverRequestedCharacteristics(BluetoothDevice device, BluetoothGattService service, ReadableArray characteristicIds) throws BluetoothException {
-        for (int index = 0; index < characteristicIds.size(); index++) {
-            BluetoothGattCharacteristic characteristic = findCharacteristicById(
-                    device, service, characteristicIds.getString(index));
-
-            emit(characteristicDiscovered(device, characteristic));
-        }
-    }
-
-    private void discoverAllCharacteristics(BluetoothDevice device, BluetoothGattService service) {
-        for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
-            emit(characteristicDiscovered(device, characteristic));
+    private List<BluetoothGattCharacteristic> filterCharacteristics(BluetoothDevice device,
+                                                                    BluetoothGattService service,
+                                                                    ReadableArray characteristicIds) throws BluetoothException {
+        if (characteristicIds == null || characteristicIds.size() == 0) {
+            return service.getCharacteristics();
+        } else {
+            List<BluetoothGattCharacteristic> characteristics = new ArrayList<>();
+            for (int index = 0; index < characteristicIds.size(); index++) {
+                characteristics.add(
+                        findCharacteristicById(device, service, characteristicIds.getString(index)));
+            }
+            return characteristics;
         }
     }
 
@@ -338,7 +336,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
         constants.put("ServiceDiscovered", SERVICE_DISCOVERED);
         constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);
-        constants.put("CharacteristicDiscovered", CHARACTERISTIC_DISCOVERED);
+        constants.put("CharacteristicDiscovered", CHARACTERISTICS_DISCOVERED);
         constants.put("CharacteristicRead", CHARACTERISTIC_READ);
         constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
         constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
