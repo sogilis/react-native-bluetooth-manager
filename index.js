@@ -144,9 +144,6 @@ const scanDidStop = (callback) => {
 const discoverServicesInternal = (device, serviceIds, callback) => {
   return new Promise((resolve, reject) => {
     const onServicesDiscovered = serviceMap => {
-      console.assert("services" in serviceMap || "service" in serviceMap,
-        "Missing services in service found event");
-
       if (serviceMap.services) {
         const services = serviceMap.services
           .filter(s => _.includes(serviceIds, s.id));
@@ -191,9 +188,6 @@ const discoverServicesInternal = (device, serviceIds, callback) => {
 const discoverCharacteristicsInternal = (service, characteristicIds, callback) => {
   return new Promise((resolve, reject) => {
     const onCharacteristicsDiscovered = characteristicMap => {
-      console.assert("characteristics" in characteristicMap || "characteristic" in characteristicMap,
-        "Missing characteristics in characteristic found event");
-
       if (characteristicMap.characteristics) {
         const characteristics = characteristicMap.characteristics
           .filter(c => _.includes(characteristicIds, c.id));
@@ -322,10 +316,6 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
 const idsAreSame = (set1, set2) => ("id" in set1) && ("id" in set2) && set1["id"] == set2["id"];
 
 const characteristicDidNotify = (characteristic, callback) => {
-  console.assert(characteristic.id, "Notification characteristic does not contain key [id]");
-  console.assert(characteristic.serviceId, "Notification characteristic does not contain key [servicdId]");
-  console.assert(characteristic.deviceId, "Notification characteristic does not contain key [devicedId]");
-
   const onNotifyCaught = notified => {
     if (!idsAreSame(characteristic, notified))
       return;
@@ -494,10 +484,6 @@ const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds)
 };
 
 const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
-  console.assert("id" in device, "Valid device must be specified");
-  console.assert(serviceId, "Device id must be specified");
-  console.assert(characteristicId, "Valid characteristic must be specified");
-
   return connectAndDiscoverCharacteristics(device, serviceId, [characteristicId])
     .then(characteristics => {
       if ("error" in characteristics) {
@@ -511,10 +497,6 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
 };
 
 const findAndWriteToCharacteristic = (device, serviceId, characteristicId, buffer, withResponse = false) => {
-  console.assert("id" in device, "Valid device must be specified");
-  console.assert(serviceId, "Device id must be specified");
-  console.assert(characteristicId, "Valid characteristic must be specified");
-
   return connectAndDiscoverCharacteristics(device, serviceId, [characteristicId])
     .then(characteristics => {
       if ("error" in characteristics) {
