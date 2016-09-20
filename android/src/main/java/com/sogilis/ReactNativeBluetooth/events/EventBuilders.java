@@ -49,8 +49,8 @@ public class EventBuilders {
         return new BluetoothEvent(SERVICE_DISCOVERY_STARTED, deviceMap(device));
     }
 
-    public static BluetoothEvent serviceDiscovered(BluetoothDevice device, BluetoothGattService service) {
-        return new BluetoothEvent(SERVICE_DISCOVERED, serviceMap(device, service));
+    public static BluetoothEvent servicesDiscovered(BluetoothDevice device, List<BluetoothGattService> services) {
+        return new BluetoothEvent(SERVICES_DISCOVERED, serviceListMap(device, services));
     }
 
     public static BluetoothEvent characteristicDiscoveryStarted(BluetoothDevice device, BluetoothGattService service) {
@@ -96,13 +96,32 @@ public class EventBuilders {
         return map;
     }
 
-    public static ReadableMap serviceMap(BluetoothDevice device, BluetoothGattService service) {
+    public static WritableMap serviceMap(BluetoothDevice device, BluetoothGattService service) {
         WritableMap map = new WritableNativeMap();
 
         map.putString("id", service.getUuid().toString());
         map.putString("deviceId", deviceId(device));
 
         return map;
+    }
+
+    public static WritableMap serviceListMap(BluetoothDevice device, List<BluetoothGattService> services) {
+        WritableMap map = new WritableNativeMap();
+
+        map.putString("deviceId", deviceId(device));
+        map.putArray("services", serviceArray(device, services));
+
+        return map;
+    }
+
+    public static WritableArray serviceArray(BluetoothDevice device, List<BluetoothGattService> services) {
+        WritableArray array = new WritableNativeArray();
+
+        for (BluetoothGattService service: services) {
+            array.pushMap(serviceMap(device, service));
+        }
+
+        return array;
     }
 
     public static WritableMap characteristicMap(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {

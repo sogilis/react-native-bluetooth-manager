@@ -148,9 +148,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            for (BluetoothGattService service: gatt.getServices()) {
-                emit(serviceDiscovered(gatt.getDevice(), service));
-            }
+            emit(servicesDiscovered(gatt.getDevice(), gatt.getServices()));
         }
 
         @Override
@@ -334,7 +332,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("DeviceConnected", DEVICE_CONNECTED);
         constants.put("DeviceDisconnected", DEVICE_DISCONNECTED);
         constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
-        constants.put("ServiceDiscovered", SERVICE_DISCOVERED);
+        constants.put("ServiceDiscovered", SERVICES_DISCOVERED);
         constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);
         constants.put("CharacteristicDiscovered", CHARACTERISTICS_DISCOVERED);
         constants.put("CharacteristicRead", CHARACTERISTIC_READ);
