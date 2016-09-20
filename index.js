@@ -141,7 +141,8 @@ const scanDidStop = (callback) => {
   return unsubscription(listener);
 };
 
-const discoverServicesInternal = (device, serviceIds, callback) => {
+const discoverServicesInternal = (device, _serviceIds, callback) => {
+  const serviceIds = _serviceIds.map(id => id.toLowerCase());
   return new Promise((resolve, reject) => {
     const onServicesDiscovered = serviceMap => {
       if (serviceMap.services) {
