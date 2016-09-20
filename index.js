@@ -470,7 +470,8 @@ const discoverServices = (device, serviceIds) => {
 
 const connectAndDiscoverServices = (device, serviceIds) => {
   return connect(device)
-    .then(() => discoverServices(device, serviceIds));
+    .then(() => discoverServices(device, serviceIds))
+    .catch(console.log.bind(console));
 };
 
 const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds) => {
@@ -480,7 +481,8 @@ const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds)
   };
 
   return connectAndDiscoverServices(device, [serviceId])
-    .then(() => discoverCharacteristics(service, characteristicIds));
+    .then(() => discoverCharacteristics(service, characteristicIds))
+    .catch(console.log.bind(console));
 };
 
 const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
@@ -493,7 +495,8 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
         return Promise.reject("Error in characteristic discovery. Wrong number of characteristics.");
       }
       return readCharacteristicValue(characteristics[0]);
-    });
+    })
+    .catch(console.log.bind(console));
 };
 
 const findAndWriteToCharacteristic = (device, serviceId, characteristicId, buffer, withResponse = false) => {
