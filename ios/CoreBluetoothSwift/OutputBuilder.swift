@@ -19,6 +19,13 @@ class OutputBuilder {
         ]
     }
 
+    static func asServiceList(services: [CBService]) -> BluetoothServiceReturn {
+        return [
+            "deviceId": services.first?.peripheral.identifier.UUIDString ?? "",
+            "services": services.map(asService)
+        ]
+    }
+
     static func asStateChange(state: CBCentralManagerState) -> String {
         switch state {
         case .Unknown:
@@ -59,6 +66,14 @@ class OutputBuilder {
             "serviceId": characteristic.service.UUID.UUIDString,
             "properties": makeCharacteristicProperties(characteristic),
             "value": characteristic.value?.base64EncodedStringWithOptions(NSDataBase64EncodingOptions()) ?? "",
+        ]
+    }
+
+    static func asCharacteristicList(characteristics: [CBCharacteristic]) -> BluetoothServiceReturn {
+        return [
+            "deviceId": characteristics.first?.service.peripheral.identifier.UUIDString ?? "",
+            "serviceId": characteristics.first?.service.UUID.UUIDString ?? "",
+            "characteristics": characteristics.map(asCharacteristic)
         ]
     }
 

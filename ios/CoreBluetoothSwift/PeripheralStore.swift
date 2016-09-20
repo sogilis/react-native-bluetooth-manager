@@ -96,6 +96,13 @@ class PeripheralStore {
 
         let charId = CBUUID(string: charIdString).UUIDString
 
-        return service.characteristics?.filter { $0.UUID.UUIDString == charId }.first
+        let characteristic = service.characteristics?.filter { $0.UUID.UUIDString == charId }.first
+
+        if characteristic == nil {
+            print("Unable to locate characteristic in service", charId,
+                  service.characteristics?.map { $0.UUID.UUIDString })
+        }
+
+        return characteristic
     }
 }

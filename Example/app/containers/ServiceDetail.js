@@ -26,11 +26,13 @@ const ServiceDetail = React.createClass({
     const { service, characteristicDiscovered, applicationError } = this.props;
     this.unsubscribe = [];
 
-    Bluetooth.discoverCharacteristics(service, null, characteristic => {
-      characteristicDiscovered(characteristic);
-    })
-    .then(unsubscribe => {
-      this.unsubscribe = [...this.unsubscribe, unsubscribe];
+    if ((this.props.characteristics || []).length > 0) {
+      return;
+    }
+
+    Bluetooth.discoverCharacteristics(service, null)
+    .then(characteristics => {
+      characteristics.forEach(c => characteristicDiscovered(c));
     })
     .catch(error => {
       applicationError(error.message);

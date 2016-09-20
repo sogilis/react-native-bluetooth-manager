@@ -186,7 +186,9 @@ RCT_EXPORT_METHOD(discoverServices:(NSDictionary<NSString *, id> *)params servic
             [myself sendEventWithName:serviceDiscoveryStartedEventName body:result];
         };
 
-    [actions discoverServices:params services:services onDiscoverStarted:onDiscoverStarted];
+    NSDictionary<NSString *, id> * toSearch = [params count] == 0 ? NULL : params;
+
+    [actions discoverServices:toSearch services:services onDiscoverStarted:onDiscoverStarted];
 }
 
 RCT_EXPORT_METHOD(discoverCharacteristics:(NSDictionary<NSString *, id> *)params characteristics:(NSArray<NSString *> *)characteristics) {
@@ -196,6 +198,8 @@ RCT_EXPORT_METHOD(discoverCharacteristics:(NSDictionary<NSString *, id> *)params
         ^(BluetoothServiceReturn result) {
             [myself sendEventWithName:characteristicDiscoveryStartedEventName body:result];
         };
+
+    NSDictionary<NSString *, id> * toSearch = [params count] == 0 ? NULL : params;
 
     [actions discoverCharacteristics:params characteristics:characteristics onDiscoverStarted:onDiscoverStarted];
 }

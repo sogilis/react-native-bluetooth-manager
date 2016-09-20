@@ -56,8 +56,6 @@ const Routes = React.createClass({
       );
 
       resetError();
-
-      console.error(error);
     }
   },
 

@@ -106,16 +106,20 @@ const DeviceDetail = React.createClass({
 
     storeDisconnectionHandler(disconnectSubscription);
 
-    Bluetooth.connect(device)
+    if ((this.props.services || []).length > 0) {
+      return;
+    }
+
+    Bluetooth.connect(device, null)
     .then(() => {
       setConnectionStatus(true);
       setConnectionInProgress(false);
 
-      return Bluetooth.discoverServices(device, null, service => {
-        serviceDiscovered(service);
-      });
+      return Bluetooth.discoverServices(device, null);
     })
-    .then(unsubscribe => this.unsubscribe = unsubscribe)
+    .then(services => {
+      services.forEach(service => serviceDiscovered(service));
+    })
     .catch(error => applicationError(error.message));
   },
 

@@ -141,20 +141,20 @@ const scanDidStop = (callback) => {
   return unsubscription(listener);
 };
 
-const discoverServicesInternal = (device, _serviceIds, callback) => {
-  const serviceIds = _serviceIds.map(id => id.toLowerCase());
+const discoverServicesInternal = (device, serviceIds, callback) => {
   return new Promise((resolve, reject) => {
     const onServicesDiscovered = serviceMap => {
-      if (serviceMap.services) {
-        const services = serviceMap.services
-          .filter(s => _.includes(serviceIds, s.id));
 
-        if (services.length > 0)
-          callback(services);
-      } else {
-        if (_.includes(serviceIds, serviceMap.service.id))
-          callback([serviceMap.service]);
-      }
+      const allServices = serviceMap.services || [];
+      const lowerCaseIds = (serviceIds || []).map(s => s.toLowerCase());
+
+      const services = serviceIds == null
+        ? allServices
+        : allServices
+          .map(s => s.toLowerCase())
+          .filter(s => _.includes(lowerCaseIds, s.id));
+
+      callback(services);
     };
 
     const listener = EventEmitter.addListener(
@@ -182,25 +182,23 @@ const discoverServicesInternal = (device, _serviceIds, callback) => {
       onStartedCaught
     );
 
-    ReactNativeBluetooth.discoverServices(device, serviceIds);
+    ReactNativeBluetooth.discoverServices(device, serviceIds || []);
   });
 };
 
-const discoverCharacteristicsInternal = (service, _characteristicIds, callback) => {
-  const characteristicIds = _characteristicIds.map(id => id.toLowerCase());
-
+const discoverCharacteristicsInternal = (service, characteristicIds, callback) => {
   return new Promise((resolve, reject) => {
     const onCharacteristicsDiscovered = characteristicMap => {
-      if (characteristicMap.characteristics) {
-        const characteristics = characteristicMap.characteristics
-          .filter(c => _.includes(characteristicIds, c.id));
+      const allCharacteristics = characteristicMap.characteristics || [];
+      const lowerCaseIds = (characteristicIds || []).map(id => id.toLowerCase());
 
-        if (characteristics.length > 0)
-          callback(characteristics);
-      } else {
-        if (_.includes(characteristicIds, characteristicMap.characteristic))
-          callback([characteristicMap.characteristic]);
-      }
+      const characteristics = characteristicIds == null
+        ? allCharacteristics
+        : allCharacteristics.map(c => c.toLowerCase())
+          .filter(c => _.includes(lowerCaseIds, c.id));
+
+      if (characteristics.length > 0)
+        callback(characteristics);
     };
 
     const listener = EventEmitter.addListener(
@@ -239,7 +237,7 @@ const discoverCharacteristicsInternal = (service, _characteristicIds, callback) 
         reject(new Error("Timeout discovering characteristics"));
       }}, 15000);
 
-    ReactNativeBluetooth.discoverCharacteristics(service, characteristicIds);
+    ReactNativeBluetooth.discoverCharacteristics(service, characteristicIds || []);
   });
 };
 
@@ -480,8 +478,7 @@ const discoverServices = (device, serviceIds) => {
 
 const connectAndDiscoverServices = (device, serviceIds) => {
   return connect(device)
-    .then(() => discoverServices(device, serviceIds))
-    .catch(console.log.bind(console));
+    .then(() => discoverServices(device, serviceIds));
 };
 
 const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds) => {
@@ -491,8 +488,7 @@ const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds)
   };
 
   return connectAndDiscoverServices(device, [serviceId])
-    .then(() => discoverCharacteristics(service, characteristicIds))
-    .catch(console.log.bind(console));
+    .then(() => discoverCharacteristics(service, characteristicIds));
 };
 
 const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
@@ -505,8 +501,7 @@ const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
         return Promise.reject("Error in characteristic discovery. Wrong number of characteristics.");
       }
       return readCharacteristicValue(characteristics[0]);
-    })
-    .catch(console.log.bind(console));
+    });
 };
 
 const findAndWriteToCharacteristic = (device, serviceId, characteristicId, buffer, withResponse = false) => {

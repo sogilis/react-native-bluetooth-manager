@@ -18,6 +18,8 @@ public class BluetoothActions: NSObject {
     private var onCharacteristicReadHandler: (BluetoothServiceReturn -> Void) = { _ in }
     private var onCharacteristicWriteHandler: (BluetoothServiceReturn -> Void) = { _ in }
     private var onCharacteristicNotifyHandler: (BluetoothServiceReturn -> Void) = { _ in }
+    private var onServiceDiscoveredHandler: (BluetoothServiceReturn -> Void) = { _ in }
+    private var onCharacteristicDiscoveredHandler: (BluetoothServiceReturn -> Void) = { _ in }
 
     private var lastState = CBCentralManagerState.Unknown
 
@@ -66,6 +68,11 @@ public class BluetoothActions: NSObject {
             return
         }
 
+        if device.state == .Connected {
+            onDeviceConnectedHandler(deviceLookup)
+            return
+        }
+
         dispatch_async(backgroundQueue, { [unowned self] in
             self.centralManager.connectPeripheral(device, options: nil)
         })
@@ -77,6 +84,11 @@ public class BluetoothActions: NSObject {
             onDeviceDisconnectedHandler([
                 "error": "No device found"]
             )
+            return
+        }
+
+        if device.state == .Disconnected {
+            onDeviceDisconnectedHandler(deviceLookup)
             return
         }
 
@@ -97,9 +109,26 @@ public class BluetoothActions: NSObject {
             return
         }
 
-        dispatch_async(backgroundQueue, {
+        dispatch_async(backgroundQueue, { [unowned self] in
+            if let services = services {
+                if let deviceServices = device.services {
+                    let hasId: String -> Bool = services.contains
+                    let filter: CBService -> Bool = { hasId($0.UUID.UUIDString) }
+
+                    let servicesList = deviceServices.filter(filter)
+
+                    let alreadyFound = servicesList.count == services.count
+
+                    if alreadyFound {
+                        self.onServiceDiscoveredHandler(OutputBuilder.asServiceList(servicesList))
+                        return
+                    }
+                }
+            }
+
             let serviceIds = services?.map { CBUUID(string: $0) }
-            print("Discovering service ids", serviceIds)
+            print("Discovering service ids for", device, serviceIds)
+
             device.discoverServices(serviceIds)
             onDiscoverStarted(BluetoothServiceReturn())
         })
@@ -118,7 +147,24 @@ public class BluetoothActions: NSObject {
             return
         }
 
-        dispatch_async(backgroundQueue, {
+        dispatch_async(backgroundQueue, { [unowned self] in
+            if let characteristics = characteristics {
+                if let devicecharacteristics = requiredService.characteristics {
+                    let hasId: String -> Bool = characteristics.contains
+                    let filter: CBCharacteristic -> Bool = { hasId($0.UUID.UUIDString) }
+
+                    let characteristicsList = devicecharacteristics.filter(filter)
+
+                    let alreadyFound = characteristicsList.count == characteristics.count
+
+                    if alreadyFound {
+                        self.onCharacteristicDiscoveredHandler(
+                            OutputBuilder.asCharacteristicList(characteristicsList))
+                        return
+                    }
+                }
+            }
+
             let characteristicIds = characteristics?.map { CBUUID(string: $0) }
             requiredService.peripheral.discoverCharacteristics(characteristicIds,
                 forService: requiredService)
@@ -136,16 +182,16 @@ public class BluetoothActions: NSObject {
             return
         }
 
-        let properties = withResponse ? CBCharacteristicProperties.Write :
-            CBCharacteristicProperties.WriteWithoutResponse
-
-        guard characteristic.properties.contains(properties) else {
-            onCharacteristicWriteHandler([
-                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
-                "error": "Trying to write to a characteristic that does not support write type."
-                ])
-            return
-        }
+//        let properties = withResponse ? CBCharacteristicProperties.Write :
+//            CBCharacteristicProperties.WriteWithoutResponse
+//
+//        guard characteristic.properties.contains(properties) else {
+//            onCharacteristicWriteHandler([
+//                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
+//                "error": "Trying to write to a characteristic that does not support write type."
+//                ])
+//            return
+//        }
 
         guard let dataToSend = NSData(base64EncodedString: data, options: NSDataBase64DecodingOptions()) else {
             onCharacteristicWriteHandler([
@@ -167,8 +213,6 @@ public class BluetoothActions: NSObject {
 
     public func readCharacteristicValue(lookup: [String: AnyObject]) {
         guard let characteristic = peripheralStore.getCharacteristic(lookup) else {
-            print("WTF is my characteristic", lookup, peripheralStore.listIds())
-
             onCharacteristicReadHandler([
                 "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
                 "error": "Unable to find characteristic to read from"
@@ -222,6 +266,8 @@ public class BluetoothActions: NSObject {
     }
 
     public func onServiceDiscovered(handler: BluetoothServiceReturn -> Void) {
+        onServiceDiscoveredHandler = handler
+
         peripheralEventHandler.onServiceDiscovered { serviceInfo in
 
             guard let services = serviceInfo.0.services else {
@@ -229,13 +275,13 @@ public class BluetoothActions: NSObject {
                 return
             }
 
-            services.forEach { service in
-                handler(OutputBuilder.asService(service))
-            }
+            handler(OutputBuilder.asServiceList(services))
         }
     }
 
     public func onCharacteristicDiscovered(handler: BluetoothServiceReturn -> Void) {
+        onCharacteristicDiscoveredHandler = handler
+
         peripheralEventHandler.onCharacteristicDiscovered { characteristicInfo in
 
             guard let characteristics = characteristicInfo.1.characteristics else {
@@ -243,9 +289,7 @@ public class BluetoothActions: NSObject {
                 return
             }
 
-            characteristics.forEach { characteristic in
-                handler(OutputBuilder.asCharacteristic(characteristic))
-            }
+            handler(OutputBuilder.asCharacteristicList(characteristics))
         }
     }
 
