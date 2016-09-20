@@ -245,9 +245,15 @@ const discoverCharacteristicsInternal = (service, _characteristicIds, callback) 
 
 const readCharacteristicValue = characteristic => {
   return new Promise((resolve, reject) => {
+    let timer = null;
+
     let listener = EventEmitter.addListener(ReactNativeBluetooth.CharacteristicRead, detail => {
       if (!idsAreSame(characteristic, detail))
         return;
+
+      if (timer) {
+        clearTimeout(timer);
+      }
 
       if (listener) {
         listener.remove();
@@ -266,11 +272,12 @@ const readCharacteristicValue = characteristic => {
       }
     });
 
-    setTimeout(() => {
+    timer = setTimeout(() => {
       if (listener) {
         listener.remove();
         reject(new Error("Timeout reading characteristic"));
-      }}, 5000);
+      }
+    }, 5000);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);
   });
