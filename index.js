@@ -312,7 +312,8 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
       if (listener) {
         listener.remove();
         reject(new Error("Timeout writing characteristic"));
-      }}, 5000);
+      }
+    }, 5000);
 
     ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
   });
