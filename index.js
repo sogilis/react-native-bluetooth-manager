@@ -186,7 +186,9 @@ const discoverServicesInternal = (device, _serviceIds, callback) => {
   });
 };
 
-const discoverCharacteristicsInternal = (service, characteristicIds, callback) => {
+const discoverCharacteristicsInternal = (service, _characteristicIds, callback) => {
+  const characteristicIds = _characteristicIds.map(id => id.toLowerCase());
+
   return new Promise((resolve, reject) => {
     const onCharacteristicsDiscovered = characteristicMap => {
       if (characteristicMap.characteristics) {
