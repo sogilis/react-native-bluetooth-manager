@@ -4,6 +4,10 @@ import { NativeAppEventEmitter, NativeModules, NativeEventEmitter, Platform } fr
 import { Buffer } from 'buffer';
 import * as _ from 'lodash';
 
+const Configuration = {
+  timeout: 10000,
+};
+
 const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
 
 const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
@@ -144,15 +148,17 @@ const scanDidStop = (callback) => {
 const discoverServicesInternal = (device, serviceIds, callback) => {
   return new Promise((resolve, reject) => {
     const onServicesDiscovered = serviceMap => {
+      if ("error" in serviceMap) {
+        callback(serviceMap);
+        return;
+      }
 
       const allServices = serviceMap.services || [];
       const lowerCaseIds = (serviceIds || []).map(s => s.toLowerCase());
 
-      const services = serviceIds == null
+      const services = serviceIds == null || serviceIds.length == 0
         ? allServices
-        : allServices
-          .map(s => s.toLowerCase())
-          .filter(s => _.includes(lowerCaseIds, s.id));
+        : allServices.filter(c => _.includes(lowerCaseIds, c.id.toLowerCase()));
 
       callback(services);
     };
@@ -189,21 +195,24 @@ const discoverServicesInternal = (device, serviceIds, callback) => {
 const discoverCharacteristicsInternal = (service, characteristicIds, callback) => {
   return new Promise((resolve, reject) => {
     const onCharacteristicsDiscovered = characteristicMap => {
+      if ("error" in characteristicMap) {
+        callback(characteristicMap);
+        return;
+      }
+
       const allCharacteristics = characteristicMap.characteristics || [];
       const lowerCaseIds = (characteristicIds || []).map(id => id.toLowerCase());
 
-      const characteristics = characteristicIds == null
+      const characteristics = characteristicIds == null || characteristicIds.length == 0
         ? allCharacteristics
-        : allCharacteristics.map(c => c.toLowerCase())
-          .filter(c => _.includes(lowerCaseIds, c.id));
+        : allCharacteristics.filter(c => _.includes(lowerCaseIds, c.id.toLowerCase()));
 
-      if (characteristics.length > 0)
-        callback(characteristics);
+      callback(characteristics);
     };
 
     const listener = EventEmitter.addListener(
       ReactNativeBluetooth.CharacteristicDiscovered,
-      onCharacteristicsDiscovered
+      (...args) => onCharacteristicsDiscovered(...args)
     );
 
     let startupListener;
@@ -235,7 +244,7 @@ const discoverCharacteristicsInternal = (service, characteristicIds, callback) =
       if (startupListener) {
         listener.remove();
         reject(new Error("Timeout discovering characteristics"));
-      }}, 15000);
+      }}, Configuration.timeout);
 
     ReactNativeBluetooth.discoverCharacteristics(service, characteristicIds || []);
   });
@@ -275,7 +284,7 @@ const readCharacteristicValue = characteristic => {
         listener.remove();
         reject(new Error("Timeout reading characteristic"));
       }
-    }, 5000);
+    }, Configuration.timeout);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);
   });
@@ -315,7 +324,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
         listener.remove();
         reject(new Error("Timeout writing characteristic"));
       }
-    }, 5000);
+    }, Configuration.timeout);
 
     ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
   });
@@ -420,15 +429,19 @@ const connect = (device) => {
 };
 
 const disconnect = (device) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let unsubscribe;
 
-    let disconnectCallback = device => {
+    let disconnectCallback = callBackInfo => {
       if (unsubscribe) {
         unsubscribe();
       }
 
-      resolve(device);
+      if ("error" in callBackInfo) {
+        reject(new Error(callBackInfo.error));
+      }
+
+      resolve(callBackInfo);
     };
 
     unsubscribe = deviceDidDisconnect(device, disconnectCallback);
@@ -451,12 +464,16 @@ const discoverCharacteristics = (service, characteristicIds) => {
     const onDiscovery = characteristics => {
       if (unsubscribe)
         unsubscribe();
-      resolve(characteristics);
+
+      if ("error" in characteristics)
+        reject(characteristics["error"]);
+      else
+        resolve(characteristics);
     };
 
     discoverCharacteristicsInternal(service, characteristicIds, onDiscovery)
-    .then( release => unsubscribe = release )
-    .catch(reject);
+      .then(release => unsubscribe = release)
+      .catch(reject);
   });
 };
 
@@ -467,12 +484,19 @@ const discoverServices = (device, serviceIds) => {
     const onDiscovery = services => {
       if (unsubscribe)
         unsubscribe();
-      resolve(services);
+
+      if ("error" in services)
+        reject(services["error"]);
+      else
+        resolve(services);
     };
 
     discoverServicesInternal(device, serviceIds, onDiscovery)
-    .then( release => unsubscribe = release )
-    .catch(reject);
+      .then(release => unsubscribe = release)
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
   });
 };
 
@@ -535,5 +559,6 @@ export default {
   findAndWriteToCharacteristic,
   connectAndDiscoverServices,
   connectAndDiscoverCharacteristics,
-  Buffer
+  Buffer,
+  Configuration,
 };

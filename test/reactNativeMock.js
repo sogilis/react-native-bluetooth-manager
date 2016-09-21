@@ -1,25 +1,27 @@
-const Configuration = {
+const TestConfiguration = {
   platform: "android",
   connectSucceed: true,
   disconnectSucceed: true,
   discoverCharacteristicsSucceed: true,
+  discoverServicesSucceed: true,
 };
-
-const Reset = () => {
-  NativeAppEventEmitter.callBacks = {};
-};
-
 
 const NativeAppEventEmitter = {
+  callBackParams: {},
   callbacks: {},
   addListener: function(name, callback) {
     this.callbacks[name] = callback;
+
     return {
       remove: () => {
         this.callbacks[name] = null;
       }
     };
   },
+};
+
+const Reset = () => {
+  NativeAppEventEmitter.callBacks = {};
 };
 
 const NativeEventEmitter = NativeAppEventEmitter;
@@ -33,6 +35,8 @@ const EventConstants = {
   DeviceDisconnected: "DeviceDisconnected",
   CharacteristicDiscovered: "CharacteristicDiscovered",
   CharacteristicDiscoveryStarted: "CharacteristicDiscoveryStarted",
+  ServiceDiscovered: "ServiceDiscovered",
+  ServiceDiscoveryStarted: "ServiceDiscoveryStarted",
 };
 
 const NativeModules = {
@@ -40,10 +44,24 @@ const NativeModules = {
     DeviceConnected: EventConstants.DeviceConnected,
     DeviceDisconnected: EventConstants.DeviceDisconnected,
     CharacteristicDiscovered: EventConstants.CharacteristicDiscovered,
+    ServiceDiscovered: EventConstants.ServiceDiscovered,
     CharacteristicDiscovereryStarted: EventConstants.CharacteristicDiscovereryStarted,
+    ServiceDiscovereryStarted: EventConstants.ServiceDiscovereryStarted,
+
+    connect: function(device) {
+      if (!TestConfiguration.connectSucceed) {
+        NativeAppEventEmitter.callbacks[this.DeviceConnected]({
+          id: device.id,
+          error: "Error",
+        });
+        return;
+      }
+
+      NativeAppEventEmitter.callbacks[this.DeviceConnected](device);
+    },
 
     disconnect: function(device) {
-      if (!Configuration.disconnectSucceed) {
+      if (!TestConfiguration.disconnectSucceed) {
         NativeAppEventEmitter.callbacks[this.DeviceDisconnected]({
           id: device.id,
           error: "Error",
@@ -55,7 +73,7 @@ const NativeModules = {
     },
 
     discoverCharacteristics: function(service) {
-      if (!Configuration.discoverCharacteristicsSucceed) {
+      if (!TestConfiguration.discoverCharacteristicsSucceed) {
         NativeAppEventEmitter.callbacks[this.CharacteristicDiscovereryStarted]({
           id: service.id,
           error: "Error",
@@ -64,12 +82,38 @@ const NativeModules = {
       }
 
       NativeAppEventEmitter.callbacks[this.CharacteristicDiscovereryStarted](service);
+
+      const callBackParams = NativeAppEventEmitter.callBackParams[this.CharacteristicDiscovered];
+      const discoveredCallback = NativeAppEventEmitter.callbacks[this.CharacteristicDiscovered];
+
+      if (callBackParams && discoveredCallback) {
+        discoveredCallback.apply(this, callBackParams);
+      }
+    },
+
+    discoverServices: function(service) {
+      if (!TestConfiguration.discoverServicesSucceed) {
+        NativeAppEventEmitter.callbacks[this.ServiceDiscovereryStarted]({
+          id: service.id,
+          error: "Error",
+        });
+        return;
+      }
+
+      NativeAppEventEmitter.callbacks[this.ServiceDiscovereryStarted](service);
+
+      const callBackParams = NativeAppEventEmitter.callBackParams[this.ServiceDiscovered];
+      const discoveredCallback = NativeAppEventEmitter.callbacks[this.ServiceDiscovered];
+
+      if (callBackParams && discoveredCallback) {
+        discoveredCallback.apply(this, callBackParams);
+      }
     }
   }
 };
 
 export {
-  Configuration,
+  TestConfiguration,
   NativeAppEventEmitter,
   NativeEventEmitter,
   Platform,
