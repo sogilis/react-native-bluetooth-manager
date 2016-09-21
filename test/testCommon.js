@@ -15,7 +15,7 @@ import mockery from "mockery";
 mockery.enable();
 mockery.warnOnUnregistered(false);
 
-mockery.registerSubstitute('react-native', './test/reactNativeMock.js');
+mockery.registerSubstitute('react-native', '../test/reactNativeMock.js');
 
 const api = require("../");
 
