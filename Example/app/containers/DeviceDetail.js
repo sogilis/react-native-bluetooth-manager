@@ -33,10 +33,6 @@ const DeviceDetail = React.createClass({
     services: PropTypes.array.isRequired,
   },
 
-  componentWillUnmount() {
-    this.unsubscribe && this.unsubscribe();
-  },
-
   disconnect() {
     const {
       setConnectionStatus,
@@ -46,9 +42,6 @@ const DeviceDetail = React.createClass({
       isConnected,
       device,
     } = this.props;
-
-    this.unsubscribe && this.unsubscribe();
-    this.unsubscribe = null;
 
     if (isConnected) {
       setConnectionInProgress(true);
@@ -65,7 +58,6 @@ const DeviceDetail = React.createClass({
     } else {
       resetServices();
     }
-
   },
 
   listenForDisconnect() {
