@@ -44,6 +44,15 @@ public class BluetoothHelpers {
         return characteristic;
     }
 
+    public static String propertyName(int property) throws BluetoothException {
+        switch(property) {
+            case BluetoothGattCharacteristic.PROPERTY_READ: return "READ";
+            case BluetoothGattCharacteristic.PROPERTY_WRITE: return "WRITE";
+            case BluetoothGattCharacteristic.PROPERTY_NOTIFY: return "NOTIFY";
+            default: throw new BluetoothException("Unhandled characteristic property: " + Integer.toString(property));
+        }
+    }
+
     public static boolean hasProperty(BluetoothGattCharacteristic characteristic, int property) {
         return (characteristic.getProperties() & property) != 0;
     }
