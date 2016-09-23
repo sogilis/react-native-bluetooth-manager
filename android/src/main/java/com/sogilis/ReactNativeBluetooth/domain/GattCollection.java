@@ -10,8 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GattCollection {
     private ConcurrentHashMap<String, BluetoothGatt> gatts = new ConcurrentHashMap<>();
 
-    public void add(BluetoothGatt gatt) {
-        gatts.put(deviceId(gatt.getDevice()), gatt);
+    public boolean add(BluetoothGatt gatt) {
+        BluetoothGatt alreadyPresentGatt = gatts.putIfAbsent(deviceId(gatt.getDevice()), gatt);
+        return alreadyPresentGatt == null;
     }
 
     public void close(String deviceId) {

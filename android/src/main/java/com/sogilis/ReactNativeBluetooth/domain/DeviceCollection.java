@@ -9,12 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DeviceCollection {
     private ConcurrentHashMap<String, BluetoothDevice> devices = new ConcurrentHashMap<>();
 
-    public boolean contains(BluetoothDevice device) {
-        return devices.containsKey(deviceId(device));
-    }
-
-    public void add(BluetoothDevice device) {
-        devices.put(deviceId(device), device);
+    public boolean add(BluetoothDevice device) {
+        BluetoothDevice alreadyPresentDevice = devices.putIfAbsent(deviceId(device), device);
+        return alreadyPresentDevice == null;
     }
 
     public void clear() {
