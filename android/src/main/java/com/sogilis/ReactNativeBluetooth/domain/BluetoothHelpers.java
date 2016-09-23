@@ -44,6 +44,20 @@ public class BluetoothHelpers {
         return characteristic;
     }
 
+    public static BluetoothGattCharacteristic findCharacteristic(BluetoothGatt gatt, String serviceId, String characteristicId, int property) throws BluetoothException {
+        BluetoothGattService service = findServiceById(gatt, serviceId);
+        BluetoothGattCharacteristic characteristic = findCharacteristic(gatt.getDevice(), service, characteristicId);
+
+        if (! hasProperty(characteristic, property)) {
+            throw new BluetoothException("Characteristic " + characteristicId +
+                " doesn't have property " + propertyName(property) +
+                    " (service: " + serviceId(service) +
+                    ", device: " + deviceId(gatt.getDevice()) + ")");
+        }
+
+        return characteristic;
+    }
+
     public static String propertyName(int property) throws BluetoothException {
         switch(property) {
             case BluetoothGattCharacteristic.PROPERTY_READ: return "READ";
