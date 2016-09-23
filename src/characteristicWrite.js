@@ -13,7 +13,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
 
     const resultMapper = detail => detail;
 
-    makeCharacteristicEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicWrite, characteristic, resultMapper);
+    makeCharacteristicEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicWritten, characteristic, resultMapper);
 
     ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
   });
