@@ -266,7 +266,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void writeCharacteristicValue(final ReadableMap characteristicMap, final String base64Value, boolean withResponse) {
+    public void writeCharacteristicValue(final ReadableMap characteristicMap, final String base64Value, final boolean withResponse) {
         final String deviceId = characteristicMap.getString("deviceId");
         final String serviceId = characteristicMap.getString("serviceId");
         final String characteristicId = characteristicMap.getString("id");
@@ -278,6 +278,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattCharacteristic characteristic = findCharacteristicById(gatt, serviceId, characteristicId);
 
                 characteristic.setValue(Base64.decode(base64Value, Base64.DEFAULT));
+
+                if (withResponse) {
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                } else {
+                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                }
 
                 if (!gatt.writeCharacteristic(characteristic)) {
                     eventEmitter.emitError(CHARACTERISTIC_WRITTEN,
