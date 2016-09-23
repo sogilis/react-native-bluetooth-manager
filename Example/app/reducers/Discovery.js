@@ -1,4 +1,5 @@
 import * as types from '../actions/DiscoveryActionTypes';
+import _ from 'lodash';
 
 const initialState = {
   devicesDiscovered: [],
@@ -10,7 +11,7 @@ export default function discovery(state = initialState, action) {
     case types.DEVICEDISCOVERED:
       return {
         ...state,
-        devicesDiscovered: [...state.devicesDiscovered, action.device]
+        devicesDiscovered: _.uniq([...state.devicesDiscovered, action.device]),
       };
     case types.DISCOVERYSTATUSCHANGE:
       return {
