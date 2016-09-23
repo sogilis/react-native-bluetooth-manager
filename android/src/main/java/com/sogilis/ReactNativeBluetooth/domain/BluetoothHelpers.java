@@ -28,11 +28,11 @@ public class BluetoothHelpers {
         return service;
     }
 
-    public static BluetoothGattCharacteristic findCharacteristicById(BluetoothGatt gatt, String serviceId, String characteristicId) throws BluetoothException {
-        return findCharacteristicById(gatt.getDevice(), findServiceById(gatt, serviceId), characteristicId);
+    public static BluetoothGattCharacteristic findCharacteristic(BluetoothGatt gatt, String serviceId, String characteristicId) throws BluetoothException {
+        return findCharacteristic(gatt.getDevice(), findServiceById(gatt, serviceId), characteristicId);
     }
 
-    public static BluetoothGattCharacteristic findCharacteristicById(BluetoothDevice device, BluetoothGattService service, String characteristicId) throws BluetoothException {
+    public static BluetoothGattCharacteristic findCharacteristic(BluetoothDevice device, BluetoothGattService service, String characteristicId) throws BluetoothException {
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(characteristicId));
 
         if (characteristic == null) {
