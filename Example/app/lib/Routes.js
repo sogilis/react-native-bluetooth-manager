@@ -42,7 +42,7 @@ const Routes = React.createClass({
       return <CharacteristicDetail navigator={navigate} />;
     }
 
-    console.assert(false, "Invalid route name requested.");
+    console.error("Invalid route name requested.");
   },
 
   componentWillReceiveProps(nextProps) {
