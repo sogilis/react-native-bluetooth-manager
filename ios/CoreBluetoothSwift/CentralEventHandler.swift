@@ -6,15 +6,23 @@
 import Foundation
 import CoreBluetooth
 
+enum BluetoothState {
+    case Unknown
+    case Resetting
+    case Unsupported
+    case Unauthorized
+    case PoweredOff
+    case PoweredOn
+}
 
 class CentralEventHandler: NSObject, CBCentralManagerDelegate {
-    private var onStateChange: (CBCentralManagerState -> Void)?
+    private var onStateChange: (BluetoothState -> Void)?
     private var onDeviceDiscovered: (CBPeripheral -> Void)?
     private var onDeviceConnected: (CBPeripheral -> Void)?
     private var onDeviceConnectedOnce: (CBPeripheral -> Void)?
     private var onDeviceDisconnected: (CBPeripheral -> Void)?
 
-    func onStateChange(handler: CBCentralManagerState -> Void) -> Void {
+    func onStateChange(handler: BluetoothState -> Void) -> Void {
         self.onStateChange = handler
     }
 
@@ -39,7 +47,25 @@ class CentralEventHandler: NSObject, CBCentralManagerDelegate {
             return
         }
 
-        callback(central.state)
+        switch central.state {
+        case .Unknown:
+            callback(BluetoothState.Unknown)
+            break
+        case .Resetting:
+            callback(BluetoothState.Resetting)
+            break
+        case .Unsupported:
+            callback(BluetoothState.Unsupported)
+            break
+        case .Unauthorized:
+            callback(BluetoothState.Unauthorized)
+            break
+        case .PoweredOff:
+            callback(BluetoothState.PoweredOff)
+            break
+        case .PoweredOn:
+            callback(BluetoothState.PoweredOn)
+        }
     }
 
     /**

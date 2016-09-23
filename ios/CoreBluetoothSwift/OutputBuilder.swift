@@ -26,7 +26,7 @@ class OutputBuilder {
         ]
     }
 
-    static func asStateChange(state: CBCentralManagerState) -> String {
+    static func asStateChange(state: BluetoothState) -> String {
         switch state {
         case .Unknown:
             return "unknown"

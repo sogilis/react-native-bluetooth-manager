@@ -21,7 +21,7 @@ public class BluetoothActions: NSObject {
     private var onServiceDiscoveredHandler: (BluetoothServiceReturn -> Void) = { _ in }
     private var onCharacteristicDiscoveredHandler: (BluetoothServiceReturn -> Void) = { _ in }
 
-    private var lastState = CBCentralManagerState.Unknown
+    private var lastState = BluetoothState.Unknown
 
 
     private let peripheralStore = PeripheralStore()
