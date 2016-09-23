@@ -2,6 +2,7 @@ import {
   makeCharacteristicEventListener,
   ReactNativeBluetooth,
 } from './lib';
+import { Buffer } from 'buffer';
 
 const readCharacteristicValue = characteristic => {
   return new Promise((resolve, reject) => {
