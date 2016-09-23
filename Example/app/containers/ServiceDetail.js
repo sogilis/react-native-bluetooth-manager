@@ -23,30 +23,24 @@ const ServiceDetail = React.createClass({
   },
 
   componentWillMount() {
-    const { service, characteristicDiscovered, applicationError } = this.props;
-    this.unsubscribe = [];
+    const { service, characteristicDiscovered, applicationError, characteristics } = this.props;
 
-    if ((this.props.characteristics || []).length > 0) {
+    if ((characteristics || []).length > 0) {
       return;
     }
 
     Bluetooth.discoverCharacteristics(service, null)
-    .then(characteristics => {
-      characteristics.forEach(c => characteristicDiscovered(c));
+    .then(discoveredItems => {
+      discoveredItems.forEach(c => characteristicDiscovered(c));
     })
     .catch(error => {
       applicationError(error.message);
     });
   },
 
-  componentWillUnmount() {
-      this.unsubscribe.forEach(u => u());
-  },
-
   characteristicSelected(characteristic) {
-    const { setCharacteristic, navigator, resetCharacteristics } = this.props;
+    const { setCharacteristic, navigator } = this.props;
 
-    resetCharacteristics();
     setCharacteristic(characteristic);
 
     navigator('CharacteristicDetail');

@@ -147,24 +147,7 @@ public class BluetoothActions: NSObject {
             return
         }
 
-        dispatch_async(backgroundQueue, { [unowned self] in
-            if let characteristics = characteristics {
-                if let devicecharacteristics = requiredService.characteristics {
-                    let hasId: String -> Bool = characteristics.contains
-                    let filter: CBCharacteristic -> Bool = { hasId($0.UUID.UUIDString) }
-
-                    let characteristicsList = devicecharacteristics.filter(filter)
-
-                    let alreadyFound = characteristicsList.count == characteristics.count
-
-                    if alreadyFound {
-                        self.onCharacteristicDiscoveredHandler(
-                            OutputBuilder.asCharacteristicList(characteristicsList))
-                        return
-                    }
-                }
-            }
-
+        dispatch_async(backgroundQueue, { 
             let characteristicIds = characteristics?.map { CBUUID(string: $0) }
             requiredService.peripheral.discoverCharacteristics(characteristicIds,
                 forService: requiredService)
@@ -181,17 +164,6 @@ public class BluetoothActions: NSObject {
                 ])
             return
         }
-
-//        let properties = withResponse ? CBCharacteristicProperties.Write :
-//            CBCharacteristicProperties.WriteWithoutResponse
-//
-//        guard characteristic.properties.contains(properties) else {
-//            onCharacteristicWriteHandler([
-//                "id": lookup.eitherOr("characteristicId", key2: "id") ?? "",
-//                "error": "Trying to write to a characteristic that does not support write type."
-//                ])
-//            return
-//        }
 
         guard let dataToSend = NSData(base64EncodedString: data, options: NSDataBase64DecodingOptions()) else {
             onCharacteristicWriteHandler([
