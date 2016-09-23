@@ -12,8 +12,9 @@ const CharacteristicNotify = React.createClass({
   getInitialState() {
     return {
       operationInProgress: false,
-      characteristicStatus: "Not subscribed",
+      characteristicStatus: 'Not subscribed',
       isSubscribed: false,
+      buttonText: 'Subscribe'
     };
   },
 
@@ -38,6 +39,7 @@ const CharacteristicNotify = React.createClass({
     this.setState({
       isSubscribed: false,
       characteristicStatus: "Not subscribed",
+      buttonText: 'Notify'
     });
   },
 
@@ -63,9 +65,10 @@ const CharacteristicNotify = React.createClass({
       Bluetooth.characteristicDidNotify(this.props.characteristic, this.onNotificationReceived);
 
     this.setState({
-          isConnected: true,
+          isSubscribed: true,
           characteristicStatus: "Waiting for value",
           operationInProgress: false,
+          buttonText: 'Unsubscribe'
         });
   },
 
@@ -74,7 +77,7 @@ const CharacteristicNotify = React.createClass({
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.subscribeToNotifyValue} style={styles.buttonStyle}>Notify</Button>
+        <Button onPress={this.subscribeToNotifyValue} style={styles.buttonStyle}>{this.state.buttonText}</Button>
         <View style={ styles.resultHolder }>
           <Text>{this.state.characteristicStatus}</Text>
           <ActivityIndicator animating={this.state.operationInProgress} />
