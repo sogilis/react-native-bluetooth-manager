@@ -17,7 +17,9 @@ public class GattCollection {
 
     public void close(String deviceId) {
         BluetoothGatt gatt = gatts.remove(deviceId);
-        gatt.close();
+        if (gatt != null) {
+            gatt.close();
+        }
     }
 
     public BluetoothGatt get(String deviceId) throws BluetoothException {
