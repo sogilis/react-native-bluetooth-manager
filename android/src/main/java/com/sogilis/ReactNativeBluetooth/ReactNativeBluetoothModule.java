@@ -144,23 +144,37 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             String deviceId = deviceId(device);
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                gattCollection.add(gatt);
-                emit(deviceConnected(device));
+                if (status == GATT_SUCCESS) {
+                    gattCollection.add(gatt);
+                    emit(deviceConnected(device));
+                } else {
+                    emitGattError(DEVICE_CONNECTED, status);
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                gattCollection.close(deviceId);
-                emit(deviceDisconnected(device));
+                if (status == GATT_SUCCESS) {
+                    gattCollection.close(deviceId);
+                    emit(deviceDisconnected(device));
+                } else {
+                    emitGattError(DEVICE_DISCONNECTED, status);
+                }
             }
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            emit(servicesDiscovered(gatt.getDevice(), gatt.getServices()));
+            if (status == GATT_SUCCESS) {
+                emit(servicesDiscovered(gatt.getDevice(), gatt.getServices()));
+            } else {
+                emitGattError(SERVICES_DISCOVERED, status);
+            }
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == GATT_SUCCESS) {
                 emit(characteristicRead(gatt.getDevice(), characteristic));
+            } else {
+                emitGattError(CHARACTERISTIC_READ, status);
             }
         }
 
@@ -168,6 +182,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == GATT_SUCCESS) {
                 emit(characteristicWritten(gatt.getDevice(), characteristic));
+            } else {
+                emitGattError(CHARACTERISTIC_WRITTEN, status);
             }
         }
 
