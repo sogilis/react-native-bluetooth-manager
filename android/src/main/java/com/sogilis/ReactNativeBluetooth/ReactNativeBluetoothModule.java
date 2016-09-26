@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Base64;
 
+import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
+
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -152,14 +154,14 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (status == GATT_SUCCESS) {
                 emit(characteristicRead(gatt.getDevice(), characteristic));
             }
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (status == GATT_SUCCESS) {
                 emit(characteristicWritten(gatt.getDevice(), characteristic));
             }
         }
