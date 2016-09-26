@@ -33,6 +33,7 @@ import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.findServiceById;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.findCharacteristic;
+import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.gattStatusString;
 import static com.sogilis.ReactNativeBluetooth.util.UUIDHelpers.uuidsFromStrings;
 import static com.sogilis.ReactNativeBluetooth.events.EventBuilders.*;
 
@@ -63,6 +64,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
     private void emit(BluetoothEvent event) {
         eventEmitter.emit(event);
+    }
+
+    private void emitGattError(String eventName, int status) {
+        eventEmitter.emitError(eventName, gattStatusString(status));
     }
 
     private void didEnableBluetooth() {
