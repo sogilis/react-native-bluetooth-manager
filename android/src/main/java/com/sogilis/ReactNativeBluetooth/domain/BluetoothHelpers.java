@@ -90,4 +90,19 @@ public class BluetoothHelpers {
         gatt.writeDescriptor(descriptor);
         gatt.setCharacteristicNotification(characteristic, false);
     }
+
+    public static String gattStatusString(int status) {
+        switch(status) {
+            case BluetoothGatt.GATT_CONNECTION_CONGESTED: return "Connection congested";
+            case BluetoothGatt.GATT_FAILURE: return "Failure";
+            case BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION: return "Insufficient authentication";
+            case BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION: return "Insufficient encryption";
+            case BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH: return "Invalid attribute length";
+            case BluetoothGatt.GATT_INVALID_OFFSET: return "Invalid offset";
+            case BluetoothGatt.GATT_READ_NOT_PERMITTED: return "Read not permitted";
+            case BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED: return "Request not supported";
+            case BluetoothGatt.GATT_WRITE_NOT_PERMITTED: return "Write not permitted";
+            default: return "GATT error with unknown status code: " + status;
+        }
+    }
 }
