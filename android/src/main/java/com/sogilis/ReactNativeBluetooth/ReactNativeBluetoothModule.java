@@ -350,6 +350,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         };
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        gattCollection.clear();
+        super.finalize();
+    }
+
     @Override public Map<String, Object> getConstants() {
         final Map<String, Object> constants = new HashMap<>();
 

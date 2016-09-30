@@ -2,7 +2,9 @@ package com.sogilis.ReactNativeBluetooth.domain;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.util.Log;
 
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.deviceId;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,9 +19,20 @@ public class GattCollection {
 
     public void close(String deviceId) {
         BluetoothGatt gatt = gatts.remove(deviceId);
+
         if (gatt != null) {
-            gatt.close();
+            disconnect(gatt);
         }
+    }
+
+    private void disconnect(BluetoothGatt gatt) {
+        BluetoothDevice device = gatt.getDevice();
+        Log.d(MODULE_NAME, "Disconnecting from " + device.getName() + " (" + device.getAddress() + ")");
+        gatt.close();
+    }
+
+    public void close(BluetoothGatt gatt) {
+        close(deviceId(gatt.getDevice()));
     }
 
     public BluetoothGatt get(String deviceId) throws BluetoothException {
@@ -36,7 +49,7 @@ public class GattCollection {
 
     public void clear() {
         for (BluetoothGatt gatt: gatts.values()) {
-            gatt.close();
+            close(gatt);
         }
         gatts.clear();
     }
