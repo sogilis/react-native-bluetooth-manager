@@ -13,6 +13,10 @@ Bluetooth API for [React Native](https://github.com/facebook/react-native).
 - Read, write and receive characteristic notifications
 - Support both iOS/Android
 
+## Install
+
+`npm install --save react-native-bluetooth-manager`
+
 ## Usage
 
 See the [Example app](https://github.com/sogilis/react-native-bluetooth-manager/tree/master/Example).
