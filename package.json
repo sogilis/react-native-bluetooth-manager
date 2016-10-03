@@ -1,10 +1,10 @@
 {
-  "name": "react-native-bluetooth",
+  "name": "react-native-bluetooth-manager",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sogilis/react-native-bluetooth.git"
+    "url": "git+https://github.com/sogilis/react-native-bluetooth-manager.git"
   },
   "keywords": [
     "react",
@@ -13,12 +13,12 @@
   ],
   "author": "Sogilis SARL",
   "bugs": {
-    "url": "https://github.com/sogilis/react-native-bluetooth/issues"
+    "url": "https://github.com/sogilis/react-native-bluetooth-manager/issues"
   },
-  "homepage": "https://github.com/sogilis/react-native-bluetooth#readme",
+  "homepage": "https://github.com/sogilis/react-native-bluetooth-manager#readme",
   "scripts": {
     "test": "BABEL_ENV=test ./node_modules/babel-tape-runner/bin/babel-tape-runner ./test/*.js | tap-spec",
-    "module-watch": "nodemon -w index.js -e js -x rsync -rtv index.js Example/node_modules/react-native-bluetooth/index.js",
+    "module-watch": "nodemon -w index.js -e js -x rsync -rtv index.js Example/node_modules/react-native-bluetooth-manager/index.js",
     "lint": "eslint .",
     "lint-example": "eslint Example/app"
   },

@@ -1,4 +1,4 @@
-# react-native-bluetooth
+# react-native-bluetooth-manager
 
 __Disclaimer: This is alpha software.__
 
@@ -15,7 +15,7 @@ Bluetooth API for [React Native](https://github.com/facebook/react-native).
 
 ## Usage
 
-See the [Example app](https://github.com/sogilis/react-native-bluetooth/tree/master/Example).
+See the [Example app](https://github.com/sogilis/react-native-bluetooth-manager/tree/master/Example).
 
 ## License
 

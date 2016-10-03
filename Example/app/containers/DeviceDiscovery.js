@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import DeviceList from '../components/DeviceList';
 import TopBar from '../components/TopBar';
-import Bluetooth from 'react-native-bluetooth';
+import Bluetooth from 'react-native-bluetooth-manager';
 
 import {
   deviceDiscovered,

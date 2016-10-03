@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import TopBar from '../components/TopBar';
 import CharacteristicList from '../components/CharacteristicList';
-import Bluetooth from 'react-native-bluetooth';
+import Bluetooth from 'react-native-bluetooth-manager';
 
 import { applicationError } from '../actions/GlobalActions';
 import { setCharacteristic, setService } from '../actions/DeviceContextActions';

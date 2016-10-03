@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { Navigator, Alert } from 'react-native';
-import Bluetooth from 'react-native-bluetooth';
+import Bluetooth from 'react-native-bluetooth-manager';
 import { connect } from 'react-redux';
 
 import DeviceDiscovery from '../containers/DeviceDiscovery';

@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, Alert } from 'react-native';
-import Bluetooth from 'react-native-bluetooth';
+import Bluetooth from 'react-native-bluetooth-manager';
 
 import Button from './Button';
 

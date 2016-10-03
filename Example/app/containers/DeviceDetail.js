@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, ActivityIndicator, TouchableOpacity } from 'rea
 import { connect } from 'react-redux';
 import TopBar from '../components/TopBar';
 import ServiceList from '../components/ServiceList';
-import Bluetooth from 'react-native-bluetooth';
+import Bluetooth from 'react-native-bluetooth-manager';
 
 import { applicationError } from '../actions/GlobalActions';
 import { setService, setDevice } from '../actions/DeviceContextActions';
