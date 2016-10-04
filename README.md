@@ -1,5 +1,7 @@
 # react-native-bluetooth-manager
 
+[![npm version](https://badge.fury.io/js/react-native-bluetooth-manager.svg)](https://npmjs.org/package/react-native-bluetooth-manager)
+
 __Disclaimer: This is alpha software.__
 
 Bluetooth API for [React Native](https://github.com/facebook/react-native).
