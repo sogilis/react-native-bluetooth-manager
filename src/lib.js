@@ -10,7 +10,7 @@ const ReactNativeBluetooth = NativeModules.ReactNativeBluetooth;
 const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
   new NativeEventEmitter(ReactNativeBluetooth);
 
-const idsAreSame = (set1, set2) => set1 && set2 && ("id" in set1) && ("id" in set2) && set1["id"] == set2["id"];
+const idsAreSame = (set1, set2) => set1 && set2 && ("id" in set1) && ("id" in set2) && set1["id"].toLowerCase() == set2["id"].toLowerCase();
 
 const Configuration = {
   timeout: 10000,
