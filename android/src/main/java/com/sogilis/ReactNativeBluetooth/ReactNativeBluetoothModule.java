@@ -76,6 +76,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        reactContext.registerReceiver(pairingStatusChangeReceiver,
+                new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
     }
 
     private void emit(BluetoothEvent event) {
@@ -110,6 +113,16 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
         }
     };
+
+    private BroadcastReceiver pairingStatusChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            int newStatus = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+
+            emit(pairingStatusChanged(device, newStatus));
+        }
+    }
 
     @ReactMethod
     public void notifyCurrentState() {
@@ -231,6 +244,20 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void run() {
                 gattCollection.close(deviceId);
+            }
+        };
+    }
+
+    @ReactMethod
+    public void notifyCurrentPairingStatus(final ReadableMap deviceMap) throws BluetoothException {
+        final String deviceId = deviceMap.getString("id");
+
+        new BluetoothAction(PAIRING_STATUS_CHANGED, eventEmitter) {
+            @Override
+            public void run() throws BluetoothException {
+                BluetoothDevice device = discoveredDevices.get(deviceId);
+
+                emit(pairingStatusChanged(device));
             }
         };
     }
@@ -381,6 +408,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("DeviceDiscovered", DEVICE_DISCOVERED);
         constants.put("DeviceConnected", DEVICE_CONNECTED);
         constants.put("DeviceDisconnected", DEVICE_DISCONNECTED);
+        constants.put("PairingStatusChanged", PAIRING_STATUS_CHANGED);
         constants.put("ServiceDiscoveryStarted", SERVICE_DISCOVERY_STARTED);
         constants.put("ServiceDiscovered", SERVICES_DISCOVERED);
         constants.put("CharacteristicDiscoveryStarted", CHARACTERISTIC_DISCOVERY_STARTED);

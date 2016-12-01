@@ -86,6 +86,17 @@ const startScanWithDiscovery = (customOptions, onDeviceFound) => {
   return startScan(customOptions);
 };
 
+const didChangePairingStatus = (callback) => {
+  const listener = EventEmitter.addListener(
+    ReactNativeBluetooth.PairingStatusChanged,
+    callback
+  );
+
+  ReactNativeBluetooth.notifyCurrentPairingStatus();
+
+  return unsubscription(listener);
+};
+
 const connectAndDiscoverServices = (device, serviceIds) => {
   return connect(device)
     .then(() => discoverServices(device, serviceIds));
@@ -141,6 +152,7 @@ export default {
   disconnect,
   deviceDidDisconnect,
   deviceDidConnect,
+  didChangePairingStatus,
   findAndReadFromCharacteristic,
   findAndWriteToCharacteristic,
   connectAndDiscoverServices,

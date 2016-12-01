@@ -61,6 +61,14 @@ public class EventBuilders {
         return new BluetoothEvent(DEVICE_DISCONNECTED, deviceMap(device));
     }
 
+    public static BluetoothEvent pairingStatusChanged(BluetoothDevice device) {
+        WritableMap map = new WritableNativeMap();
+
+        map.putBoolean("paired", device.getBondState() == BluetoothDevice.BOND_BONDED);
+
+        return new BluetoothEvent(PAIRING_STATUS_CHANGED, map);
+    }
+
     public static BluetoothEvent serviceDiscoveryStarted(BluetoothDevice device) {
         return new BluetoothEvent(SERVICE_DISCOVERY_STARTED, deviceMap(device));
     }

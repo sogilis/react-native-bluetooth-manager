@@ -25,6 +25,7 @@ public class EventNames {
     public static final String DEVICE_DISCOVERED = name("DEVICE_DISCOVERED");
     public static final String DEVICE_CONNECTED = name("DEVICE_CONNECTED");
     public static final String DEVICE_DISCONNECTED = name("DEVICE_DISCONNECTED");
+    public static final String PAIRING_STATUS_CHANGED = name("PAIRING_STATUS_CHANGED");
     public static final String SERVICE_DISCOVERY_STARTED = name("SERVICE_DISCOVERY_STARTED");
     public static final String SERVICES_DISCOVERED = name("SERVICES_DISCOVERED");
     public static final String CHARACTERISTIC_DISCOVERY_STARTED = name("CHARACTERISTIC_DISCOVERY_STARTED");
