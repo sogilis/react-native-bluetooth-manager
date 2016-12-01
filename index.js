@@ -56,17 +56,7 @@ const characteristicDidNotify = (characteristic, callback) => {
     onNotifyCaught
   );
 
-  const deviceMap = {
-    id: characteristic.deviceId
-  };
-
-  connectAndDiscoverCharacteristics(deviceMap, characteristic.serviceId, [characteristic.id])
-    .then(() => ReactNativeBluetooth.subscribeToNotification(characteristic))
-    .catch(error => {
-      callback({
-        error: error,
-      });
-    });
+  ReactNativeBluetooth.subscribeToNotification(characteristic);
 
   return () => {
     listener.remove();
