@@ -23,6 +23,8 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 
 import java.util.UUID;
+import android.util.Log;
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 public class BluetoothHelpers {
     public static String deviceId(BluetoothDevice device) {
@@ -97,7 +99,11 @@ public class BluetoothHelpers {
         gatt.setCharacteristicNotification(characteristic, true);
         BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        gatt.writeDescriptor(descriptor);
+        if(! gatt.writeDescriptor(descriptor)) {
+            Log.d(MODULE_NAME, "enableNotification - writeDescriptor failed for unknown reason");
+        } else {
+            Log.d(MODULE_NAME, "enableNotification - writeDescriptor success");
+        }
     }
 
     public static void disableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
