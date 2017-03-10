@@ -29,10 +29,7 @@ import com.sogilis.ReactNativeBluetooth.domain.GattCollection;
 import com.sogilis.ReactNativeBluetooth.events.BluetoothEvent;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
@@ -215,7 +212,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void run() throws BluetoothException {
                 BluetoothDevice device = discoveredDevices.get(deviceId);
-
+                Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+                if(!bondedDevices.contains(device)) {
+                    bluetoothAdapter.startDiscovery();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                    }
+                    bluetoothAdapter.cancelDiscovery();
+                }
                 device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
         };
