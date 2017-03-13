@@ -59,6 +59,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        reactContext.registerReceiver(pairingStatusChangeReceiver,
+            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+
         bluetoothActionsLoop = new BluetoothActionsLoop();
     }
 
@@ -205,6 +209,17 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         }
     };
 
+
+    private BroadcastReceiver pairingStatusChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState() == BluetoothDevice.BOND_NONE) {
+                device.connectGatt(getReactApplicationContext(), false, gattCallback);
+            }
+        }
+    };
+
     @ReactMethod
     public void connect(final ReadableMap deviceMap) {
         final String deviceId = deviceMap.getString("id");
@@ -215,14 +230,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothDevice device = discoveredDevices.get(deviceId);
                 Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
                 if(!bondedDevices.contains(device)) {
-                    bluetoothAdapter.startDiscovery();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
+                    if (!device.createBond()) {
+                        eventEmitter.emitError(DEVICE_CONNECTED, "Error when pairing to device");
                     }
-                    bluetoothAdapter.cancelDiscovery();
+                } else {
+                    device.connectGatt(getReactApplicationContext(), false, gattCallback);
                 }
-                device.connectGatt(getReactApplicationContext(), false, gattCallback);
             }
         };
 
