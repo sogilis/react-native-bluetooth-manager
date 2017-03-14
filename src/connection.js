@@ -19,6 +19,7 @@ import {
   ReactNativeBluetooth,
   EventEmitter,
   unsubscription,
+  Configuration,
 } from './lib';
 
 const deviceDidDisconnect = (device, callback) => {
@@ -57,10 +58,15 @@ const deviceDidConnect = (device, callback) => {
 const connect = (device) => {
   return new Promise((resolve, reject) => {
     let listener;
+    let timer = null;
 
     const onConnectionCaught = connectedDetail => {
       if (!idsAreSame(device, connectedDetail))
         return;
+
+      if (timer) {
+        clearTimeout(timer);
+      }
 
       if ("error" in connectedDetail) {
         reject(new Error(connectedDetail["error"]));
@@ -80,6 +86,12 @@ const connect = (device) => {
     );
 
     ReactNativeBluetooth.connect(device);
+    timer = setTimeout(() => {
+      if (listener) {
+        listener.remove();
+      }
+      reject(new Error('CONNECTION_TIMEOUT'));
+    }, 2 * Configuration.timeout);
   });
 };
 
