@@ -120,6 +120,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(SCAN_STARTED, eventEmitter) {
             @Override
             public void run() {
+                discoveredDevices.clear();
                 bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
                 emit(scanStarted());
             }
