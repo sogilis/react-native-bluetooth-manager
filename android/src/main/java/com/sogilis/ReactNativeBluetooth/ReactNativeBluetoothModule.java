@@ -17,10 +17,12 @@
 package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.*;
+import android.bluetooth.le.*;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.ParcelUuid;
 import android.util.Base64;
 import com.facebook.react.bridge.*;
 import com.sogilis.ReactNativeBluetooth.domain.BluetoothException;
@@ -32,11 +34,11 @@ import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 import java.util.*;
 
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
+import static android.bluetooth.le.ScanSettings.*;
 import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 import static com.sogilis.ReactNativeBluetooth.domain.BluetoothHelpers.*;
 import static com.sogilis.ReactNativeBluetooth.events.EventBuilders.*;
 import static com.sogilis.ReactNativeBluetooth.events.EventNames.*;
-import static com.sogilis.ReactNativeBluetooth.util.UUIDHelpers.uuidsFromStrings;
 
 
 public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
@@ -110,14 +112,36 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
+    ScanCallback scanCallback = new ScanCallback() {
         @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (discoveredDevices.add(device)) {
-                emit(deviceDiscovered(device));
+        public void onScanResult(int callbackType, ScanResult result) {
+            if (discoveredDevices.add(result.getDevice())) {
+                emit(deviceDiscovered(result.getDevice()));
+            }
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for(ScanResult result: results) {
+                if (discoveredDevices.add(result.getDevice())) {
+                    emit(deviceDiscovered(result.getDevice()));
+                }
             }
         }
     };
+
+    private List<ScanFilter> getScanFiltersFromUUIDStrings(ReadableArray uuidStrings) {
+        List<ScanFilter> filters = new ArrayList<>();
+
+        for (int i = 0; i < uuidStrings.size(); i++) {
+            UUID uuid = UUID.fromString(uuidStrings.getString(i));
+            ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
+            scanFilterBuilder.setServiceUuid(new ParcelUuid(uuid));
+            filters.add(scanFilterBuilder.build());
+        }
+
+        return filters;
+    }
 
     @ReactMethod
     public void startScan(final ReadableArray uuidStrings) {
@@ -125,7 +149,14 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void run() {
                 discoveredDevices.clear();
-                bluetoothAdapter.startLeScan(uuidsFromStrings(uuidStrings), scanCallback);
+                final BluetoothLeScanner scanner = bluetoothAdapter.getBluetoothLeScanner();
+                final ScanSettings settings = new ScanSettings.Builder()
+                        .setCallbackType(CALLBACK_TYPE_ALL_MATCHES)
+                        .setScanMode(SCAN_MODE_LOW_LATENCY)
+                        .build();
+                final List<ScanFilter> filters = getScanFiltersFromUUIDStrings(uuidStrings);
+
+                scanner.startScan(filters, settings, scanCallback);
                 emit(scanStarted());
             }
         }.start();
@@ -136,7 +167,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         new BluetoothAction(SCAN_STOPPED, eventEmitter) {
             @Override
             public void run() {
-                bluetoothAdapter.stopLeScan(scanCallback);
+                bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
                 emit(scanStopped());
             }
         }.start();
