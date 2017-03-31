@@ -193,6 +193,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 } else {
                     emitGattError(DEVICE_DISCONNECTED, status);
                 }
+                bluetoothActionsLoop.clear();
             }
             bluetoothActionsLoop.actionDone();
         }

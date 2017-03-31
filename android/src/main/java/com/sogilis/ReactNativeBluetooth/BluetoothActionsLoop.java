@@ -42,4 +42,9 @@ class BluetoothActionsLoop {
         Log.d(MODULE_NAME, "BluetoothActionsLoop::tick - processing new action: " + currentAction.eventName);
         currentAction.start();
     }
+
+    public void clear() {
+        currentAction = null;
+        actionsQueue.clear();
+    }
 }
