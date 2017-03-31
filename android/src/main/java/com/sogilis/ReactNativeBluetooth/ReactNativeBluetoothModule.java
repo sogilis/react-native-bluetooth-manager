@@ -187,8 +187,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                     emitGattError(DEVICE_CONNECTED, status);
                 }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                gattCollection.close(deviceId);
                 if (status == GATT_SUCCESS) {
-                    gattCollection.close(deviceId);
                     emit(deviceDisconnected(device));
                 } else {
                     emitGattError(DEVICE_DISCONNECTED, status);
