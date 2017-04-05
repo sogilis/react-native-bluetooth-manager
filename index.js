@@ -86,45 +86,6 @@ const startScanWithDiscovery = (customOptions, onDeviceFound) => {
   return startScan(customOptions);
 };
 
-const connectAndDiscoverServices = (device, serviceIds) => {
-  return connect(device)
-    .then(() => discoverServices(device, serviceIds));
-};
-
-const connectAndDiscoverCharacteristics = (device, serviceId, characteristicIds) => {
-  const service = {
-    id: serviceId,
-    deviceId: device.id,
-  };
-
-  return connectAndDiscoverServices(device, [serviceId])
-    .then(() => discoverCharacteristics(service, characteristicIds));
-};
-
-const findAndReadFromCharacteristic = (device, serviceId, characteristicId) => {
-  return connectAndDiscoverCharacteristics(device, serviceId, [characteristicId])
-    .then(characteristics => {
-      if ("error" in characteristics) {
-        return Promise.reject(characteristics.error);
-      }
-      if (characteristics.length != 1) {
-        return Promise.reject("Error in characteristic discovery. Wrong number of characteristics.");
-      }
-      return readCharacteristicValue(characteristics[0]);
-    });
-};
-
-const findAndWriteToCharacteristic = (device, serviceId, characteristicId, buffer, withResponse = false) => {
-  return connectAndDiscoverCharacteristics(device, serviceId, [characteristicId])
-    .then(characteristics => {
-      if ("error" in characteristics) {
-        Promise.reject(characteristics.error);
-        return;
-      }
-      return writeCharacteristicValue(characteristics[0], buffer, withResponse);
-    });
-};
-
 export default {
   didChangeState,
   startScan,
@@ -141,10 +102,6 @@ export default {
   disconnect,
   deviceDidDisconnect,
   deviceDidConnect,
-  findAndReadFromCharacteristic,
-  findAndWriteToCharacteristic,
-  connectAndDiscoverServices,
-  connectAndDiscoverCharacteristics,
   Buffer,
   Configuration,
 };
