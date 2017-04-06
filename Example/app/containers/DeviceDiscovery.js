@@ -16,7 +16,7 @@ import { applicationError } from '../actions/GlobalActions';
 import { setDevice } from '../actions/DeviceContextActions';
 
 const ScanOptions = {
-  uuids: null,
+  uuids: [],
 };
 
 const DeviceDiscovery = React.createClass({
