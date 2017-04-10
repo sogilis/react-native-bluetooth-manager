@@ -49,6 +49,22 @@ class BluetoothActionsLoop {
         currentAction.start();
     }
 
+    public synchronized void cancelGattActions(String deviceId, String reason) {
+        Log.d(MODULE_NAME, "Loop - cancel device actions for " + deviceId + " (" + size() + " action(s) in queue - currentAction = " + currentAction + ")");
+        if (currentAction != null && deviceId.equals(currentAction.deviceId)) {
+            currentAction.cancel(reason);
+            currentAction = null;
+        }
+        for (BluetoothAction action: actionsQueue) {
+            if (deviceId.equals(action.deviceId)) {
+                actionsQueue.remove(action);
+                action.cancel(reason);
+            }
+        }
+        Log.d(MODULE_NAME, "Loop - " + size() + " action(s) left in queue - currentAction = " + currentAction + ")");
+        tick();
+    }
+
     public void clear() {
         currentAction = null;
         actionsQueue.clear();

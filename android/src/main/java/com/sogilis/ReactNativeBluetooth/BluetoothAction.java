@@ -17,9 +17,12 @@
 package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.util.Log;
 
 import com.sogilis.ReactNativeBluetooth.domain.BluetoothException;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
+
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 public abstract class BluetoothAction {
     public final String eventName;
@@ -62,6 +65,11 @@ public abstract class BluetoothAction {
         catch(BluetoothException e) {
             emitError(e.getMessage());
         }
+    }
+
+    public void cancel(String reason) {
+        Log.d(MODULE_NAME, "BluetoothAction " + eventName + " cancelled because of [" + reason + "]");
+        emitError(reason);
     }
 
     private void emitError(String errorMessage) {
