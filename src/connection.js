@@ -88,7 +88,7 @@ const connect = (device) => {
         listener.remove();
       }
       reject(new Error('CONNECTION_TIMEOUT'));
-    }, 2 * Configuration.timeout);
+    }, Configuration.timeout);
   });
 };
 

@@ -29,7 +29,7 @@ const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
 const idsAreSame = (set1, set2) => set1 && set2 && ("id" in set1) && ("id" in set2) && set1["id"].toLowerCase() == set2["id"].toLowerCase();
 
 const Configuration = {
-  timeout: 10000,
+  timeout: 70000,
 };
 
 const unsubscription = (listener) => {
