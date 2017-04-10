@@ -33,6 +33,10 @@ public class GattCollection {
         return alreadyPresentGatt == null;
     }
 
+    public int size() {
+        return gatts.size();
+    }
+
     public void close(String deviceId) {
         BluetoothGatt gatt = gatts.remove(deviceId);
 

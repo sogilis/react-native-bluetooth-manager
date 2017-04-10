@@ -30,6 +30,10 @@ public class DeviceCollection {
         return alreadyPresentDevice == null;
     }
 
+    public int size() {
+        return devices.size();
+    }
+
     public void clear() {
         devices.clear();
     }

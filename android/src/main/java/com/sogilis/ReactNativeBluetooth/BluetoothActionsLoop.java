@@ -18,28 +18,34 @@ class BluetoothActionsLoop {
     }
 
     void addAction(BluetoothAction bluetoothAction) {
+        Log.d(MODULE_NAME, "Loop - add " + bluetoothAction);
         actionsQueue.add(bluetoothAction);
         tick();
     }
 
     void actionDone() {
+        Log.d(MODULE_NAME, "Loop - done " + currentAction);
         currentAction = null;
         tick();
     }
 
+    public int size() {
+        return actionsQueue.size();
+    }
+
     private synchronized void tick() {
         if (currentAction != null) {
-            Log.d(MODULE_NAME, "BluetoothActionsLoop::tick - already a pending action: " + currentAction.eventName);
+            Log.d(MODULE_NAME, "Loop#tick - already pending " + currentAction);
             return;
         }
 
         if (actionsQueue.isEmpty()) {
-            Log.d(MODULE_NAME, "BluetoothActionsLoop::tick - no action to process");
+            Log.d(MODULE_NAME, "Loop#tick - empty queue");
             return;
         }
 
         currentAction = actionsQueue.poll();
-        Log.d(MODULE_NAME, "BluetoothActionsLoop::tick - processing new action: " + currentAction.eventName);
+        Log.d(MODULE_NAME, "Loop#tick - running " + currentAction);
         currentAction.start();
     }
 
