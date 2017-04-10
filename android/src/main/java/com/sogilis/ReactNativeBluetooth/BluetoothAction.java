@@ -23,6 +23,8 @@ import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
 public abstract class BluetoothAction {
     public final String eventName;
+    public final String deviceId;
+    private String id;
     private EventEmitter eventEmitter;
 
     protected BluetoothAdapter bluetoothAdapter;
@@ -30,7 +32,17 @@ public abstract class BluetoothAction {
     public abstract void run() throws BluetoothException;
 
     public BluetoothAction(String eventName, EventEmitter eventEmitter) {
+        this(eventName, null, eventEmitter);
+    }
+
+    public BluetoothAction(String eventName, String deviceId, EventEmitter eventEmitter) {
+        this(eventName, deviceId, deviceId, eventEmitter);
+    }
+
+    public BluetoothAction(String eventName, String deviceId, String id, EventEmitter eventEmitter) {
         this.eventName = eventName;
+        this.deviceId = deviceId;
+        this.id = id;
         this.eventEmitter = eventEmitter;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
@@ -53,6 +65,11 @@ public abstract class BluetoothAction {
     }
 
     private void emitError(String errorMessage) {
-        eventEmitter.emitError(eventName, errorMessage);
+        eventEmitter.emitError(eventName, errorMessage, id);
+    }
+
+    public String toString() {
+        String shortName = eventName.substring(eventName.lastIndexOf(".") + 1);
+        return shortName + " <" + deviceId + ">";
     }
 }

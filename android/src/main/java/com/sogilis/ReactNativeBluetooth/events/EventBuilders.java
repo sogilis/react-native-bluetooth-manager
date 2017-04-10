@@ -98,8 +98,8 @@ public class EventBuilders {
                 characteristicMap(device, characteristic));
     }
 
-    public static BluetoothEvent error(String eventName, String errorMessage) {
-        return new BluetoothEvent(eventName, errorMap(errorMessage));
+    public static BluetoothEvent error(String eventName, String errorMessage, String optionalId) {
+        return new BluetoothEvent(eventName, errorMap(errorMessage, optionalId));
     }
 
     public static ReadableMap deviceMap(BluetoothDevice device) {
@@ -184,9 +184,12 @@ public class EventBuilders {
         return map;
     }
 
-    public static ReadableMap errorMap(String errorMessage) {
+    public static ReadableMap errorMap(String errorMessage, String optionalId) {
         WritableMap map = new WritableNativeMap();
         map.putString("error", errorMessage);
+        if (optionalId != null) {
+            map.putString("id", optionalId);
+        }
         return map;
     }
 }
