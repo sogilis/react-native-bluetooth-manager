@@ -24,6 +24,9 @@ import {
 
 const deviceDidDisconnect = (device, callback) => {
   const disconnectionCaught = detail => {
+    if (!idsAreSame(device, detail))
+      return;
+
     callback(detail);
   };
 
