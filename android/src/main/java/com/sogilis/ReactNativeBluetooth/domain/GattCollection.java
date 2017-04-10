@@ -37,14 +37,10 @@ public class GattCollection {
         BluetoothGatt gatt = gatts.remove(deviceId);
 
         if (gatt != null) {
-            disconnect(gatt);
+            BluetoothDevice device = gatt.getDevice();
+            Log.d(MODULE_NAME, "Closing GATT client " + device.getName() + " (" + device.getAddress() + ")");
+            gatt.close();
         }
-    }
-
-    private void disconnect(BluetoothGatt gatt) {
-        BluetoothDevice device = gatt.getDevice();
-        Log.d(MODULE_NAME, "Disconnecting from " + device.getName() + " (" + device.getAddress() + ")");
-        gatt.close();
     }
 
     public void close(BluetoothGatt gatt) {

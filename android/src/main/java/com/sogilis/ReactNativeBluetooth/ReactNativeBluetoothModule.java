@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
 import android.util.Base64;
+import android.util.Log;
 import com.facebook.react.bridge.*;
 import com.sogilis.ReactNativeBluetooth.domain.BluetoothException;
 import com.sogilis.ReactNativeBluetooth.domain.DeviceCollection;
@@ -179,6 +180,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             BluetoothDevice device = gatt.getDevice();
             String deviceId = deviceId(device);
+
+            Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status);
+
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 if (status == GATT_SUCCESS) {
                     gattCollection.add(gatt);
@@ -186,6 +190,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 } else {
                     emitGattError(DEVICE_CONNECTED, status);
                 }
+                bluetoothActionsLoop.actionDone();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gattCollection.close(deviceId);
                 if (status == GATT_SUCCESS) {
@@ -195,7 +200,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 }
                 bluetoothActionsLoop.clear();
             }
-            bluetoothActionsLoop.actionDone();
         }
 
         @Override
@@ -280,8 +284,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
         BluetoothAction disconnectAction = new BluetoothAction(DEVICE_DISCONNECTED, eventEmitter) {
             @Override
-            public void run() {
-                gattCollection.close(deviceId);
+            public void run() throws BluetoothException {
+                BluetoothGatt gatt = gattCollection.get(deviceId);
+                gatt.disconnect();
                 bluetoothActionsLoop.actionDone();
             }
         };
