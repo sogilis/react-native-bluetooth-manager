@@ -95,22 +95,16 @@ public class BluetoothHelpers {
         return characteristic.getDescriptor(CONFIG_DESCRIPTOR_UUID);
     }
 
-    public static void enableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-        gatt.setCharacteristicNotification(characteristic, true);
+    public static boolean enableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        if(! gatt.writeDescriptor(descriptor)) {
-            Log.d(MODULE_NAME, "enableNotification - writeDescriptor failed for unknown reason");
-        } else {
-            Log.d(MODULE_NAME, "enableNotification - writeDescriptor success");
-        }
+        return gatt.setCharacteristicNotification(characteristic, true) && gatt.writeDescriptor(descriptor);
     }
 
-    public static void disableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+    public static boolean disableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
         descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-        gatt.writeDescriptor(descriptor);
-        gatt.setCharacteristicNotification(characteristic, false);
+        return gatt.writeDescriptor(descriptor) && gatt.setCharacteristicNotification(characteristic, false);
     }
 
     public static String gattStatusString(int status) {

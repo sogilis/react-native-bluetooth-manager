@@ -50,7 +50,7 @@ public abstract class BluetoothAction {
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    public void start() {
+    public boolean start() {
         if (this.bluetoothAdapter == null) {
             emitError("Bluetooth not supported");
         }
@@ -61,10 +61,12 @@ public abstract class BluetoothAction {
 
         try {
             this.run();
+            return true;
         }
         catch(BluetoothException e) {
             emitError(e.getMessage());
         }
+        return false;
     }
 
     public void cancel(String reason) {

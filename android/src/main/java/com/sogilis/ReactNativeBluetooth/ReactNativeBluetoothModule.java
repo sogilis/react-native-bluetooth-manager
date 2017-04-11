@@ -276,7 +276,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
                 if(!bondedDevices.contains(device)) {
                     if (!device.createBond()) {
-                        eventEmitter.emitError(DEVICE_CONNECTED, "Error when pairing to device", deviceId(device));
+                        throw new BluetoothException("Error when requesting device pairing");
                     }
                 } else {
                     device.connectGatt(getReactApplicationContext(), false, gattCallback);
@@ -312,8 +312,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void run() throws BluetoothException {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
 
-                gatt.discoverServices();
-                emit(serviceDiscoveryStarted(gatt.getDevice()));
+                if (gatt.discoverServices()) {
+                    emit(serviceDiscoveryStarted(gatt.getDevice()));
+                } else {
+                    throw new BluetoothException("Error when requesting services discovery");
+                }
             }
         };
 
@@ -370,10 +373,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_READ);
 
                 if (!gatt.readCharacteristic(characteristic)) {
-                    eventEmitter.emitError(CHARACTERISTIC_READ,
-                            "Could not initiate characteristic read for unknown reason.",
-                            characteristicId);
-                    bluetoothActionsLoop.actionDone();
+                    throw new BluetoothException("Error when requesting characteristic read");
                 }
             }
         };
@@ -402,10 +402,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 }
 
                 if (!gatt.writeCharacteristic(characteristic)) {
-                    eventEmitter.emitError(CHARACTERISTIC_WRITTEN,
-                            "Could not initiate characteristic write for unknown reason.",
-                            characteristicId);
-                    bluetoothActionsLoop.actionDone();
+                    throw new BluetoothException("Error when requesting characteristic write");
                 }
             }
         };
@@ -425,7 +422,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_NOTIFY);
 
-                enableNotification(gatt, characteristic);
+                if (enableNotification(gatt, characteristic)) {
+                    Log.d(MODULE_NAME, "Notification enabled");
+                } else {
+                    throw new BluetoothException("Error when enabling characteristic notification");
+                }
             }
         };
 
@@ -444,7 +445,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_NOTIFY);
 
-                disableNotification(gatt, characteristic);
+                if (disableNotification(gatt, characteristic)) {
+                    Log.d(MODULE_NAME, "Notification disabled");
+                } else {
+                    throw new BluetoothException("Error when disabling characteristic notification");
+                }
             }
         };
 

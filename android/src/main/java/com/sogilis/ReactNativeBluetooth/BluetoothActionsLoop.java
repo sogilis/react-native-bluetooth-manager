@@ -46,7 +46,10 @@ class BluetoothActionsLoop {
 
         currentAction = actionsQueue.poll();
         Log.d(MODULE_NAME, "Loop#tick - running " + currentAction);
-        currentAction.start();
+        if (!currentAction.start()) {
+            Log.d(MODULE_NAME, "Loop - failed " + currentAction);
+            actionDone();
+        }
     }
 
     public synchronized void cancelGattActions(String deviceId, String reason) {
