@@ -39,13 +39,13 @@ public class EventEmitter {
 
     private void log(BluetoothEvent event) {
         if (event.isError()) {
-            Log.e(MODULE_NAME, event.toString());
+            Log.e(MODULE_NAME, "Emit error " + event.toString());
         } else {
-            Log.d(MODULE_NAME, event.toString());
+            Log.d(MODULE_NAME, "Emit " + event.toString());
         }
     }
 
-    public void emitError(String eventName, String errorMessage) {
-        emit(EventBuilders.error(eventName, errorMessage));
+    public void emitError(String eventName, String errorMessage, String optionalId) {
+        emit(EventBuilders.error(eventName, errorMessage, optionalId));
     }
 }

@@ -17,12 +17,17 @@
 package com.sogilis.ReactNativeBluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.util.Log;
 
 import com.sogilis.ReactNativeBluetooth.domain.BluetoothException;
 import com.sogilis.ReactNativeBluetooth.events.EventEmitter;
 
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
+
 public abstract class BluetoothAction {
     public final String eventName;
+    public final String deviceId;
+    private String id;
     private EventEmitter eventEmitter;
 
     protected BluetoothAdapter bluetoothAdapter;
@@ -30,12 +35,22 @@ public abstract class BluetoothAction {
     public abstract void run() throws BluetoothException;
 
     public BluetoothAction(String eventName, EventEmitter eventEmitter) {
+        this(eventName, null, eventEmitter);
+    }
+
+    public BluetoothAction(String eventName, String deviceId, EventEmitter eventEmitter) {
+        this(eventName, deviceId, deviceId, eventEmitter);
+    }
+
+    public BluetoothAction(String eventName, String deviceId, String id, EventEmitter eventEmitter) {
         this.eventName = eventName;
+        this.deviceId = deviceId;
+        this.id = id;
         this.eventEmitter = eventEmitter;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    public void start() {
+    public boolean start() {
         if (this.bluetoothAdapter == null) {
             emitError("Bluetooth not supported");
         }
@@ -46,13 +61,25 @@ public abstract class BluetoothAction {
 
         try {
             this.run();
+            return true;
         }
         catch(BluetoothException e) {
             emitError(e.getMessage());
         }
+        return false;
+    }
+
+    public void cancel(String reason) {
+        Log.d(MODULE_NAME, "BluetoothAction " + eventName + " cancelled because of [" + reason + "]");
+        emitError(reason);
     }
 
     private void emitError(String errorMessage) {
-        eventEmitter.emitError(eventName, errorMessage);
+        eventEmitter.emitError(eventName, errorMessage, id);
+    }
+
+    public String toString() {
+        String shortName = eventName.substring(eventName.lastIndexOf(".") + 1);
+        return shortName + " <" + deviceId + ">";
     }
 }
