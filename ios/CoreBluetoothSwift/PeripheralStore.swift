@@ -7,10 +7,10 @@ import Foundation
 import CoreBluetooth
 
 class PeripheralStore {
-    private var peripherals = [NSUUID: CBPeripheral]()
-    private let backgroundQueue = dispatch_queue_create("PeripheralStore", DISPATCH_QUEUE_SERIAL)
+    fileprivate var peripherals = [UUID: CBPeripheral]()
+    fileprivate let backgroundQueue = DispatchQueue(label: "PeripheralStore", attributes: [])
 
-    subscript(peripheralId: NSUUID) -> CBPeripheral? {
+    subscript(peripheralId: UUID) -> CBPeripheral? {
         get {
             return peripherals[peripheralId]
         }
@@ -29,28 +29,28 @@ class PeripheralStore {
     }
 
     func removeAll() {
-        dispatch_sync(backgroundQueue, { [unowned self] in
+        backgroundQueue.sync(execute: { [unowned self] in
             self.peripherals.removeAll()
         })
     }
 
-    func addPeripheral(newItem: CBPeripheral) {
-        dispatch_sync(backgroundQueue, { [unowned self] in
+    func addPeripheral(_ newItem: CBPeripheral) {
+        backgroundQueue.sync(execute: { [unowned self] in
             self.peripherals[newItem.identifier] = newItem
         })
     }
 
-    func listIds() -> [NSUUID] {
+    func listIds() -> [UUID] {
         return peripherals.map { $0.0 }
     }
 
-    func getPeripheral(lookup: [String: AnyObject]) -> CBPeripheral? {
+    func getPeripheral(_ lookup: [String: AnyObject]) -> CBPeripheral? {
         guard let deviceIdString = lookup.eitherOr("deviceId", key2: "id") as? String else {
             print("No device id found.")
             return nil
         }
 
-        guard let deviceId = NSUUID(UUIDString: deviceIdString) else {
+        guard let deviceId = UUID(uuidString: deviceIdString) else {
             print("Invalid device id found.")
             return nil
         }
@@ -63,18 +63,18 @@ class PeripheralStore {
         return device
     }
 
-    func getService(device: CBPeripheral, lookup: [String: AnyObject]) -> CBService? {
+    func getService(_ device: CBPeripheral, lookup: [String: AnyObject]) -> CBService? {
         guard let serviceIdString = lookup.eitherOr("serviceId", key2: "id") as? String else {
             print("No service id found.")
             return nil
         }
 
-        let serviceId = CBUUID(string: serviceIdString).UUIDString
+        let serviceId = CBUUID(string: serviceIdString).uuidString
 
-        return device.services?.filter { $0.UUID.UUIDString == serviceId }.first
+        return device.services?.filter { $0.uuid.uuidString == serviceId }.first
     }
 
-    func getService(lookup: [String: AnyObject]) -> CBService? {
+    func getService(_ lookup: [String: AnyObject]) -> CBService? {
         guard let device = getPeripheral(lookup) else {
             print("Peripheral not found when looking up service")
             return nil
@@ -83,7 +83,7 @@ class PeripheralStore {
         return getService(device, lookup: lookup)
     }
 
-    func getCharacteristic(lookup: [String: AnyObject]) -> CBCharacteristic? {
+    func getCharacteristic(_ lookup: [String: AnyObject]) -> CBCharacteristic? {
         guard let service = getService(lookup) else {
             print("Service not found when looking up characteristic", lookup)
             return nil
@@ -94,13 +94,13 @@ class PeripheralStore {
             return nil
         }
 
-        let charId = CBUUID(string: charIdString).UUIDString
+        let charId = CBUUID(string: charIdString).uuidString
 
-        let characteristic = service.characteristics?.filter { $0.UUID.UUIDString == charId }.first
+        let characteristic = service.characteristics?.filter { $0.uuid.uuidString == charId }.first
 
         if characteristic == nil {
             print("Unable to locate characteristic in service", charId,
-                  service.characteristics?.map { $0.UUID.UUIDString })
+                  service.characteristics?.map { $0.uuid.uuidString })
         }
 
         return characteristic

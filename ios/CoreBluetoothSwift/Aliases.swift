@@ -15,4 +15,4 @@ typealias ServiceDiscoveryCallback = (CBPeripheral, error: NSError?) -> Void
 typealias ServiceCallback = (CBPeripheral, CBService, NSError?) -> Void
 
 typealias CharacteristicCallbackParams = (CBPeripheral, CBCharacteristic, NSError?)
-typealias CharacteristicCallback = CharacteristicCallbackParams -> Void
+typealias CharacteristicCallback = (CharacteristicCallbackParams) -> Void

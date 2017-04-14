@@ -7,32 +7,32 @@ import Foundation
 import CoreBluetooth
 
 class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
-    private var onServiceDiscovered: ServiceDiscoveryCallback?
-    private var onCharacteristicDiscovered: ServiceCallback?
-    private var onCharacteristicValueUpdated: CharacteristicCallback?
-    private var onCharacteristicValueWritten: CharacteristicCallback?
+    fileprivate var onServiceDiscovered: ServiceDiscoveryCallback?
+    fileprivate var onCharacteristicDiscovered: ServiceCallback?
+    fileprivate var onCharacteristicValueUpdated: CharacteristicCallback?
+    fileprivate var onCharacteristicValueWritten: CharacteristicCallback?
 
     override init() {
         super.init()
     }
 
-    func onServiceDiscovered(handler: ServiceDiscoveryCallback) {
+    func onServiceDiscovered(_ handler: ServiceDiscoveryCallback) {
         self.onServiceDiscovered = handler
     }
 
-    func onCharacteristicDiscovered(handler: ServiceCallback) {
+    func onCharacteristicDiscovered(_ handler: ServiceCallback) {
         self.onCharacteristicDiscovered = handler
     }
 
-    func onCharacteristicValueUpdated(handler: CharacteristicCallback) {
+    func onCharacteristicValueUpdated(_ handler: CharacteristicCallback) {
         self.onCharacteristicValueUpdated = handler
     }
 
-    func onCharacteristicValueWritten(handler: CharacteristicCallback) {
+    func onCharacteristicValueWritten(_ handler: CharacteristicCallback) {
         self.onCharacteristicValueWritten = handler
     }
 
-    func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let handler = self.onServiceDiscovered else {
             print("Peripheral discovered but no handler set", peripheral.name)
             return
@@ -41,8 +41,8 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
         handler(peripheral, error: error)
     }
 
-    func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService,
-                    error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService,
+                    error: Error?) {
         guard let handler = self.onCharacteristicDiscovered else {
             return
         }
@@ -50,8 +50,8 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
         handler(peripheral, service, error)
     }
 
-    func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic,
-                  error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic,
+                  error: Error?) {
 
         guard let handler = self.onCharacteristicValueUpdated else {
             return
@@ -60,8 +60,8 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
         handler(peripheral, characteristic, error)
     }
 
-    func peripheral(peripheral: CBPeripheral,
-                  didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral,
+                  didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         guard let handler = self.onCharacteristicValueWritten else {
             print("Characteristic written but no handler set", peripheral.name)
             return

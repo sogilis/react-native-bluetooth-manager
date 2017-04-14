@@ -7,72 +7,72 @@ import Foundation
 import CoreBluetooth
 
 enum BluetoothState {
-    case Unknown
-    case Resetting
-    case Unsupported
-    case Unauthorized
-    case PoweredOff
-    case PoweredOn
+    case unknown
+    case resetting
+    case unsupported
+    case unauthorized
+    case poweredOff
+    case poweredOn
 }
 
 class CentralEventHandler: NSObject, CBCentralManagerDelegate {
-    private var onStateChange: (BluetoothState -> Void)?
-    private var onDeviceDiscovered: (CBPeripheral -> Void)?
-    private var onDeviceConnected: (CBPeripheral -> Void)?
-    private var onDeviceConnectedOnce: (CBPeripheral -> Void)?
-    private var onDeviceDisconnected: (CBPeripheral -> Void)?
+    fileprivate var onStateChange: ((BluetoothState) -> Void)?
+    fileprivate var onDeviceDiscovered: ((CBPeripheral) -> Void)?
+    fileprivate var onDeviceConnected: ((CBPeripheral) -> Void)?
+    fileprivate var onDeviceConnectedOnce: ((CBPeripheral) -> Void)?
+    fileprivate var onDeviceDisconnected: ((CBPeripheral) -> Void)?
 
-    func onStateChange(handler: BluetoothState -> Void) -> Void {
+    func onStateChange(_ handler: (BluetoothState) -> Void) -> Void {
         self.onStateChange = handler
     }
 
-    func onDeviceDiscovered(handler: CBPeripheral -> Void) -> Void {
+    func onDeviceDiscovered(_ handler: (CBPeripheral) -> Void) -> Void {
         self.onDeviceDiscovered = handler
     }
 
-    func onDeviceConnected(handler: CBPeripheral -> Void) -> Void {
+    func onDeviceConnected(_ handler: (CBPeripheral) -> Void) -> Void {
         self.onDeviceConnected = handler
     }
 
-    func onDeviceDisconnected(handler: CBPeripheral -> Void) -> Void {
+    func onDeviceDisconnected(_ handler: (CBPeripheral) -> Void) -> Void {
         self.onDeviceDisconnected = handler
     }
 
     /**
      *  Waits to check powered on state and handles other cases.
      */
-    @objc func centralManagerDidUpdateState(central: CBCentralManager) {
+    @objc func centralManagerDidUpdateState(_ central: CBCentralManager) {
         guard let callback = onStateChange else {
             print("State changed but no callback registered \(central.state)")
             return
         }
 
         switch central.state {
-        case .Unknown:
-            callback(BluetoothState.Unknown)
+        case .unknown:
+            callback(BluetoothState.unknown)
             break
-        case .Resetting:
-            callback(BluetoothState.Resetting)
+        case .resetting:
+            callback(BluetoothState.resetting)
             break
-        case .Unsupported:
-            callback(BluetoothState.Unsupported)
+        case .unsupported:
+            callback(BluetoothState.unsupported)
             break
-        case .Unauthorized:
-            callback(BluetoothState.Unauthorized)
+        case .unauthorized:
+            callback(BluetoothState.unauthorized)
             break
-        case .PoweredOff:
-            callback(BluetoothState.PoweredOff)
+        case .poweredOff:
+            callback(BluetoothState.poweredOff)
             break
-        case .PoweredOn:
-            callback(BluetoothState.PoweredOn)
+        case .poweredOn:
+            callback(BluetoothState.poweredOn)
         }
     }
 
     /**
      *  Handles the case where a peripheral is discovered.
      */
-    @objc func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral,
-                              advertisementData: [String : AnyObject], RSSI: NSNumber) {
+    @objc func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
+                              advertisementData: [String : Any], rssi RSSI: NSNumber) {
         print("Discovered \(peripheral.name) at \(RSSI)")
 
         guard let callback = onDeviceDiscovered else {
@@ -86,7 +86,7 @@ class CentralEventHandler: NSObject, CBCentralManagerDelegate {
     /**
      *  Handles the case where a peripheral is connected.
      */
-    func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Peripheral Connected", peripheral.name)
 
         guard let callback = onDeviceConnected else {
@@ -100,7 +100,7 @@ class CentralEventHandler: NSObject, CBCentralManagerDelegate {
     /**
      *  Handles the case where a peripheral is disconnected.
      */
-    func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("Peripheral Disconnected")
 
         guard let callback = onDeviceDisconnected else {
