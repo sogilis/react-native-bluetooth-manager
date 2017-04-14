@@ -6,27 +6,27 @@
 import Foundation
 import CoreBluetooth
 
-private func getServiceName(_ serviceId: CBUUID) -> String {
+private func getServiceName(serviceId: CBUUID) -> String {
     return "Custom Service"
 }
 
 class OutputBuilder {
-    static func asService(_ service: CBService) -> BluetoothServiceReturn {
+    static func asService(service: CBService) -> BluetoothServiceReturn {
         return [
-            "id": service.uuid.uuidString,
-            "deviceId": service.peripheral.identifier.uuidString ?? "Unknown",
-            "name": "Unknown"
+            "id": service.uuid.uuidString as AnyObject,
+            "deviceId": service.peripheral.identifier.uuidString as AnyObject,
+            "name": "Unknown" as AnyObject
         ]
     }
 
-    static func asServiceList(_ services: [CBService]) -> BluetoothServiceReturn {
+    static func asServiceList(services: [CBService]) -> BluetoothServiceReturn {
         return [
-            "deviceId": services.first?.peripheral.identifier.uuidString ?? "",
-            "services": services.map(asService)
+            "deviceId": services.first?.peripheral.identifier.uuidString as AnyObject,
+            "services": services.map(asService) as AnyObject
         ]
     }
 
-    static func asStateChange(_ state: BluetoothState) -> String {
+    static func asStateChange(state: BluetoothState) -> String {
         switch state {
         case .unknown:
             return "unknown"
@@ -43,7 +43,7 @@ class OutputBuilder {
         }
     }
 
-    fileprivate static func makeCharacteristicProperties(_ characteristic: CBCharacteristic) -> [String: AnyObject] {
+    private static func makeCharacteristicProperties(characteristic: CBCharacteristic) -> [String: AnyObject] {
         let canRead = characteristic.properties.contains(CBCharacteristicProperties.read)
         let canWrite = characteristic.properties.contains(CBCharacteristicProperties.write)
         let canWriteNoResponse = characteristic.properties.contains(CBCharacteristicProperties.writeWithoutResponse)
@@ -51,55 +51,55 @@ class OutputBuilder {
         let canBroadcast = characteristic.properties.contains(CBCharacteristicProperties.broadcast)
 
         return [
-            "read": canRead,
-            "write": canWrite,
-            "writeNoResponse": canWriteNoResponse,
-            "notify": canNotify,
-            "broadcast": canBroadcast,
+            "read": canRead as AnyObject,
+            "write": canWrite as AnyObject,
+            "writeNoResponse": canWriteNoResponse as AnyObject,
+            "notify": canNotify as AnyObject,
+            "broadcast": canBroadcast as AnyObject,
         ]
     }
 
-    static func asCharacteristic(_ characteristic: CBCharacteristic) -> BluetoothServiceReturn {
+    static func asCharacteristic(characteristic: CBCharacteristic) -> BluetoothServiceReturn {
         return [
-            "id": characteristic.uuid.uuidString,
-            "deviceId": characteristic.service.peripheral.identifier.uuidString,
-            "serviceId": characteristic.service.uuid.uuidString,
-            "properties": makeCharacteristicProperties(characteristic),
-            "value": characteristic.value?.base64EncodedString(options: NSData.Base64EncodingOptions()) ?? "",
+            "id": characteristic.uuid.uuidString as AnyObject,
+            "deviceId": characteristic.service.peripheral.identifier.uuidString as AnyObject,
+            "serviceId": characteristic.service.uuid.uuidString as AnyObject,
+            "properties": makeCharacteristicProperties(characteristic: characteristic) as AnyObject,
+            "value": (characteristic.value?.base64EncodedString(options: Data.Base64EncodingOptions()) ?? "") as AnyObject,
         ]
     }
 
-    static func asCharacteristicList(_ characteristics: [CBCharacteristic]) -> BluetoothServiceReturn {
+    static func asCharacteristicList(characteristics: [CBCharacteristic]) -> BluetoothServiceReturn {
         return [
-            "deviceId": characteristics.first?.service.peripheral.identifier.uuidString ?? "",
-            "serviceId": characteristics.first?.service.uuid.uuidString ?? "",
-            "characteristics": characteristics.map(asCharacteristic)
+            "deviceId": characteristics.first?.service.peripheral.identifier.uuidString as AnyObject,
+            "serviceId": characteristics.first?.service.uuid.uuidString as AnyObject,
+            "characteristics": characteristics.map(asCharacteristic) as AnyObject
         ]
     }
 
-    static func asCharacteristicWriteResult(_ info: CharacteristicInfo) -> BluetoothServiceReturn {
+    static func asCharacteristicWriteResult(info: CharacteristicInfo) -> BluetoothServiceReturn {
         if let error = info.error {
             return [
-                "id": info.characteristic.uuid.uuidString,
-                "deviceId": info.characteristic.service.peripheral.identifier.uuidString,
-                "serviceId": info.characteristic.service.uuid.uuidString,
-                "error": error.localizedDescription,
+                "id": info.characteristic.uuid.uuidString as AnyObject,
+                "deviceId": info.characteristic.service.peripheral.identifier.uuidString as AnyObject,
+                "serviceId": info.characteristic.service.uuid.uuidString as AnyObject,
+                "error": error.localizedDescription as AnyObject,
             ]
         }
 
         return [
-            "id": info.characteristic.uuid.uuidString,
-            "deviceId": info.characteristic.service.peripheral.identifier.uuidString,
-            "serviceId": info.characteristic.service.uuid.uuidString,
-            "success": true,
+            "id": info.characteristic.uuid.uuidString as AnyObject,
+            "deviceId": info.characteristic.service.peripheral.identifier.uuidString as AnyObject,
+            "serviceId": info.characteristic.service.uuid.uuidString as AnyObject,
+            "success": true as AnyObject,
         ]
     }
 
-    static func asDevice(_ device: CBPeripheral) -> BluetoothServiceReturn {
+    static func asDevice(device: CBPeripheral) -> BluetoothServiceReturn {
         return [
-            "name" : device.name ?? "Unknown",
-            "id" : device.identifier.uuidString,
-            "address" : device.identifier.uuidString,
+            "name" : (device.name ?? "Unknown") as AnyObject,
+            "id" : device.identifier.uuidString as AnyObject,
+            "address" : device.identifier.uuidString as AnyObject,
         ]
     }
 }

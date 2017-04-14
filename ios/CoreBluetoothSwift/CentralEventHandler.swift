@@ -22,19 +22,19 @@ class CentralEventHandler: NSObject, CBCentralManagerDelegate {
     fileprivate var onDeviceConnectedOnce: ((CBPeripheral) -> Void)?
     fileprivate var onDeviceDisconnected: ((CBPeripheral) -> Void)?
 
-    func onStateChange(_ handler: (BluetoothState) -> Void) -> Void {
+    func onStateChange(_ handler: @escaping (BluetoothState) -> Void) -> Void {
         self.onStateChange = handler
     }
 
-    func onDeviceDiscovered(_ handler: (CBPeripheral) -> Void) -> Void {
+    func onDeviceDiscovered(_ handler: @escaping (CBPeripheral) -> Void) -> Void {
         self.onDeviceDiscovered = handler
     }
 
-    func onDeviceConnected(_ handler: (CBPeripheral) -> Void) -> Void {
+    func onDeviceConnected(_ handler: @escaping (CBPeripheral) -> Void) -> Void {
         self.onDeviceConnected = handler
     }
 
-    func onDeviceDisconnected(_ handler: (CBPeripheral) -> Void) -> Void {
+    func onDeviceDisconnected(_ handler: @escaping (CBPeripheral) -> Void) -> Void {
         self.onDeviceDisconnected = handler
     }
 

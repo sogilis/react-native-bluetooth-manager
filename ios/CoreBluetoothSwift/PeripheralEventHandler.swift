@@ -16,29 +16,29 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
         super.init()
     }
 
-    func onServiceDiscovered(_ handler: ServiceDiscoveryCallback) {
+    func onServiceDiscovered(_ handler: @escaping ServiceDiscoveryCallback) {
         self.onServiceDiscovered = handler
     }
 
-    func onCharacteristicDiscovered(_ handler: ServiceCallback) {
+    func onCharacteristicDiscovered(_ handler: @escaping ServiceCallback) {
         self.onCharacteristicDiscovered = handler
     }
 
-    func onCharacteristicValueUpdated(_ handler: CharacteristicCallback) {
+    func onCharacteristicValueUpdated(_ handler: @escaping CharacteristicCallback) {
         self.onCharacteristicValueUpdated = handler
     }
 
-    func onCharacteristicValueWritten(_ handler: CharacteristicCallback) {
+    func onCharacteristicValueWritten(_ handler: @escaping CharacteristicCallback) {
         self.onCharacteristicValueWritten = handler
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let handler = self.onServiceDiscovered else {
-            print("Peripheral discovered but no handler set", peripheral.name)
+            print("Peripheral discovered but no handler set", peripheral.name ?? "")
             return
         }
 
-        handler(peripheral, error: error)
+        handler(peripheral, error)
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService,
