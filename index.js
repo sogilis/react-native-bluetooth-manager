@@ -38,6 +38,10 @@ const didChangeState = (callback) => {
   return unsubscription(listener);
 };
 
+const configureForNotification = (characteristic) => {
+  ReactNativeBluetooth.subscribeToNotification(characteristic);
+}
+
 const characteristicDidNotify = (characteristic, callback) => {
   const onNotifyCaught = notified => {
     if (!idsAreSame(characteristic, notified))
@@ -97,6 +101,7 @@ export default {
   discoverCharacteristics,
   readCharacteristicValue,
   writeCharacteristicValue,
+  configureForNotification,
   characteristicDidNotify,
   connect,
   disconnect,
