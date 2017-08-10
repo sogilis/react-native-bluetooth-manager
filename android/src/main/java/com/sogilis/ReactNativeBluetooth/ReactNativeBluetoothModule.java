@@ -63,9 +63,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
-        reactContext.registerReceiver(pairingStatusChangeReceiver,
-            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-
         bluetoothActionsLoop = new BluetoothActionsLoop();
     }
 
@@ -191,7 +188,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 if (status == GATT_SUCCESS) {
-                    gattCollection.add(gatt);
                     emit(deviceConnected(device));
                 } else {
                     emitGattError(DEVICE_CONNECTED, status, gatt);
@@ -254,17 +250,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         }
     };
 
-
-    private BroadcastReceiver pairingStatusChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            if (device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState() == BluetoothDevice.BOND_NONE) {
-                device.connectGatt(getReactApplicationContext(), false, gattCallback);
-            }
-        }
-    };
-
     @ReactMethod
     public void connect(final ReadableMap deviceMap) {
         final String deviceId = deviceMap.getString("id");
@@ -273,14 +258,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void run() throws BluetoothException {
                 BluetoothDevice device = discoveredDevices.get(deviceId);
-                Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
-                if(!bondedDevices.contains(device)) {
-                    if (!device.createBond()) {
-                        throw new BluetoothException("Error when requesting device pairing");
-                    }
-                } else {
-                    device.connectGatt(getReactApplicationContext(), false, gattCallback);
-                }
+                Log.d(MODULE_NAME, "connectAction. Creating GATT client " + device.getName() + ".");
+                BluetoothGatt gatt = device.connectGatt(getReactApplicationContext(), false, gattCallback);
+                gattCollection.add(gatt);
             }
         };
 

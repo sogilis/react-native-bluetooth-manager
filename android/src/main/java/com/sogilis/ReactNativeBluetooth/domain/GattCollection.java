@@ -30,6 +30,18 @@ public class GattCollection {
 
     public boolean add(BluetoothGatt gatt) {
         BluetoothGatt alreadyPresentGatt = gatts.putIfAbsent(deviceId(gatt.getDevice()), gatt);
+
+        if (alreadyPresentGatt != null) {        
+            // old code could open two Gatt clients at the same time;
+            // make sure that only one exists,
+            // otherwise disconnect will not delete all clients
+            // and the tikee will not return to its 'advertising' state.
+            Log.d(MODULE_NAME, "#closing extra GATT client");
+            gatt.disconnect();
+            gatt.close();
+            gatt = null;
+        }
+
         return alreadyPresentGatt == null;
     }
 
@@ -42,8 +54,9 @@ public class GattCollection {
 
         if (gatt != null) {
             BluetoothDevice device = gatt.getDevice();
-            Log.d(MODULE_NAME, "Closing GATT client " + device.getName() + " (" + device.getAddress() + ")");
+            Log.d(MODULE_NAME, "##closing GATT client " + device.getName() + " (" + device.getAddress() + ")");
             gatt.close();
+            gatt = null;
         }
     }
 
