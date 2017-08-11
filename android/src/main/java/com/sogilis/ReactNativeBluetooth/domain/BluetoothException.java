@@ -15,9 +15,12 @@
  */
 
 package com.sogilis.ReactNativeBluetooth.domain;
+import android.util.Log;
+import static com.sogilis.ReactNativeBluetooth.Constants.MODULE_NAME;
 
 public class BluetoothException extends Exception {
     public BluetoothException(String detailMessage) {
         super(detailMessage);
+        Log.e(MODULE_NAME, "BLUETOOTH_EXCEPTION " + detailMessage);
     }
 }

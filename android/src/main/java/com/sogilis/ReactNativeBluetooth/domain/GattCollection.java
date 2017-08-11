@@ -36,10 +36,13 @@ public class GattCollection {
             // make sure that only one exists,
             // otherwise disconnect will not delete all clients
             // and the tikee will not return to its 'advertising' state.
-            Log.d(MODULE_NAME, "#closing extra GATT client");
+            Log.d(MODULE_NAME, "### closing extra GATT client");
             gatt.disconnect();
             gatt.close();
             gatt = null;
+        } else {
+            BluetoothDevice device = gatt.getDevice();
+            Log.d(MODULE_NAME, "=== adding GATT client " + device.getName() + " (" + device.getAddress() + ")");            
         }
 
         return alreadyPresentGatt == null;
@@ -54,7 +57,7 @@ public class GattCollection {
 
         if (gatt != null) {
             BluetoothDevice device = gatt.getDevice();
-            Log.d(MODULE_NAME, "##closing GATT client " + device.getName() + " (" + device.getAddress() + ")");
+            Log.d(MODULE_NAME, "=== closing GATT client " + device.getName() + " (" + device.getAddress() + ")");
             gatt.close();
             gatt = null;
         }

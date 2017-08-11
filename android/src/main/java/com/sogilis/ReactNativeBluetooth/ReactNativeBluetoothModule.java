@@ -60,6 +60,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         super(reactContext);
         eventEmitter = new EventEmitter(reactContext);
 
+        reactContext.registerReceiver(pairingStatusChangeReceiver,
+            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
@@ -184,7 +187,13 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothDevice device = gatt.getDevice();
             String deviceId = deviceId(device);
 
-            Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status);
+            Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status + ", bonding state: " + device.getBondState());
+
+            // ne pas flipper sur 0x85
+            // if (newState == 0 && status == 0x85) {
+            //     Log.d(MODULE_NAME, "#onConnectionStateChange: silently dropped 0x85 error");
+            //     return;
+            // }
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 if (status == GATT_SUCCESS) {
@@ -247,6 +256,29 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             emit(characteristicNotified(gatt.getDevice(), characteristic));
             bluetoothActionsLoop.actionDone();
+        }
+    };
+
+    private BroadcastReceiver pairingStatusChangeReceiver = new BroadcastReceiver() {
+        @Override
+         public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+ 
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                 final int state        = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+                 final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
+ 
+                Log.d(MODULE_NAME, "___ pairing: " + prevState + " -> " + state);
+/*
+                if (prevState == BluetoothDevice.BOND_BONDING) { // now one of [BOND_BONDED, BOND_NONE]
+                    Log.d(MODULE_NAME, (state == BluetoothDevice.BOND_BONDED ? "___ Paired" : "___ Unpaired"));
+                    // connection is fully established. Proceed with next step
+                    Log.d(MODULE_NAME, "___ Delayed DEVICE_CONNECTED event");
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    emit(deviceConnected(device));
+                }
+*/
+            }
         }
     };
 
