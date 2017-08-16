@@ -189,12 +189,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
 
             Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status + ", bonding state: " + device.getBondState());
 
-            // ne pas flipper sur 0x85
-            // if (newState == 0 && status == 0x85) {
-            //     Log.d(MODULE_NAME, "#onConnectionStateChange: silently dropped 0x85 error");
-            //     return;
-            // }
-
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 if (status == GATT_SUCCESS) {
                     emit(deviceConnected(device));
@@ -269,15 +263,6 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                  final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
  
                 Log.d(MODULE_NAME, "___ pairing: " + prevState + " -> " + state);
-/*
-                if (prevState == BluetoothDevice.BOND_BONDING) { // now one of [BOND_BONDED, BOND_NONE]
-                    Log.d(MODULE_NAME, (state == BluetoothDevice.BOND_BONDED ? "___ Paired" : "___ Unpaired"));
-                    // connection is fully established. Proceed with next step
-                    Log.d(MODULE_NAME, "___ Delayed DEVICE_CONNECTED event");
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    emit(deviceConnected(device));
-                }
-*/
             }
         }
     };
