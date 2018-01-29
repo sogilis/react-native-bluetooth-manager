@@ -38,14 +38,12 @@ const didChangeState = (callback) => {
   return unsubscription(listener);
 };
 
-const configureForNotification = (characteristic) => {
-  ReactNativeBluetooth.subscribeToNotification(characteristic);
-}
-
 const characteristicDidNotify = (characteristic, callback) => {
   const onNotifyCaught = notified => {
-    if (!idsAreSame(characteristic, notified))
+    if (!idsAreSame(characteristic, notified)) {
+      console.log("==== Received unexpected notification for characteristic " + notified + " while expecting notification ; NOT PROCESSED");
       return;
+    }
 
     const mappedNotified = {
       ...notified,
@@ -60,12 +58,16 @@ const characteristicDidNotify = (characteristic, callback) => {
     onNotifyCaught
   );
 
-  ReactNativeBluetooth.subscribeToNotification(characteristic);
-
   return () => {
     listener.remove();
-    ReactNativeBluetooth.unsubscribeFromNotification(characteristic);
   };
+};
+
+const enableNotifications = (notifyCharacteristic, enabled) => {
+  if (enabled)
+    ReactNativeBluetooth.subscribeToNotification(notifyCharacteristic);
+  else
+    ReactNativeBluetooth.unsubscribeFromNotification(notifyCharacteristic);
 };
 
 const didDiscoverDevice = (callback) => {
@@ -101,7 +103,7 @@ export default {
   discoverCharacteristics,
   readCharacteristicValue,
   writeCharacteristicValue,
-  configureForNotification,
+  enableNotifications,
   characteristicDidNotify,
   connect,
   disconnect,
