@@ -11,16 +11,27 @@ class BluetoothActionsLoop {
 
     private Queue<BluetoothAction> actionsQueue ;
     private BluetoothAction currentAction;
+    private BluetoothAction notificationAction;
 
     BluetoothActionsLoop() {
         this.actionsQueue = new ConcurrentLinkedQueue<>();
         this.currentAction = null;
+        this.notificationAction = null;
     }
 
     void addAction(BluetoothAction bluetoothAction) {
         Log.d(MODULE_NAME, "Loop - add " + bluetoothAction);
         actionsQueue.add(bluetoothAction);
         tick();
+    }
+
+    void addNotificationAction(BluetoothAction bluetoothAction) {
+        Log.d(MODULE_NAME, "NotificationActions - add " + bluetoothAction);
+        notificationAction = bluetoothAction;
+        if (!notificationAction.start()) {
+            Log.d(MODULE_NAME, "NotificationActions - failed " + currentAction);
+            notificationAction = null;
+        }
     }
 
     void actionDone() {
@@ -66,6 +77,7 @@ class BluetoothActionsLoop {
         }
         Log.d(MODULE_NAME, "Loop - " + size() + " action(s) left in queue - currentAction = " + currentAction + ")");
         tick();
+        notificationAction = null;
     }
 
     public void clear() {

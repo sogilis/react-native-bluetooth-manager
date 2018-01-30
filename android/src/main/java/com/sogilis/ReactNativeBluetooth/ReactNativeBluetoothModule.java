@@ -249,7 +249,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             emit(characteristicNotified(gatt.getDevice(), characteristic));
-            bluetoothActionsLoop.actionDone();
+            // bluetoothActionsLoop.actionDone();
         }
     };
 
@@ -427,7 +427,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
         };
 
-        bluetoothActionsLoop.addAction(subscribeAction);
+        bluetoothActionsLoop.addNotificationAction(subscribeAction);
     }
 
     @ReactMethod
@@ -450,7 +450,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             }
         };
 
-        bluetoothActionsLoop.addAction(unsubscribeAction);
+        bluetoothActionsLoop.addNotificationAction(unsubscribeAction);
     }
 
     @Override

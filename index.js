@@ -57,8 +57,10 @@ const characteristicDidNotify = (characteristic, callback) => {
     ReactNativeBluetooth.CharacteristicNotified,
     onNotifyCaught
   );
+  console.log("==== installed notification handler for characteristic " + characteristic);
 
   return () => {
+    console.log("==== removing notification handler for characteristic " + characteristic);
     listener.remove();
   };
 };
