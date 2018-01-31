@@ -73,7 +73,7 @@ const listenToStartupAndDiscoveryEvents = (onStartup, onStartupFailure, onDiscov
   timer = setTimeout(() => {
     if (startupListener) {
       listener.remove();
-      onStartupFailure(new Error("Timeout discovering characteristics"));
+      onStartupFailure(new Error("Timeout discovering services or characteristics"));
     }
   }, Configuration.timeout);
 };

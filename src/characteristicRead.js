@@ -34,7 +34,6 @@ const readCharacteristicValue = (characteristic, operationUnderTest = null) => {
     };
 
     const testPointName = getReadCharacteristicTestPointName(characteristic.id, operationUnderTest);
-console.log('------- testPointName', testPointName);
     makeBleEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicRead, characteristic, resultMapper, testPointName);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);

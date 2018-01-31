@@ -34,20 +34,21 @@ if (Platform.OS === 'android') {
 
 const getReadCharacteristicTestPointName = (characteristicId, operationUnderTest) => {
   let name;
-  if (/c40d40d2-aea2-61b7-8a42-0c411\d2a5395/.test(characteristicId.toLowerCase()))
+  if (/c40d40d2-aea2-61b7-8a42-0c411[\dabcdef]2a5395/.test(characteristicId.toLowerCase()))
     name = operationUnderTest;
   else {
-    name = {
-      // android
-      '00002a25-0000-1000-8000-00805f9b34fb': 'readingSerialNumber',
-      '00002a26-0000-1000-8000-00805f9b34fb': 'readingFirmwareVersion',
-      '00002a28-0000-1000-8000-00805f9b34fb': 'readingSoftwareVersion',
-      // ios
-      '2A25': 'readingSerialNumber',
-      '2A26': 'readingFirmwareVersion',
-      '2A28': 'readingSoftwareVersion',
-    }[characteristicId];
-
+    names = (Platform.OS === 'android') ?
+      {
+        '00002a25-0000-1000-8000-00805f9b34fb': 'readingSerialNumber',
+        '00002a26-0000-1000-8000-00805f9b34fb': 'readingFirmwareVersion',
+        '00002a28-0000-1000-8000-00805f9b34fb': 'readingSoftwareVersion',
+      } :
+      {
+        '2A25': 'readingSerialNumber',
+        '2A26': 'readingFirmwareVersion',
+        '2A28': 'readingSoftwareVersion',
+      };
+    name = names[characteristicId];
     if (!name)
       throw new Error('getReadCharacteristicTestPointName error: unknown characteristicId .' + characteristicId + '.');
   }
