@@ -43,8 +43,10 @@ const didChangeState = (callback) => {
 const characteristicDidNotify = (characteristic, callback) => {
   
   const onNotifyCaught = notified => {
+
+    console.log("characteristicDidNotify - received notification ");
     if (!idsAreSame(characteristic, notified)) {
-      console.log("==== Received unexpected notification for characteristic " + notified + " while expecting notification ; NOT PROCESSED");
+      console.log("characteristicDidNotify - UNEXPECTED notification (expecting ", characteristic, ")");
       return;
     }
 

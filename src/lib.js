@@ -43,12 +43,21 @@ const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble
 
   let listener = EventEmitter.addListener(listenEventName, detail => {
 
+/*
+    ======= makeCharacteristicEventListener - received event ', { properties: { notify: false, write: true, read: false },
+    deviceId: 'F8:F0:05:FD:C9:3B',
+    id: 'c40d40d2-aea2-61b7-8a42-0c41142a5395', ****** writeTimeCharacteristic *****
+    serviceId: 'c40d40d2-aea2-61b7-8a42-0c41102a5395',
+    value: 'CM60xtMF\n' }
+*/
+
     if (!idsAreSame(ble_event, detail)) {
-      console.log("****************************");
+      console.log("======= makeCharacteristicEventListener - event was not the one expected");
       console.log("expected", ble_event);
       console.log("received", detail);
       return;
-    }
+    } else
+      console.log("======= makeCharacteristicEventListener - received expected event");
 
     if (testPointName) {
       console.log("**************************** DEBUG: NOT PROCESSING RECEIVED EVENT " + listenEventName, 'testPointName:', testPointName);

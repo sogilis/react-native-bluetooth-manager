@@ -46,7 +46,7 @@ class BluetoothActionsLoop {
 
     private synchronized void tick() {
         if (currentAction != null) {
-            Log.d(MODULE_NAME, "Loop#tick - already pending " + currentAction);
+            Log.d(MODULE_NAME, "Loop#tick - current task " + currentAction + " is still running");
             return;
         }
 
@@ -56,7 +56,7 @@ class BluetoothActionsLoop {
         }
 
         currentAction = actionsQueue.poll();
-        Log.d(MODULE_NAME, "Loop#tick - running " + currentAction);
+        Log.d(MODULE_NAME, "Loop#tick - removed " + currentAction + " from queue and starting it");
         if (!currentAction.start()) {
             Log.d(MODULE_NAME, "Loop - failed " + currentAction);
             actionDone(1);
