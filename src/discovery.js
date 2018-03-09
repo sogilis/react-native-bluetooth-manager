@@ -96,7 +96,7 @@ const discoverServicesAction = (device, serviceIds, callback) => {
     listenToStartupAndDiscoveryEvents(resolve, reject, onServicesDiscovered,
       ReactNativeBluetooth.ServiceDiscovered, ReactNativeBluetooth.ServiceDiscoveryStarted);
 
-    setTimeout(function(){ ReactNativeBluetooth.discoverServices(device, serviceIds || []); }, 600);
+    setTimeout(function(){ ReactNativeBluetooth.discoverServices(device, serviceIds || []); }, 2000);
   });
 };
 
