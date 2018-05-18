@@ -21,6 +21,7 @@ import { discoverServices, discoverCharacteristics } from './src/discovery';
 import { startScan, stopScan, scanDidStop } from './src/scanStartStop';
 import { readCharacteristicValue } from './src/characteristicRead';
 import { writeCharacteristicValue } from './src/characteristicWrite';
+import { enableNotifications } from './src/enableNotifications';
 
 import {
   ReactNativeBluetooth,
@@ -39,6 +40,7 @@ const didChangeState = (callback) => {
 };
 
 const characteristicDidNotify = (characteristic, callback) => {
+  
   const onNotifyCaught = notified => {
     if (!idsAreSame(characteristic, notified)) {
       console.log("==== Received unexpected notification for characteristic " + notified + " while expecting notification ; NOT PROCESSED");
@@ -57,19 +59,12 @@ const characteristicDidNotify = (characteristic, callback) => {
     ReactNativeBluetooth.CharacteristicNotified,
     onNotifyCaught
   );
-  console.log("==== installed notification handler for characteristic " + characteristic);
+//  console.log("==== installing notification handler for characteristic " + characteristic);
 
   return () => {
-    console.log("==== removing notification handler for characteristic " + characteristic);
+//    console.log("==== removing notification handler for characteristic " + characteristic);
     listener.remove();
   };
-};
-
-const enableNotifications = (notifyCharacteristic, enabled) => {
-  if (enabled)
-    ReactNativeBluetooth.subscribeToNotification(notifyCharacteristic);
-  else
-    ReactNativeBluetooth.unsubscribeFromNotification(notifyCharacteristic);
 };
 
 const didDiscoverDevice = (callback) => {

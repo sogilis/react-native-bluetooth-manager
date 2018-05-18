@@ -15,7 +15,7 @@
  */
 
 import {
-  makeCharacteristicEventListener,
+  makeBleEventListener,
   ReactNativeBluetooth,
 } from './lib';
 
@@ -31,7 +31,7 @@ const readCharacteristicValue = characteristic => {
       };
     };
 
-    makeCharacteristicEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicRead, characteristic, resultMapper);
+    makeBleEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicRead, characteristic, resultMapper);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);
   });

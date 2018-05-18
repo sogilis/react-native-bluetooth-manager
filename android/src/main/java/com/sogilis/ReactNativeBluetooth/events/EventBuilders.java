@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothGattService;
 import android.util.Base64;
 
 import static android.bluetooth.BluetoothGattCharacteristic.*;
+import android.bluetooth.BluetoothGattDescriptor;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
@@ -92,6 +93,12 @@ public class EventBuilders {
                 characteristicMap(device, characteristic));
     }
 
+    public static BluetoothEvent descriptorWritten(BluetoothDevice device,
+                                                   BluetoothGattDescriptor descriptor) {
+        return new BluetoothEvent(DESCRIPTOR_WRITE,
+                descriptorMap(device, descriptor));
+    }
+
     public static BluetoothEvent characteristicNotified(BluetoothDevice device,
                                                         BluetoothGattCharacteristic characteristic) {
         return new BluetoothEvent(CHARACTERISTIC_NOTIFIED,
@@ -150,6 +157,19 @@ public class EventBuilders {
         map.putString("serviceId", characteristic.getService().getUuid().toString());
         map.putString("deviceId", deviceId(device));
         map.putMap("properties", propertiesMap(characteristic));
+
+        return map;
+    }
+
+    public static WritableMap descriptorMap(BluetoothDevice device, BluetoothGattDescriptor descriptor) {
+        byte[] value = descriptor.getValue();
+        String encodedValue = (value != null ? Base64.encodeToString(value, Base64.DEFAULT) : null);
+        WritableMap map = new WritableNativeMap();
+
+        map.putString("value", encodedValue);
+        map.putString("id", descriptor.getUuid().toString());
+        map.putString("serviceId", descriptor.getCharacteristic().getUuid().toString());
+        map.putString("deviceId", deviceId(device));
 
         return map;
     }

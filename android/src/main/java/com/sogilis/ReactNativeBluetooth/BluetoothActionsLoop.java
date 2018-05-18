@@ -34,8 +34,8 @@ class BluetoothActionsLoop {
         }
     }
 
-    void actionDone() {
-        Log.d(MODULE_NAME, "Loop - done " + currentAction);
+    void actionDone(int caller_id) {
+        Log.d(MODULE_NAME, "Loop - done " + currentAction + " (" + caller_id + ")");
         currentAction = null;
         tick();
     }
@@ -59,7 +59,7 @@ class BluetoothActionsLoop {
         Log.d(MODULE_NAME, "Loop#tick - running " + currentAction);
         if (!currentAction.start()) {
             Log.d(MODULE_NAME, "Loop - failed " + currentAction);
-            actionDone();
+            actionDone(1);
         }
     }
 

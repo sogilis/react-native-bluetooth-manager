@@ -32,6 +32,7 @@ public class EventNames {
     public static final String CHARACTERISTIC_READ = name("CHARACTERISTIC_READ");
     public static final String CHARACTERISTIC_WRITTEN = name("CHARACTERISTIC_WRITTEN");
     public static final String CHARACTERISTIC_NOTIFIED = name("CHARACTERISTIC_NOTIFIED");
+    public static final String DESCRIPTOR_WRITE = name("DESCRIPTOR_WRITE");
 
     private static final String name(String customNamePart) {
         return MODULE_NAME + "." + customNamePart;

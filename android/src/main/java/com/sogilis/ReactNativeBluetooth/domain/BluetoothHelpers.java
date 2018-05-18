@@ -89,22 +89,52 @@ public class BluetoothHelpers {
         return (characteristic.getProperties() & property) != 0;
     }
 
+    // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
     public static final UUID CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     public static BluetoothGattDescriptor configDescriptor(BluetoothGattCharacteristic characteristic) {
         return characteristic.getDescriptor(CONFIG_DESCRIPTOR_UUID);
     }
 
-    public static boolean enableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-        BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
-        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        return gatt.setCharacteristicNotification(characteristic, true) && gatt.writeDescriptor(descriptor);
-    }
+    public static boolean configureNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, Boolean enable) {
+        if (enable)
+        {
+            // configure local service to receive notifications
+            boolean success = gatt.setCharacteristicNotification(characteristic, enable);
+            Log.d(MODULE_NAME, "gatt.setCharacteristicNotification returned " + success);
+            if (!success)
+                return false;
 
-    public static boolean disableNotification(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-        BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
-        descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-        return gatt.writeDescriptor(descriptor) && gatt.setCharacteristicNotification(characteristic, false);
+            // a delay between the two is necessary
+            try {
+                Thread.sleep(200);
+            } catch(InterruptedException ie) {}
+
+            // configure BLE peripheral to emit notifications
+            BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
+            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            success = gatt.writeDescriptor(descriptor);
+            Log.d(MODULE_NAME, "gatt.writeDescriptor returned " + success + " : Request 'activate notification' sent to peripheral");
+            return success;
+        } else {
+            // configure BLE peripheral so that it does not emit notifications
+            BluetoothGattDescriptor descriptor = configDescriptor(characteristic);
+            descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+            boolean success = gatt.writeDescriptor(descriptor);
+            Log.d(MODULE_NAME, "gatt.writeDescriptor returned " + success + " : Request 'desactivate notification' sent to peripheral");
+            if (!success)
+                return false;           
+
+            // a delay between the two is necessary
+            try {
+                Thread.sleep(200);
+            } catch(InterruptedException ie) {}
+
+            // configure local service so that it does not receive notifications
+            success = gatt.setCharacteristicNotification(characteristic, enable);
+            Log.d(MODULE_NAME, "gatt.setCharacteristicNotification returned " + success);
+            return success;
+        }
     }
 
     public static String gattStatusString(int status) {

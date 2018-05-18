@@ -38,12 +38,17 @@ const unsubscription = (listener) => {
   };
 };
 
-const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEventName, characteristic, resultMapper) => {
+const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper) => {
   let timer = null;
 
   let listener = EventEmitter.addListener(listenEventName, detail => {
-    if (!idsAreSame(characteristic, detail))
+
+    if (!idsAreSame(ble_event, detail)) {
+      console.log("****************************")
+      console.log("expected", ble_event)
+      console.log("received", detail)
       return;
+    }
 
     if (timer) {
       clearTimeout(timer);
@@ -64,7 +69,7 @@ const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEve
   timer = setTimeout(() => {
     if (listener) {
       listener.remove();
-      listenFailure(new Error("Timeout on characteristic operation"));
+      listenFailure(new Error("Timeout on " + listenEventName + " operation"));
     }
   }, Configuration.timeout);
 };
@@ -72,7 +77,7 @@ const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEve
 export {
   idsAreSame,
   unsubscription,
-  makeCharacteristicEventListener,
+  makeBleEventListener,
   ReactNativeBluetooth,
   EventEmitter,
   Configuration,
