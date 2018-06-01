@@ -2,6 +2,7 @@ import {
   makeBleEventListener,
   ReactNativeBluetooth,
 } from './lib';
+import { testPoints } from './testPoints'
 
 const enableNotifications = (notifyCharacteristic, enable, ios) => {
   console.log("==== " + (enable ? "en" : "dis") + "ableNotifications (ios:" + ios + ')');
@@ -15,13 +16,15 @@ const enableNotifications = (notifyCharacteristic, enable, ios) => {
       // https://developer.apple.com/library/content/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/PerformingCommonCentralRoleTasks/PerformingCommonCentralRoleTasks.html
       resolve();
     } else {
+      emulateError = (enable && testPoints.enableNotification) || (disable && testPoints.disableNotification);
       const resultMapper = detail => detail;
       makeBleEventListener(
         resolve,
         reject,
         ReactNativeBluetooth.NotificationDescriptorWritten,
         {id: "00002902-0000-1000-8000-00805f9b34fb"}, // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
-        resultMapper);
+        resultMapper,
+        emulateError);
 
       if (enable)
         ReactNativeBluetooth.subscribeToNotification(notifyCharacteristic);

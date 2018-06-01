@@ -38,7 +38,7 @@ const unsubscription = (listener) => {
   };
 };
 
-const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper) => {
+const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper, dontProcessEvent) => {
   let timer = null;
 
   let listener = EventEmitter.addListener(listenEventName, detail => {
@@ -47,6 +47,11 @@ const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble
       console.log("****************************")
       console.log("expected", ble_event)
       console.log("received", detail)
+      return;
+    }
+
+    if (dontProcessEvent) {
+      console.log("**************************** DEBUG: NOT PROCESSING RECEIVED EVENT " + listenEventName)
       return;
     }
 
