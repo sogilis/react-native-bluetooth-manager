@@ -37,7 +37,7 @@ const DefaultScanOptions = {
 let scanInProgress = false;
 
 const Scan = {
-  stopAfter: (timeout) => {
+  stopAfter: (stopInfo) => { // stopInfo = { timeout: timeoutInMs, cancel: null }
     return new Promise((resolve, reject) => {
       let timeoutReached = false;
       let timer = null;
@@ -55,12 +55,17 @@ const Scan = {
         resolve(timeoutReached);
       });
 
+      stopInfo.cancel = () => {
+        console.log('Tikee scan terminated by device found');
+        stopScan()
+      };
+
       timer = setTimeout(() => {
         timeoutReached = true;
-
+        console.log('Tikee scan terminated by timeout');
         stopScan()
-          .catch(error => reject(error));
-      }, timeout);
+        .catch(error => reject(error));
+      }, stopInfo.timeout);
     });
   },
 };

@@ -38,20 +38,20 @@ const unsubscription = (listener) => {
   };
 };
 
-const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper, dontProcessEvent) => {
+const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper, testPointName) => {
   let timer = null;
 
   let listener = EventEmitter.addListener(listenEventName, detail => {
 
     if (!idsAreSame(ble_event, detail)) {
-      console.log("****************************")
-      console.log("expected", ble_event)
-      console.log("received", detail)
+      console.log("****************************");
+      console.log("expected", ble_event);
+      console.log("received", detail);
       return;
     }
 
-    if (dontProcessEvent) {
-      console.log("**************************** DEBUG: NOT PROCESSING RECEIVED EVENT " + listenEventName)
+    if (testPointName) {
+      console.log("**************************** DEBUG: NOT PROCESSING RECEIVED EVENT " + listenEventName, 'testPointName:', testPointName);
       return;
     }
 
@@ -65,8 +65,10 @@ const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble
     }
 
     if ("error" in detail) {
+      console.log("**************************** makeBleEventListener failed", detail);
       listenFailure(new Error(detail.error));
     } else {
+      console.log("**************************** makeBleEventListener successful", detail);
       listenSuccess(resultMapper(detail));
     }
   });
@@ -74,7 +76,8 @@ const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble
   timer = setTimeout(() => {
     if (listener) {
       listener.remove();
-      listenFailure(new Error("Timeout on " + listenEventName + " operation"));
+      const errText = testPointName || ("Timeout on " + listenEventName + " operation");
+      listenFailure(new Error(errText));
     }
   }, Configuration.timeout);
 };

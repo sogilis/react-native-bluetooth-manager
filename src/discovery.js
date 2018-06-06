@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { Platform } from 'react-native';
 import {
   ReactNativeBluetooth,
   EventEmitter,
   unsubscription,
   Configuration,
 } from './lib';
+import { getTestPointName } from './testPoints';
 
 import * as _ from 'lodash';
 
@@ -96,7 +98,11 @@ const discoverServicesAction = (device, serviceIds, callback) => {
     listenToStartupAndDiscoveryEvents(resolve, reject, onServicesDiscovered,
       ReactNativeBluetooth.ServiceDiscovered, ReactNativeBluetooth.ServiceDiscoveryStarted);
 
-    setTimeout(function(){ ReactNativeBluetooth.discoverServices(device, serviceIds || []); }, 2000);
+    if (Platform.OS === 'android')
+      // using the ble stack for android is discouraged while it is filling its cache with device information 
+      setTimeout(function(){ ReactNativeBluetooth.discoverServices(device, serviceIds || []); }, 2000);
+    else
+      ReactNativeBluetooth.discoverServices(device, serviceIds || []);
   });
 };
 
@@ -111,7 +117,7 @@ const discoverCharacteristicsAction = (service, characteristicIds, callback) => 
   });
 };
 
-const callDiscoveryAction = (actionToCall, context, itemIds) => {
+const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
 
@@ -120,7 +126,9 @@ const callDiscoveryAction = (actionToCall, context, itemIds) => {
         unsubscribe();
 
       if ("error" in items)
-        reject(items["error"]);
+        reject(new Error(items["error"]));
+      else if (testPointName)
+        reject(new Error(testPointName));
       else
         resolve(items);
     };
@@ -137,11 +145,11 @@ const callDiscoveryAction = (actionToCall, context, itemIds) => {
 };
 
 const discoverServices = (device, serviceIds) => {
-  return callDiscoveryAction(discoverServicesAction, device, serviceIds);
+  return callDiscoveryAction(discoverServicesAction, device, serviceIds, getTestPointName('discoverServices'));
 };
 
 const discoverCharacteristics = (service, characteristicIds) => {
-  return callDiscoveryAction(discoverCharacteristicsAction, service, characteristicIds);
+  return callDiscoveryAction(discoverCharacteristicsAction, service, characteristicIds, getTestPointName('discoverCharacteristics'));
 };
 
 export {

@@ -18,10 +18,12 @@ import {
   makeBleEventListener,
   ReactNativeBluetooth,
 } from './lib';
+import { getReadCharacteristicTestPointName } from './testPoints';
 
 import { Buffer } from 'buffer';
 
-const readCharacteristicValue = characteristic => {
+const readCharacteristicValue = (characteristic, operationUnderTest = null) => {
+  console.log('==== readCharacteristicValue(', characteristic.id, operationUnderTest, ')');
   return new Promise((resolve, reject) => {
     const resultMapper = detail => {
       return {
@@ -31,7 +33,9 @@ const readCharacteristicValue = characteristic => {
       };
     };
 
-    makeBleEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicRead, characteristic, resultMapper);
+    const testPointName = getReadCharacteristicTestPointName(characteristic.id, operationUnderTest);
+console.log('------- testPointName', testPointName);
+    makeBleEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicRead, characteristic, resultMapper, testPointName);
 
     ReactNativeBluetooth.readCharacteristicValue(characteristic);
   });

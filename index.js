@@ -22,6 +22,7 @@ import { startScan, stopScan, scanDidStop } from './src/scanStartStop';
 import { readCharacteristicValue } from './src/characteristicRead';
 import { writeCharacteristicValue } from './src/characteristicWrite';
 import { enableNotifications } from './src/enableNotifications';
+import { testPoints, resetTestPoints, getTestPointName, getReadProtobufTestPointName } from './src/testPoints';
 
 import {
   ReactNativeBluetooth,
@@ -108,4 +109,8 @@ export default {
   deviceDidConnect,
   Buffer,
   Configuration,
+  testPoints,
+  resetTestPoints,
+  getTestPointName,
+  getReadProtobufTestPointName
 };
