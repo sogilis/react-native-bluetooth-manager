@@ -121,17 +121,21 @@ const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
 console.log('callDiscoveryAction 1')
-    const onDiscovery = items => {
-console.log('callDiscoveryAction 2', items)
-      if (unsubscribe)
-        unsubscribe();
 
-      if ("error" in items)
-        reject(new Error(items["error"]));
-      else if (testPointName)
-        reject(new Error(testPointName));
-      else
-        resolve(items);
+    const onDiscovery = items => {
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+        console.log('callDiscoveryAction 2', items, 'unsubscribing');
+
+        if ("error" in items)
+          reject(new Error(items["error"]));
+        else if (testPointName)
+          reject(new Error(testPointName));
+        else
+          resolve(items);
+      } else
+        console.log('callDiscoveryAction  - NOT HANDLED');
     };
 
     actionToCall(context, itemIds, onDiscovery)
