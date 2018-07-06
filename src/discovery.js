@@ -120,8 +120,9 @@ const discoverCharacteristicsAction = (service, characteristicIds, callback) => 
 const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
-
+console.log('callDiscoveryAction 1')
     const onDiscovery = items => {
+console.log('callDiscoveryAction 2', items)
       if (unsubscribe)
         unsubscribe();
 
@@ -135,9 +136,11 @@ const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
 
     actionToCall(context, itemIds, onDiscovery)
       .then(release => {
+console.log('callDiscoveryAction 3', release)
         unsubscribe = release;
       })
       .catch(error => {
+console.log('callDiscoveryAction 4 ERROR', error)
         console.log(error);
         reject(error);
       });
