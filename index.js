@@ -40,41 +40,31 @@ const didChangeState = (callback) => {
   return unsubscription(listener);
 };
 
-const configureForNotification = (characteristic) => {
-  ReactNativeBluetooth.subscribeToNotification(characteristic);
-}
-
-const characteristicDidNotify = (notifyChar, callback, feedbackChar = null, feedback = null) => {
+const characteristicDidNotify = (characteristic, callback) => {
   
   const onNotifyCaught = notified => {
-    if (idsAreSame(notifyChar, notified)) {
-      const mappedNotified = {
-        ...notified,
-        value: notified.value ? new Buffer(notified.value, 'base64') : new Buffer(0),
-      };
-      callback(mappedNotified);
-    } else if (feedback && idsAreSame(feedbackChar, notified)) {
-      feedback(notified.value ? new Buffer(notified.value, 'base64') : new Buffer(0));
-    } else
+    if (!idsAreSame(characteristic, notified)) {
+      console.log("==== Received unexpected notification for characteristic " + notified + " while expecting notification ; NOT PROCESSED");
       return;
+    }
+
+    const mappedNotified = {
+      ...notified,
+      value: notified.value ? new Buffer(notified.value, 'base64') : new Buffer(0),
+    };
+
+    callback(mappedNotified);
   };
 
   const listener = EventEmitter.addListener(
     ReactNativeBluetooth.CharacteristicNotified,
     onNotifyCaught
   );
-
 //  console.log("==== installing notification handler for characteristic " + characteristic);
-  ReactNativeBluetooth.subscribeToNotification(notifyChar);
-  if (feedback)
-    ReactNativeBluetooth.subscribeToNotification(feedbackChar);
 
   return () => {
 //    console.log("==== removing notification handler for characteristic " + characteristic);
     listener.remove();
-    if (feedback)
-      ReactNativeBluetooth.unsubscribeFromNotification(feedbackChar);
-    ReactNativeBluetooth.unsubscribeFromNotification(notifyChar);
   };
 };
 
