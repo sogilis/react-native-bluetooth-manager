@@ -120,13 +120,15 @@ const discoverCharacteristicsAction = (service, characteristicIds, callback) => 
 const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
+    let itemsReceivedPrematurely;
 console.log('callDiscoveryAction 1')
 
     const onDiscovery = items => {
       if (unsubscribe) {
-        unsubscribe();
+        const unsubscribeFunc = unsubscribe;
         unsubscribe = null;
         console.log('callDiscoveryAction 2', items, 'unsubscribing');
+        unsubscribeFunc();
 
         if ("error" in items)
           reject(new Error(items["error"]));
@@ -134,14 +136,20 @@ console.log('callDiscoveryAction 1')
           reject(new Error(testPointName));
         else
           resolve(items);
-      } else
-        console.log('callDiscoveryAction  - NOT HANDLED');
+      } else {
+        itemsReceivedPrematurely = items;
+        console.log('callDiscoveryAction  - RECEIVED EARLY');
+      }
     };
 
     actionToCall(context, itemIds, onDiscovery)
       .then(release => {
 console.log('callDiscoveryAction 3', release)
         unsubscribe = release;
+        if (itemsReceivedPrematurely) {
+          console.log('callDiscoveryAction  - PROCESSING ITEMS RECEIVED EARLY');
+          onDiscovery(itemsReceivedPrematurely);
+        }
       })
       .catch(error => {
 console.log('callDiscoveryAction 4 ERROR', error)
