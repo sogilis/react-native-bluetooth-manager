@@ -66,6 +66,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
+        final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
+//        pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
+        reactContext.registerReceiver(pairingRequestReceiver, pairingRequestFilter);
+
         bluetoothActionsLoop = new BluetoothActionsLoop();
     }
 
@@ -269,10 +273,22 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             String action = intent.getAction();
  
             if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                 final int state        = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
-                 final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
- 
+                final int state        = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+                final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
+
                 Log.d(MODULE_NAME, "___ pairing: " + prevState + " -> " + state);
+            }
+        }
+    };
+
+    private BroadcastReceiver pairingRequestReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction()))
+            {
+                emit(pairingRequest("Received request"));
             }
         }
     };
@@ -484,6 +500,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
         constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
         constants.put("NotificationDescriptorWritten", DESCRIPTOR_WRITE);
+        constants.put("PairingRequest", PAIRING_REQUEST);
         return constants;
     }
 }

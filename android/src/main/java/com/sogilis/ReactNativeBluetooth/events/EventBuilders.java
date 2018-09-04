@@ -105,6 +105,10 @@ public class EventBuilders {
                 characteristicMap(device, characteristic));
     }
 
+    public static BluetoothEvent pairingRequest(String status) {
+        return new BluetoothEvent(PAIRING_REQUEST, status);
+    }
+
     public static BluetoothEvent error(String eventName, String errorMessage, String optionalId) {
         return new BluetoothEvent(eventName, errorMap(errorMessage, optionalId));
     }

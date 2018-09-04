@@ -54,11 +54,28 @@ const deviceDidConnect = (device, callback) => {
   return unsubscription(listener);
 };
 
+const installPairingRequestHandler = (androidPullNotificationDrawer) => {
+    let listener;
+    const onPairingRequest = (detail) => {
+        console.log("================= onPairingRequest", detail);
+        if (detail == "Received request") {
+          androidPullNotificationDrawer();
+          if (listener)
+              listener.remove();
+        }
+    };
+    listener = EventEmitter.addListener(
+      ReactNativeBluetooth.PairingRequest,
+      onPairingRequest
+    );
+}
 
-const connect = (device) => {
+const connect = (device, androidPullNotificationDrawer) => {
   return new Promise((resolve, reject) => {
     let listener;
     let timer = null;
+
+    installPairingRequestHandler(androidPullNotificationDrawer);
 
     const onConnectionCaught = connectedDetail => {
       if (!idsAreSame(device, connectedDetail))
