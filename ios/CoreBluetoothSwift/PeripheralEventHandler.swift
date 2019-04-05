@@ -57,7 +57,7 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
             return
         }
 
-        handler(peripheral, characteristic, error)
+        handler((peripheral, characteristic, error))
     }
 
     func peripheral(_ peripheral: CBPeripheral,
@@ -67,6 +67,6 @@ class PeripheralEventHandler: NSObject, CBPeripheralDelegate {
             return
         }
 
-        handler(peripheral, characteristic, error)
+        handler((peripheral, characteristic, error))
     }
 }

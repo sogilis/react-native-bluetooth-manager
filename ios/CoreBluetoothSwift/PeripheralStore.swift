@@ -100,7 +100,7 @@ class PeripheralStore {
 
         if characteristic == nil {
             print("Unable to locate characteristic in service", charId,
-                  service.characteristics?.map { $0.uuid.uuidString })
+                  service.characteristics?.map { $0.uuid.uuidString as Any })
         }
 
         return characteristic
