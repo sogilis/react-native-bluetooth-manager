@@ -60,11 +60,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         super(reactContext);
         eventEmitter = new EventEmitter(reactContext);
 
+        reactContext.registerReceiver(pairingStatusChangeReceiver,
+            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+
         reactContext.registerReceiver(stateChangeReceiver,
                 new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
-        reactContext.registerReceiver(pairingStatusChangeReceiver,
-            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+        final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
+//        pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
+        reactContext.registerReceiver(pairingRequestReceiver, pairingRequestFilter);
 
         bluetoothActionsLoop = new BluetoothActionsLoop();
     }
@@ -81,6 +85,11 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
     private void emitGattCharacteristicError(String eventName, int status, BluetoothGattCharacteristic characteristic) {
         String charId = characteristic.getUuid().toString();
         eventEmitter.emitError(eventName, gattStatusString(status), charId);
+    }
+
+    private void emitGattDescriptorError(String eventName, int status, BluetoothGattDescriptor descriptor) {
+        String characteristicName = descriptor.getCharacteristic().toString();
+        eventEmitter.emitError(eventName, gattStatusString(status), characteristicName);
     }
 
     private void didEnableBluetooth() {
@@ -187,16 +196,15 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             BluetoothDevice device = gatt.getDevice();
             String deviceId = deviceId(device);
 
-            Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status);
+            Log.d(MODULE_NAME, "#onConnectionStateChange: " + newState + " - status: " + status + ", bonding state: " + device.getBondState());
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 if (status == GATT_SUCCESS) {
-                    gattCollection.add(gatt);
                     emit(deviceConnected(device));
                 } else {
                     emitGattError(DEVICE_CONNECTED, status, gatt);
                 }
-                bluetoothActionsLoop.actionDone();
+                bluetoothActionsLoop.actionDone(2);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 gattCollection.close(deviceId);
                 String statusString;
@@ -218,7 +226,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             } else {
                 emitGattError(SERVICES_DISCOVERED, status, gatt);
             }
-            bluetoothActionsLoop.actionDone();
+            bluetoothActionsLoop.actionDone(3);
         }
 
         @Override
@@ -228,7 +236,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             } else {
                 emitGattCharacteristicError(CHARACTERISTIC_READ, status, characteristic);
             }
-            bluetoothActionsLoop.actionDone();
+            bluetoothActionsLoop.actionDone(4);
         }
 
         @Override
@@ -238,29 +246,49 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             } else {
                 emitGattCharacteristicError(CHARACTERISTIC_WRITTEN, status, characteristic);
             }
-            bluetoothActionsLoop.actionDone();
+            bluetoothActionsLoop.actionDone(5);
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            super.onDescriptorWrite(gatt, descriptor, status);
-            bluetoothActionsLoop.actionDone();
+            Log.d(MODULE_NAME, "#onDescriptorWrite: status: " + status + ", ok: " + (status == GATT_SUCCESS));
+            if (status == GATT_SUCCESS) {
+                emit(descriptorWritten(gatt.getDevice(), descriptor));
+            } else {
+                emitGattDescriptorError(DESCRIPTOR_WRITE, status, descriptor);
+            }
+            bluetoothActionsLoop.actionDone(6);
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             emit(characteristicNotified(gatt.getDevice(), characteristic));
-            bluetoothActionsLoop.actionDone();
+            // bluetoothActionsLoop.actionDone(7);
         }
     };
 
-
     private BroadcastReceiver pairingStatusChangeReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            if (device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState() == BluetoothDevice.BOND_NONE) {
-                device.connectGatt(getReactApplicationContext(), false, gattCallback);
+         public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+ 
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                final int state        = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
+                final int prevState    = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
+
+                Log.d(MODULE_NAME, "___ pairing: " + prevState + " -> " + state);
+            }
+        }
+    };
+
+    private BroadcastReceiver pairingRequestReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction()))
+            {
+                emit(pairingRequest("Received request"));
             }
         }
     };
@@ -273,14 +301,9 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             @Override
             public void run() throws BluetoothException {
                 BluetoothDevice device = discoveredDevices.get(deviceId);
-                Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
-                if(!bondedDevices.contains(device)) {
-                    if (!device.createBond()) {
-                        throw new BluetoothException("Error when requesting device pairing");
-                    }
-                } else {
-                    device.connectGatt(getReactApplicationContext(), false, gattCallback);
-                }
+                Log.d(MODULE_NAME, "connecting to " + device.getName() + ".");
+                BluetoothGatt gatt = device.connectGatt(getReactApplicationContext(), false, gattCallback);
+                gattCollection.add(gatt);
             }
         };
 
@@ -296,7 +319,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void run() throws BluetoothException {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 gatt.disconnect();
-                bluetoothActionsLoop.actionDone();
+                bluetoothActionsLoop.actionDone(8);
             }
         };
 
@@ -338,7 +361,7 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 emit(characteristicDiscoveryStarted(device, service));
                 emit(characteristicsDiscovered(device, service,
                         filterCharacteristics(device, service, characteristicIds)));
-                bluetoothActionsLoop.actionDone();
+                bluetoothActionsLoop.actionDone(9);
             }
         };
 
@@ -371,6 +394,10 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
             public void run() throws BluetoothException {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_READ);
+
+
+                String s = String.format("gatt .%s., serviceId .%s., characteristicId .%s., characteristic .%s.", gatt.toString(), serviceId.toString(), characteristicId.toString(), characteristic.toString());
+                Log.d(MODULE_NAME, s);
 
                 if (!gatt.readCharacteristic(characteristic)) {
                     throw new BluetoothException("Error when requesting characteristic read");
@@ -422,15 +449,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_NOTIFY);
 
-                if (enableNotification(gatt, characteristic)) {
-                    Log.d(MODULE_NAME, "Notification enabled");
-                } else {
+                if (!configureNotification(gatt, characteristic, true))
                     throw new BluetoothException("Error when enabling characteristic notification");
-                }
             }
         };
 
-        bluetoothActionsLoop.addAction(subscribeAction);
+        bluetoothActionsLoop.addNotificationAction(subscribeAction);
     }
 
     @ReactMethod
@@ -445,15 +469,12 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
                 BluetoothGatt gatt = gattCollection.get(deviceId);
                 BluetoothGattCharacteristic characteristic = findCharacteristic(gatt, serviceId, characteristicId, BluetoothGattCharacteristic.PROPERTY_NOTIFY);
 
-                if (disableNotification(gatt, characteristic)) {
-                    Log.d(MODULE_NAME, "Notification disabled");
-                } else {
+                if (!configureNotification(gatt, characteristic, false))
                     throw new BluetoothException("Error when disabling characteristic notification");
-                }
             }
         };
 
-        bluetoothActionsLoop.addAction(unsubscribeAction);
+        bluetoothActionsLoop.addNotificationAction(unsubscribeAction);
     }
 
     @Override
@@ -478,7 +499,8 @@ public class ReactNativeBluetoothModule extends ReactContextBaseJavaModule {
         constants.put("CharacteristicRead", CHARACTERISTIC_READ);
         constants.put("CharacteristicWritten", CHARACTERISTIC_WRITTEN);
         constants.put("CharacteristicNotified", CHARACTERISTIC_NOTIFIED);
-
+        constants.put("NotificationDescriptorWritten", DESCRIPTOR_WRITE);
+        constants.put("PairingRequest", PAIRING_REQUEST);
         return constants;
     }
 }

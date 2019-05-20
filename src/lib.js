@@ -29,7 +29,7 @@ const EventEmitter = Platform.OS === 'android' ? NativeAppEventEmitter :
 const idsAreSame = (set1, set2) => set1 && set2 && ("id" in set1) && ("id" in set2) && set1["id"].toLowerCase() == set2["id"].toLowerCase();
 
 const Configuration = {
-  timeout: 70000,
+  timeout: 3000,
 };
 
 const unsubscription = (listener) => {
@@ -38,12 +38,31 @@ const unsubscription = (listener) => {
   };
 };
 
-const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEventName, characteristic, resultMapper) => {
+const makeBleEventListener = (listenSuccess, listenFailure, listenEventName, ble_event, resultMapper, testPointName) => {
   let timer = null;
 
   let listener = EventEmitter.addListener(listenEventName, detail => {
-    if (!idsAreSame(characteristic, detail))
+
+/*
+    ======= makeCharacteristicEventListener - received event ', { properties: { notify: false, write: true, read: false },
+    deviceId: 'F8:F0:05:FD:C9:3B',
+    id: 'c40d40d2-aea2-61b7-8a42-0c41142a5395', ****** writeTimeCharacteristic *****
+    serviceId: 'c40d40d2-aea2-61b7-8a42-0c41102a5395',
+    value: 'CM60xtMF\n' }
+*/
+
+    if (!idsAreSame(ble_event, detail)) {
+      console.log("======= makeCharacteristicEventListener - event was not the one expected");
+      console.log("expected", ble_event);
+      console.log("received", detail);
       return;
+    } else
+      console.log("======= makeCharacteristicEventListener - received expected event");
+
+    if (testPointName) {
+      console.log("**************************** DEBUG: NOT PROCESSING RECEIVED EVENT " + listenEventName, 'testPointName:', testPointName);
+      return;
+    }
 
     if (timer) {
       clearTimeout(timer);
@@ -55,8 +74,10 @@ const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEve
     }
 
     if ("error" in detail) {
+      console.log("**************************** makeBleEventListener failed", detail);
       listenFailure(new Error(detail.error));
     } else {
+      console.log("**************************** makeBleEventListener successful", detail);
       listenSuccess(resultMapper(detail));
     }
   });
@@ -64,7 +85,8 @@ const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEve
   timer = setTimeout(() => {
     if (listener) {
       listener.remove();
-      listenFailure(new Error("Timeout on characteristic operation"));
+      const errText = testPointName || ("Timeout on " + listenEventName + " operation");
+      listenFailure(new Error(errText));
     }
   }, Configuration.timeout);
 };
@@ -72,7 +94,7 @@ const makeCharacteristicEventListener = (listenSuccess, listenFailure, listenEve
 export {
   idsAreSame,
   unsubscription,
-  makeCharacteristicEventListener,
+  makeBleEventListener,
   ReactNativeBluetooth,
   EventEmitter,
   Configuration,

@@ -19,6 +19,7 @@ NSString *const characteristicNotifiedEventName = @"CharacteristicNotified";
 NSString *const deviceConnectedEventName = @"DeviceConnected";
 NSString *const deviceDisconnectedEventName = @"DeviceDisconnected";
 NSString *const deviceDiscoveredEventName = @"DeviceDiscovered";
+NSString *const pairingRequestEventName = @"PairingRequest";
 
 @implementation ReactNativeBluetooth {
     BluetoothActions * actions;
@@ -51,7 +52,9 @@ RCT_EXPORT_MODULE();
              characteristicNotifiedEventName: characteristicNotifiedEventName,
              deviceConnectedEventName: deviceConnectedEventName,
              deviceDisconnectedEventName: deviceDisconnectedEventName,
-             deviceDiscoveredEventName: deviceDiscoveredEventName};
+             deviceDiscoveredEventName: deviceDiscoveredEventName,
+             pairingRequestEventName: pairingRequestEventName
+         };
 }
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -68,6 +71,7 @@ RCT_EXPORT_MODULE();
              deviceConnectedEventName,
              deviceDisconnectedEventName,
              deviceDiscoveredEventName,
+             pairingRequestEventName
              ];
 }
 

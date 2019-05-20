@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { Platform } from 'react-native';
 import {
   ReactNativeBluetooth,
   EventEmitter,
   unsubscription,
   Configuration,
 } from './lib';
+import { getTestPointName } from './testPoints';
 
 import * as _ from 'lodash';
 
@@ -71,7 +73,7 @@ const listenToStartupAndDiscoveryEvents = (onStartup, onStartupFailure, onDiscov
   timer = setTimeout(() => {
     if (startupListener) {
       listener.remove();
-      onStartupFailure(new Error("Timeout discovering characteristics"));
+      onStartupFailure(new Error("Timeout discovering services or characteristics"));
     }
   }, Configuration.timeout);
 };
@@ -96,7 +98,11 @@ const discoverServicesAction = (device, serviceIds, callback) => {
     listenToStartupAndDiscoveryEvents(resolve, reject, onServicesDiscovered,
       ReactNativeBluetooth.ServiceDiscovered, ReactNativeBluetooth.ServiceDiscoveryStarted);
 
-    ReactNativeBluetooth.discoverServices(device, serviceIds || []);
+    if (Platform.OS === 'android')
+      // using the ble stack for android is discouraged while it is filling its cache with device information 
+      setTimeout(function(){ ReactNativeBluetooth.discoverServices(device, serviceIds || []); }, 2000);
+    else
+      ReactNativeBluetooth.discoverServices(device, serviceIds || []);
   });
 };
 
@@ -111,25 +117,42 @@ const discoverCharacteristicsAction = (service, characteristicIds, callback) => 
   });
 };
 
-const callDiscoveryAction = (actionToCall, context, itemIds) => {
+const callDiscoveryAction = (actionToCall, context, itemIds, testPointName) => {
   return new Promise((resolve, reject) => {
     let unsubscribe;
+    let itemsReceivedPrematurely;
+console.log('callDiscoveryAction 1')
 
     const onDiscovery = items => {
-      if (unsubscribe)
-        unsubscribe();
+      if (unsubscribe) {
+        const unsubscribeFunc = unsubscribe;
+        unsubscribe = null;
+        console.log('callDiscoveryAction 2', items, 'unsubscribing');
+        unsubscribeFunc();
 
-      if ("error" in items)
-        reject(items["error"]);
-      else
-        resolve(items);
+        if ("error" in items)
+          reject(new Error(items["error"]));
+        else if (testPointName)
+          reject(new Error(testPointName));
+        else
+          resolve(items);
+      } else {
+        itemsReceivedPrematurely = items;
+        console.log('callDiscoveryAction  - RECEIVED EARLY');
+      }
     };
 
     actionToCall(context, itemIds, onDiscovery)
       .then(release => {
+console.log('callDiscoveryAction 3', release)
         unsubscribe = release;
+        if (itemsReceivedPrematurely) {
+          console.log('callDiscoveryAction  - PROCESSING ITEMS RECEIVED EARLY');
+          onDiscovery(itemsReceivedPrematurely);
+        }
       })
       .catch(error => {
+console.log('callDiscoveryAction 4 ERROR', error)
         console.log(error);
         reject(error);
       });
@@ -137,11 +160,11 @@ const callDiscoveryAction = (actionToCall, context, itemIds) => {
 };
 
 const discoverServices = (device, serviceIds) => {
-  return callDiscoveryAction(discoverServicesAction, device, serviceIds);
+  return callDiscoveryAction(discoverServicesAction, device, serviceIds, getTestPointName('discoverServices'));
 };
 
 const discoverCharacteristics = (service, characteristicIds) => {
-  return callDiscoveryAction(discoverCharacteristicsAction, service, characteristicIds);
+  return callDiscoveryAction(discoverCharacteristicsAction, service, characteristicIds, getTestPointName('discoverCharacteristics'));
 };
 
 export {

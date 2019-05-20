@@ -21,6 +21,8 @@ import { discoverServices, discoverCharacteristics } from './src/discovery';
 import { startScan, stopScan, scanDidStop } from './src/scanStartStop';
 import { readCharacteristicValue } from './src/characteristicRead';
 import { writeCharacteristicValue } from './src/characteristicWrite';
+import { enableNotifications } from './src/enableNotifications';
+import { testPoints, resetTestPoints, getTestPointName, getReadProtobufTestPointName } from './src/testPoints';
 
 import {
   ReactNativeBluetooth,
@@ -39,9 +41,12 @@ const didChangeState = (callback) => {
 };
 
 const characteristicDidNotify = (characteristic, callback) => {
+  
   const onNotifyCaught = notified => {
-    if (!idsAreSame(characteristic, notified))
+    if (!idsAreSame(characteristic, notified)) {
+      console.log("==== Received unexpected notification for characteristic " + notified + " while expecting notification ; NOT PROCESSED");
       return;
+    }
 
     const mappedNotified = {
       ...notified,
@@ -55,12 +60,11 @@ const characteristicDidNotify = (characteristic, callback) => {
     ReactNativeBluetooth.CharacteristicNotified,
     onNotifyCaught
   );
-
-  ReactNativeBluetooth.subscribeToNotification(characteristic);
+//  console.log("==== installing notification handler for characteristic " + characteristic);
 
   return () => {
+//    console.log("==== removing notification handler for characteristic " + characteristic);
     listener.remove();
-    ReactNativeBluetooth.unsubscribeFromNotification(characteristic);
   };
 };
 
@@ -97,6 +101,7 @@ export default {
   discoverCharacteristics,
   readCharacteristicValue,
   writeCharacteristicValue,
+  enableNotifications,
   characteristicDidNotify,
   connect,
   disconnect,
@@ -104,4 +109,8 @@ export default {
   deviceDidConnect,
   Buffer,
   Configuration,
+  testPoints,
+  resetTestPoints,
+  getTestPointName,
+  getReadProtobufTestPointName
 };

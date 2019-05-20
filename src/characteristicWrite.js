@@ -15,11 +15,13 @@
  */
 
 import {
-  makeCharacteristicEventListener,
+  makeBleEventListener,
   ReactNativeBluetooth,
 } from './lib';
 
-const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
+const writeCharacteristicValue = (characteristic, buffer, withResponse, testPointName) => {
+  console.log('==== writeCharacteristicValue(', characteristic.serviceId, testPointName, ')');
+
   return new Promise((resolve, reject) => {
     if (!withResponse) {
       ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
@@ -28,9 +30,7 @@ const writeCharacteristicValue = (characteristic, buffer, withResponse) => {
     }
 
     const resultMapper = detail => detail;
-
-    makeCharacteristicEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicWritten, characteristic, resultMapper);
-
+    makeBleEventListener(resolve, reject, ReactNativeBluetooth.CharacteristicWritten, characteristic, resultMapper, testPointName);
     ReactNativeBluetooth.writeCharacteristicValue(characteristic, buffer.toString('base64'), withResponse);
   });
 };
