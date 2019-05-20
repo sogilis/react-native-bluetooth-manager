@@ -26,7 +26,7 @@ open class BluetoothActions: NSObject {
     
     fileprivate let peripheralStore = PeripheralStore()
     
-    open var bluetoothState: String {
+    @objc open var bluetoothState: String {
         get {
             return OutputBuilder.asStateChange(state: lastState)
         }
@@ -40,7 +40,7 @@ open class BluetoothActions: NSObject {
         cleanConnections()
     }
     
-    open func startScan(_ serviceUUIDs: [String], onScanStarted: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func startScan(_ serviceUUIDs: [String], onScanStarted: @escaping (BluetoothServiceReturn) -> Void) {
         let mappedIds = serviceUUIDs.map { CBUUID(string: $0) }
         
         backgroundQueue.async(execute: { [unowned self] in
@@ -50,7 +50,7 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func stopScan(_ onStopScanComplete: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func stopScan(_ onStopScanComplete: @escaping (BluetoothServiceReturn) -> Void) {
         backgroundQueue.async(execute: { [unowned self] in
             self.centralManager.stopScan()
             
@@ -59,7 +59,7 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func connect(_ deviceLookup: [String: AnyObject]) {
+    @objc open func connect(_ deviceLookup: [String: AnyObject]) {
         guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not connect")
             onDeviceConnectedHandler([
@@ -78,7 +78,7 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func disconnect(_ deviceLookup: [String: AnyObject]) {
+    @objc open func disconnect(_ deviceLookup: [String: AnyObject]) {
         guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not discover services")
             onDeviceDisconnectedHandler([
@@ -97,9 +97,9 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func discoverServices(_ deviceLookup: [String: AnyObject],
-                               services: [String]?,
-                               onDiscoverStarted: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func discoverServices(_ deviceLookup: [String: AnyObject],
+                                     services: [String]?,
+                                     onDiscoverStarted: @escaping (BluetoothServiceReturn) -> Void) {
         
         guard let device = peripheralStore.getPeripheral(deviceLookup) else {
             print("No device found. Can not discover services")
@@ -134,9 +134,9 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func discoverCharacteristics(_ lookup: [String: AnyObject],
-                                      characteristics: [String]?,
-                                      onDiscoverStarted: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func discoverCharacteristics(_ lookup: [String: AnyObject],
+                                            characteristics: [String]?,
+                                            onDiscoverStarted: @escaping (BluetoothServiceReturn) -> Void) {
         
         guard let requiredService = peripheralStore.getService(lookup) else {
             print("No service found. Can not discover characteristics", lookup)
@@ -155,7 +155,7 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func writeCharacteristicValue(_ lookup: [String: AnyObject], data: String, withResponse: Bool) {
+    @objc open func writeCharacteristicValue(_ lookup: [String: AnyObject], data: String, withResponse: Bool) {
         
         guard let characteristic = peripheralStore.getCharacteristic(lookup) else {
             onCharacteristicWriteHandler([
@@ -183,7 +183,7 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func readCharacteristicValue(_ lookup: [String: AnyObject]) {
+    @objc open func readCharacteristicValue(_ lookup: [String: AnyObject]) {
         guard let characteristic = peripheralStore.getCharacteristic(lookup) else {
             onCharacteristicReadHandler([
                 "id": lookup.eitherOr("characteristicId", key2: "id") ?? "" as AnyObject,
@@ -221,15 +221,15 @@ open class BluetoothActions: NSObject {
         })
     }
     
-    open func subscribeToNotification(_ lookup: [String: AnyObject]) {
+    @objc open func subscribeToNotification(_ lookup: [String: AnyObject]) {
         changeCharacteristicNotification(lookup, newState: true)
     }
     
-    open func unsubscribeFromNotification(_ lookup: [String: AnyObject]) {
+    @objc open func unsubscribeFromNotification(_ lookup: [String: AnyObject]) {
         changeCharacteristicNotification(lookup, newState: false)
     }
     
-    open func onChangeState(_ handler: @escaping (String) -> Void) {
+    @objc open func onChangeState(_ handler: @escaping (String) -> Void) {
         centralEventHandler.onStateChange { [unowned self] state in
             self.lastState = state
             
@@ -237,7 +237,7 @@ open class BluetoothActions: NSObject {
         }
     }
     
-    open func onServiceDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onServiceDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onServiceDiscoveredHandler = handler
         
         peripheralEventHandler.onServiceDiscovered { serviceInfo, _  in
@@ -251,7 +251,7 @@ open class BluetoothActions: NSObject {
         }
     }
     
-    open func onCharacteristicDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onCharacteristicDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onCharacteristicDiscoveredHandler = handler
         
         peripheralEventHandler.onCharacteristicDiscovered { _, serviceInfo, _  in
@@ -273,12 +273,12 @@ open class BluetoothActions: NSObject {
         onCharacteristicReadHandler(OutputBuilder.asCharacteristic(characteristic: params.1))
     }
     
-    open func onCharacteristicRead(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onCharacteristicRead(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onCharacteristicReadHandler = handler
         peripheralEventHandler.onCharacteristicValueUpdated(handleCharacteristicUpdate)
     }
     
-    open func onCharacteristicWritten(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onCharacteristicWritten(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onCharacteristicWriteHandler = handler
         
         peripheralEventHandler.onCharacteristicValueWritten { characteristicInfo in
@@ -286,12 +286,12 @@ open class BluetoothActions: NSObject {
         }
     }
     
-    open func onCharacteristicNotified(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onCharacteristicNotified(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onCharacteristicNotifyHandler = handler
         peripheralEventHandler.onCharacteristicValueUpdated(handleCharacteristicUpdate)
     }
     
-    open func onDeviceConnected(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onDeviceConnected(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onDeviceConnectedHandler = handler
         
         centralEventHandler.onDeviceConnected { device in
@@ -300,7 +300,7 @@ open class BluetoothActions: NSObject {
         }
     }
     
-    open func onDeviceDisconnected(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onDeviceDisconnected(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         onDeviceDisconnectedHandler = handler
         
         centralEventHandler.onDeviceDisconnected { device in
@@ -308,14 +308,14 @@ open class BluetoothActions: NSObject {
         }
     }
     
-    open func onDeviceDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
+    @objc open func onDeviceDiscovered(_ handler: @escaping (BluetoothServiceReturn) -> Void) {
         centralEventHandler.onDeviceDiscovered { [unowned self] device in
             self.peripheralStore.addPeripheral(device)
             handler(OutputBuilder.asDevice(device: device))
         }
     }
     
-    open func cleanUp() {
+    @objc open func cleanUp() {
         onDeviceConnectedHandler = { _ in }
         onDeviceDisconnectedHandler = { _ in }
         onCharacteristicReadHandler = { _ in }
@@ -325,7 +325,7 @@ open class BluetoothActions: NSObject {
         cleanConnections()
     }
     
-    open func cleanConnections() {
+    @objc open func cleanConnections() {
         peripheralStore.items
             .forEach { [unowned self] peripheral in
                 
